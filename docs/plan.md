@@ -86,9 +86,9 @@ React-Frontend zeigt die Items an. Jedes Item enthält: Titel, Quelle, kurzen Su
 
 ### Phase 1: Projektsetup
 
-- [ ] Monorepo aufsetzen (z.B. Turborepo oder einfache Ordnerstruktur) · _Projektstruktur_
-- [ ] TypeScript Backend-Projekt initialisieren (Hono oder Express) · _Backend-Framework_
-- [ ] React-Projekt initialisieren (Vite) · _Frontend-Tooling_
+- [x] Monorepo aufsetzen (z.B. Turborepo oder einfache Ordnerstruktur) · _Projektstruktur_
+- [x] TypeScript Backend-Projekt initialisieren (Hono oder Express) · _Backend-Framework_
+- [x] React-Projekt initialisieren (Vite) · _Frontend-Tooling_
 - [ ] PostgreSQL aufsetzen (lokal via Docker) · _Docker, PostgreSQL_
 - [ ] Drizzle ORM einrichten + erstes Schema · _ORM, DB-Migrationen_
 - [ ] VPS einrichten + Deployment-Pipeline (z.B. SSH + PM2 oder Docker) · _DevOps, Linux_
