@@ -90,7 +90,7 @@ React-Frontend zeigt die Items an. Jedes Item enthält: Titel, Quelle, kurzen Su
 - [x] TypeScript Backend-Projekt initialisieren (Hono oder Express) · _Backend-Framework_
 - [x] React-Projekt initialisieren (Vite) · _Frontend-Tooling_
 - [x] PostgreSQL aufsetzen (lokal via Docker) · _Docker, PostgreSQL_
-- [ ] Drizzle ORM einrichten + erstes Schema · _ORM, DB-Migrationen_
+- [x] Drizzle ORM einrichten + erstes Schema · _ORM, DB-Migrationen_
 - [ ] VPS einrichten + Deployment-Pipeline (z.B. SSH + PM2 oder Docker) · _DevOps, Linux_
 
 ### Phase 2: Ingest-Pipeline
