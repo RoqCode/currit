@@ -1,0 +1,9 @@
+{
+  "name": "@currit/db",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "db:start": "docker compose --env-file .env -f compose.yml up -d",
+    "db:stop": "docker compose --env-file .env -f compose.yml down"
+  }
+}
