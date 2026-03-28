@@ -1,8 +1,13 @@
 import { Hono } from "hono";
 import { seedDB } from "./lib/seed";
 import { getAllSources } from "./lib/getAllSources";
+import type { CreateSourceInput } from "@currit/shared/types/CreateSourceInput";
+import { createSource } from "./lib/createSource";
+import { clearSources } from "./lib/clearSources";
 
 const app = new Hono();
+
+const isDev = process.env.NODE_ENV === "development";
 
 app.get("/health", (c) => {
   return c.json({ ok: true });
@@ -27,6 +32,40 @@ app.get("/api/sources", async (c) => {
   } catch (e) {
     console.error(e);
     return c.json({ res: "welp, something went wrong" });
+  }
+});
+
+app.post("/api/sources", async (c) => {
+  const rawBody = await c.req.json();
+
+  if (typeof rawBody.name !== "string" || typeof rawBody.url !== "string") {
+    return c.json({ error: "invalid body" }, 400);
+  }
+
+  const body = rawBody as CreateSourceInput;
+
+  try {
+    await createSource(body.name, body.url);
+    return c.json({ ok: true }, 201);
+  } catch (e) {
+    console.error(e);
+    return c.json({ error: "failed to create source" }, 500);
+  }
+});
+
+app.get("/reset-db", async (c) => {
+  console.log(process.env.NODE_ENV);
+
+  if (!isDev) {
+    return c.json({ message: "no" }, 400);
+  }
+
+  try {
+    await clearSources();
+    return c.json({ ok: true, message: "sources table reset" }, 200);
+  } catch (e) {
+    console.error("failed to clear sources table", e);
+    return c.json({ error: "failed to clear sources table" }, 500);
   }
 });
 

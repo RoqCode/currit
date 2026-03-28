@@ -10,6 +10,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@currit/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       '@hono/node-server':
         specifier: ^1.19.11
         version: 1.19.11(hono@4.12.8)
