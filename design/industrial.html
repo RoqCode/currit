@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Currit – Industrial Component Sheet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --c-primary: #FF5A1F;
+      --c-primary-hover: #E84E15;
+      --c-accent: #FFB800;
+      --c-dark: #1C1C1C;
+      --c-bg: #F9F9F9;
+      --c-surface: #F2F2F2;
+      --c-border: #D9D9D9;
+      --c-muted: #999999;
+      --c-body: #3A3A3A;
+      --c-white: #FFFFFF;
+
+      --f-mono: 'Space Grotesk', sans-serif;
+      --f-serif: 'Lora', serif;
+
+      --sp-4: 4px;
+      --sp-8: 8px;
+      --sp-12: 12px;
+      --sp-16: 16px;
+      --sp-24: 24px;
+      --sp-32: 32px;
+      --sp-48: 48px;
+      --sp-64: 64px;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--c-bg);
+      color: var(--c-dark);
+      font-family: var(--f-mono);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ============================================
+       PAGE LAYOUT
+       ============================================ */
+    .sheet-header {
+      padding: var(--sp-32) var(--sp-48);
+      border-bottom: 1px solid var(--c-border);
+    }
+    .sheet-header h1 {
+      font-family: var(--f-mono);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--c-primary);
+      margin-bottom: var(--sp-4);
+    }
+    .sheet-header p {
+      font-family: var(--f-mono);
+      font-size: 11px;
+      color: var(--c-muted);
+    }
+
+    .sheet-section {
+      padding: var(--sp-48);
+      border-bottom: 1px solid var(--c-border);
+    }
+    .sheet-section:last-child {
+      border-bottom: none;
+    }
+
+    .section-title {
+      font-family: var(--f-mono);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--c-muted);
+      margin-bottom: var(--sp-32);
+      padding-bottom: var(--sp-12);
+      border-bottom: 1px solid var(--c-border);
+    }
+
+    /* ============================================
+       SECTION 1: DESIGN TOKENS
+       ============================================ */
+    .tokens-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: var(--sp-48);
+    }
+    @media (max-width: 900px) {
+      .tokens-grid { grid-template-columns: 1fr; }
+    }
+
+    .token-group-label {
+      font-family: var(--f-mono);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--c-dark);
+      margin-bottom: var(--sp-16);
+    }
+
+    /* Color tokens */
+    .color-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-8);
+    }
+    .color-row {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-12);
+    }
+    .color-chip {
+      width: 32px;
+      height: 32px;
+      flex-shrink: 0;
+    }
+    .color-chip--bordered {
+      border: 1px solid var(--c-border);
+    }
+    .color-info {
+      display: flex;
+      flex-direction: column;
+    }
+    .color-name {
+      font-family: var(--f-mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--c-dark);
+    }
+    .color-hex {
+      font-family: var(--f-mono);
+      font-size: 10px;
+      color: var(--c-muted);
+    }
+
+    /* Type tokens */
+    .type-scale {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-16);
+    }
+    .type-row {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .type-sample-h1 {
+      font-family: var(--f-mono);
+      font-weight: 700;
+      font-size: 28px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      line-height: 1.1;
+      color: var(--c-dark);
+    }
+    .type-sample-h2 {
+      font-family: var(--f-mono);
+      font-weight: 700;
+      font-size: 18px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--c-dark);
+    }
+    .type-sample-h3 {
+      font-family: var(--f-mono);
+      font-weight: 700;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--c-dark);
+    }
+    .type-sample-body {
+      font-family: var(--f-serif);
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--c-body);
+    }
+    .type-sample-small {
+      font-family: var(--f-mono);
+      font-size: 10px;
+      color: var(--c-muted);
+      letter-spacing: 0.05em;
+    }
+    .type-spec {
+      font-family: var(--f-mono);
+      font-size: 9px;
+      color: var(--c-muted);
+      margin-top: 2px;
+    }
+
+    /* Spacing tokens */
+    .spacing-scale {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-12);
+    }
+    .spacing-row {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-12);
+    }
+    .spacing-bar {
+      height: 16px;
+      background: var(--c-primary);
+      opacity: 0.25;
+    }
+    .spacing-label {
+      font-family: var(--f-mono);
+      font-size: 10px;
+      color: var(--c-muted);
+      white-space: nowrap;
+      min-width: 50px;
+    }
+
+    /* ============================================
+       BUTTONS
+       ============================================ */
+    .buttons-grid {
+      display: flex;
+      gap: var(--sp-48);
+      flex-wrap: wrap;
+    }
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: var(--sp-8);
+    }
+    .button-group-label {
+      font-family: var(--f-mono);
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--c-muted);
+      margin-bottom: var(--sp-4);
+    }
+
+    .btn {
+      font-family: var(--f-mono);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: var(--sp-12) var(--sp-24);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      border: none;
+    }
+
+    .btn--primary {
+      background: var(--c-primary);
+      color: var(--c-white);
+    }
+    .btn--primary:hover {
+      background: var(--c-primary-hover);
+    }
+
+    .btn--secondary {
+      background: transparent;
+      color: var(--c-dark);
+      border: 1px solid var(--c-border);
+    }
+    .btn--secondary:hover {
+      border-color: var(--c-dark);
+    }
+
+    .btn--ghost {
+      background: transparent;
+      color: var(--c-muted);
+      padding-left: 0;
+      padding-right: 0;
+    }
+    .btn--ghost:hover {
+      color: var(--c-primary);
+    }
+
+    /* ============================================
+       ICON BUTTONS (Like, Bookmark, Read)
+       ============================================ */
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: 1px solid var(--c-border);
+      color: var(--c-muted);
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      line-height: 1;
+    }
+    .icon-btn:hover {
+      border-color: var(--c-dark);
+      color: var(--c-dark);
+    }
+
+    .icon-btn--active-like {
+      border-color: var(--c-primary);
+      color: var(--c-primary);
+      background: rgba(255, 90, 31, 0.06);
+    }
+    .icon-btn--active-bookmark {
+      border-color: var(--c-accent);
+      color: #B38600;
+      background: rgba(255, 184, 0, 0.08);
+    }
+    .icon-btn--active-read {
+      border-color: var(--c-border);
+      color: var(--c-muted);
+      background: var(--c-surface);
+    }
+
+    /* ============================================
+       FEED CARD
+       ============================================ */
+    .feed-card {
+      background: var(--c-surface);
+      padding: var(--sp-24);
+      max-width: 560px;
+    }
+
+    .feed-card__top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--sp-12);
+    }
+
+    .feed-card__source {
+      font-family: var(--f-mono);
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--c-muted);
+      display: flex;
+      align-items: center;
+      gap: var(--sp-8);
+    }
+    .feed-card__source-tag {
+      font-family: var(--f-mono);
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 3px 6px;
+      display: inline-block;
+    }
+    .feed-card__source-tag--reddit {
+      background: rgba(255, 69, 0, 0.1);
+      color: #FF4500;
+    }
+    .feed-card__source-tag--hn {
+      background: rgba(255, 102, 0, 0.1);
+      color: #FF6600;
+    }
+    .feed-card__source-tag--rss {
+      background: rgba(10, 132, 255, 0.1);
+      color: #0A84FF;
+    }
+
+    .feed-card__title {
+      font-family: var(--f-mono);
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1.35;
+      color: var(--c-dark);
+      text-decoration: none;
+      display: block;
+      margin-bottom: var(--sp-8);
+    }
+    .feed-card__title:hover {
+      color: var(--c-primary);
+    }
+
+    .feed-card__summary {
+      font-family: var(--f-serif);
+      font-size: 14px;
+      line-height: 1.65;
+      color: var(--c-body);
+      margin-bottom: var(--sp-16);
+    }
+
+    .feed-card__footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .feed-card__actions {
+      display: flex;
+      gap: var(--sp-4);
+    }
+
+    .feed-card__time {
+      font-family: var(--f-mono);
+      font-size: 10px;
+      color: var(--c-muted);
+      letter-spacing: 0.05em;
+    }
+
+    .feed-card__link {
+      display: flex;
+      align-items: center;
+      gap: var(--sp-8);
+      color: var(--c-muted);
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+    .feed-card__link:hover {
+      color: var(--c-primary);
+    }
+    .feed-card__link:hover .feed-card__arrow {
+      width: 48px;
+      background: var(--c-primary);
+    }
+    .feed-card__link:hover .feed-card__arrow::after {
+      border-color: var(--c-primary);
+    }
+    .feed-card__arrow {
+      display: inline-block;
+      position: relative;
+      width: 32px;
+      height: 1px;
+      background: var(--c-muted);
+      transition: all 0.2s ease;
+    }
+    .feed-card__arrow::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 50%;
+      width: 6px;
+      height: 6px;
+      border-top: 1px solid var(--c-muted);
+      border-right: 1px solid var(--c-muted);
+      transform: translateY(-50%) rotate(45deg);
+      transition: border-color 0.2s ease;
+    }
+
+    /* ============================================
+       HEADER
+       ============================================ */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--sp-24);
+      height: 56px;
+      background: var(--c-surface);
+      border-bottom: 2px solid var(--c-dark);
+    }
+
+    .header__wordmark {
+      font-family: var(--f-mono);
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--c-dark);
+      text-decoration: none;
+    }
+    .header__wordmark span {
+      color: var(--c-primary);
+    }
+
+    .header__nav {
+      display: flex;
+      list-style: none;
+      height: 100%;
+    }
+    .header__nav-link {
+      font-family: var(--f-mono);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--c-muted);
+      text-decoration: none;
+      padding: 0 var(--sp-16);
+      display: flex;
+      align-items: center;
+      height: 100%;
+      border-left: 1px solid var(--c-border);
+      transition: color 0.15s ease;
+    }
+    .header__nav-link:hover {
+      color: var(--c-dark);
+    }
+    .header__nav-link--active {
+      color: var(--c-primary);
+      box-shadow: inset 0 -2px 0 var(--c-primary);
+    }
+
+    /* ============================================
+       FOOTER
+       ============================================ */
+    .footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--sp-24);
+      height: 40px;
+      background: var(--c-surface);
+      border-top: 1px solid var(--c-border);
+    }
+
+    .footer__left {
+      font-family: var(--f-mono);
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--c-muted);
+    }
+    .footer__left span {
+      color: var(--c-primary);
+    }
+
+    .footer__right {
+      font-family: var(--f-mono);
+      font-size: 9px;
+      color: var(--c-muted);
+      letter-spacing: 0.05em;
+    }
+
+    .component-frame {
+      border: 1px solid var(--c-border);
+      overflow: hidden;
+    }
+    .component-frame + .component-frame {
+      margin-top: var(--sp-16);
+    }
+    .component-label {
+      font-family: var(--f-mono);
+      font-size: 9px;
+      font-weight: 400;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--c-muted);
+      padding: var(--sp-8) var(--sp-12);
+      border-bottom: 1px solid var(--c-border);
+      background: var(--c-bg);
+    }
+
+    /* ============================================
+       MOBILE HEADER
+       ============================================ */
+    .mobile-frame {
+      max-width: 375px;
+    }
+
+    .mobile-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 var(--sp-16);
+      height: 48px;
+      background: var(--c-surface);
+      position: relative;
+    }
+    .mobile-header__progress-track {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--c-border);
+    }
+    .mobile-header__progress-bar {
+      height: 100%;
+      background: var(--c-primary);
+      transition: width 0.3s ease;
+    }
+
+    .mobile-header__wordmark {
+      font-family: var(--f-mono);
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--c-dark);
+      text-decoration: none;
+    }
+    .mobile-header__wordmark span {
+      color: var(--c-primary);
+    }
+
+    .mobile-header__count {
+      font-family: var(--f-mono);
+      font-size: 10px;
+      color: var(--c-muted);
+      letter-spacing: 0.05em;
+    }
+    .mobile-header__count strong {
+      color: var(--c-primary);
+      font-weight: 700;
+    }
+
+    /* ============================================
+       MOBILE FOOTER / TAB BAR
+       ============================================ */
+    .mobile-footer {
+      display: flex;
+      align-items: stretch;
+      height: 52px;
+      background: var(--c-surface);
+      border-top: 1px solid var(--c-border);
+    }
+
+    .mobile-footer__tab {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      font-family: var(--f-mono);
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--c-muted);
+      text-decoration: none;
+      border-left: 1px solid var(--c-border);
+      transition: color 0.15s ease;
+    }
+    .mobile-footer__tab:first-child {
+      border-left: none;
+    }
+    .mobile-footer__tab:hover {
+      color: var(--c-dark);
+    }
+    .mobile-footer__tab--active {
+      color: var(--c-primary);
+      box-shadow: inset 0 2px 0 var(--c-primary);
+    }
+    .mobile-footer__tab-icon {
+      font-size: 16px;
+      line-height: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SHEET HEADER -->
+  <div class="sheet-header">
+    <h1>Currit — Component Sheet</h1>
+    <p>Industrial Direction · Space Grotesk + Lora · Light Mode</p>
+  </div>
+
+  <!-- ==========================================
+       SECTION 1: DESIGN TOKENS
+       ========================================== -->
+  <div class="sheet-section">
+    <div class="section-title">01 — Design Tokens</div>
+    <div class="tokens-grid">
+
+      <!-- Colors -->
+      <div>
+        <div class="token-group-label">Farben</div>
+        <div class="color-list">
+          <div class="color-row">
+            <div class="color-chip" style="background: var(--c-primary);"></div>
+            <div class="color-info">
+              <span class="color-name">Primary</span>
+              <span class="color-hex">#FF5A1F</span>
+            </div>
+          </div>
+          <div class="color-row">
+            <div class="color-chip" style="background: var(--c-accent);"></div>
+            <div class="color-info">
+              <span class="color-name">Accent</span>
+              <span class="color-hex">#FFB800</span>
+            </div>
+          </div>
+          <div class="color-row">
+            <div class="color-chip" style="background: var(--c-dark);"></div>
+            <div class="color-info">
+              <span class="color-name">Dark</span>
+              <span class="color-hex">#1C1C1C</span>
+            </div>
+          </div>
+          <div class="color-row">
+            <div class="color-chip color-chip--bordered" style="background: var(--c-bg);"></div>
+            <div class="color-info">
+              <span class="color-name">Background</span>
+              <span class="color-hex">#F9F9F9</span>
+            </div>
+          </div>
+          <div class="color-row">
+            <div class="color-chip" style="background: var(--c-surface);"></div>
+            <div class="color-info">
+              <span class="color-name">Surface</span>
+              <span class="color-hex">#F2F2F2</span>
+            </div>
+          </div>
+          <div class="color-row">
+            <div class="color-chip" style="background: var(--c-border);"></div>
+            <div class="color-info">
+              <span class="color-name">Border</span>
+              <span class="color-hex">#D9D9D9</span>
+            </div>
+          </div>
+          <div class="color-row">
+            <div class="color-chip" style="background: var(--c-muted);"></div>
+            <div class="color-info">
+              <span class="color-name">Muted</span>
+              <span class="color-hex">#999999</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Typography -->
+      <div>
+        <div class="token-group-label">Typografie</div>
+        <div class="type-scale">
+          <div class="type-row">
+            <div class="type-sample-h1">HEADLINE</div>
+            <div class="type-spec">Space Grotesk Bold · 28px · Uppercase · 0.05em</div>
+          </div>
+          <div class="type-row">
+            <div class="type-sample-h2">SUBHEADING</div>
+            <div class="type-spec">Space Grotesk Bold · 18px · Uppercase · 0.08em</div>
+          </div>
+          <div class="type-row">
+            <div class="type-sample-h3">SECTION LABEL</div>
+            <div class="type-spec">Space Grotesk Bold · 13px · Uppercase · 0.12em</div>
+          </div>
+          <div class="type-row">
+            <div class="type-sample-body">Kuratierter Feed mit Substanz statt endlosem Scrollen.</div>
+            <div class="type-spec">Lora Regular · 15px · 1.7 line-height</div>
+          </div>
+          <div class="type-row">
+            <div class="type-sample-small">META · 2 MIN AGO · R/TECHNOLOGY</div>
+            <div class="type-spec">Space Grotesk Regular · 10px · 0.05em</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Spacing -->
+      <div>
+        <div class="token-group-label">Spacing</div>
+        <div class="spacing-scale">
+          <div class="spacing-row">
+            <span class="spacing-label">4px</span>
+            <div class="spacing-bar" style="width: 4px;"></div>
+          </div>
+          <div class="spacing-row">
+            <span class="spacing-label">8px</span>
+            <div class="spacing-bar" style="width: 8px;"></div>
+          </div>
+          <div class="spacing-row">
+            <span class="spacing-label">12px</span>
+            <div class="spacing-bar" style="width: 12px;"></div>
+          </div>
+          <div class="spacing-row">
+            <span class="spacing-label">16px</span>
+            <div class="spacing-bar" style="width: 16px;"></div>
+          </div>
+          <div class="spacing-row">
+            <span class="spacing-label">24px</span>
+            <div class="spacing-bar" style="width: 24px;"></div>
+          </div>
+          <div class="spacing-row">
+            <span class="spacing-label">32px</span>
+            <div class="spacing-bar" style="width: 32px;"></div>
+          </div>
+          <div class="spacing-row">
+            <span class="spacing-label">48px</span>
+            <div class="spacing-bar" style="width: 48px;"></div>
+          </div>
+          <div class="spacing-row">
+            <span class="spacing-label">64px</span>
+            <div class="spacing-bar" style="width: 64px;"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==========================================
+       SECTION 2: BUTTONS
+       ========================================== -->
+  <div class="sheet-section">
+    <div class="section-title">02 — Buttons</div>
+    <div class="buttons-grid">
+
+      <div class="button-group">
+        <span class="button-group-label">Primary</span>
+        <button class="btn btn--primary">Quelle hinzufügen</button>
+        <button class="btn btn--primary" style="background: var(--c-primary-hover);">Hover</button>
+      </div>
+
+      <div class="button-group">
+        <span class="button-group-label">Secondary</span>
+        <button class="btn btn--secondary">Abbrechen</button>
+        <button class="btn btn--secondary" style="border-color: var(--c-dark);">Hover</button>
+      </div>
+
+      <div class="button-group">
+        <span class="button-group-label">Ghost</span>
+        <button class="btn btn--ghost">Mehr anzeigen</button>
+        <button class="btn btn--ghost" style="color: var(--c-primary);">Hover</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==========================================
+       SECTION 3: ICON BUTTONS
+       ========================================== -->
+  <div class="sheet-section">
+    <div class="section-title">03 — Icon Buttons</div>
+    <div class="buttons-grid">
+
+      <div class="button-group">
+        <span class="button-group-label">Like</span>
+        <div style="display: flex; gap: var(--sp-8);">
+          <button class="icon-btn">♡</button>
+          <button class="icon-btn icon-btn--active-like">♥</button>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <span class="button-group-label">Bookmark</span>
+        <div style="display: flex; gap: var(--sp-8);">
+          <button class="icon-btn">☆</button>
+          <button class="icon-btn icon-btn--active-bookmark">★</button>
+        </div>
+      </div>
+
+      <div class="button-group">
+        <span class="button-group-label">Gelesen</span>
+        <div style="display: flex; gap: var(--sp-8);">
+          <button class="icon-btn">○</button>
+          <button class="icon-btn icon-btn--active-read">✓</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==========================================
+       SECTION 4: FEED CARD
+       ========================================== -->
+  <div class="sheet-section">
+    <div class="section-title">04 — Feed Card</div>
+
+    <div class="feed-card">
+      <div class="feed-card__top-row">
+        <div class="feed-card__source">
+          <span class="feed-card__source-tag feed-card__source-tag--reddit">RDT</span>
+          r/programming
+        </div>
+        <span class="feed-card__time">3h ago</span>
+      </div>
+      <a href="#" class="feed-card__title">SQLite is not a toy database – here's why it belongs in your production stack</a>
+      <div class="feed-card__summary">A deep dive into how SQLite handles concurrency, WAL mode, and why companies like Expensify serve billions of requests through it daily.</div>
+      <div class="feed-card__footer">
+        <div class="feed-card__actions">
+          <button class="icon-btn">♡</button>
+          <button class="icon-btn">☆</button>
+        </div>
+        <a href="#" class="feed-card__link"><span class="feed-card__arrow"></span></a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ==========================================
+       SECTION 5: HEADER & FOOTER
+       ========================================== -->
+  <div class="sheet-section">
+    <div class="section-title">05 — Header & Footer</div>
+
+    <div class="component-frame">
+      <div class="component-label">Header · Feed active</div>
+      <header class="header">
+        <a href="#" class="header__wordmark">Currit<span>.</span></a>
+        <nav>
+          <ul class="header__nav">
+            <li><a href="#" class="header__nav-link header__nav-link--active">Feed</a></li>
+            <li><a href="#" class="header__nav-link">Bookmarks</a></li>
+            <li><a href="#" class="header__nav-link">Sources</a></li>
+          </ul>
+        </nav>
+      </header>
+    </div>
+
+    <div class="component-frame">
+      <div class="component-label">Header · Sources active</div>
+      <header class="header">
+        <a href="#" class="header__wordmark">Currit<span>.</span></a>
+        <nav>
+          <ul class="header__nav">
+            <li><a href="#" class="header__nav-link">Feed</a></li>
+            <li><a href="#" class="header__nav-link">Bookmarks</a></li>
+            <li><a href="#" class="header__nav-link header__nav-link--active">Sources</a></li>
+          </ul>
+        </nav>
+      </header>
+    </div>
+
+    <div class="component-frame">
+      <div class="component-label">Footer</div>
+      <footer class="footer">
+        <span class="footer__left">Currit<span>.</span> v0.1</span>
+        <span class="footer__right"><span style="color: var(--c-primary); font-weight: 700;">3 / 5</span> Artikel heute</span>
+      </footer>
+    </div>
+
+  </div>
+
+  <!-- ==========================================
+       SECTION 6: MOBILE HEADER & FOOTER
+       ========================================== -->
+  <div class="sheet-section">
+    <div class="section-title">06 — Mobile Header & Footer</div>
+
+    <div class="component-frame mobile-frame">
+      <div class="component-label">Mobile Header · 375px · 3/5 gelesen</div>
+      <div class="mobile-header">
+        <a href="#" class="mobile-header__wordmark">Currit<span>.</span></a>
+        <span class="mobile-header__count"><strong>3 / 5</strong> heute</span>
+        <div class="mobile-header__progress-track">
+          <div class="mobile-header__progress-bar" style="width: 60%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="component-frame mobile-frame">
+      <div class="component-label">Mobile Footer · Feed active</div>
+      <div class="mobile-footer">
+        <a href="#" class="mobile-footer__tab mobile-footer__tab--active">
+          <span class="mobile-footer__tab-icon">◉</span>
+          Feed
+        </a>
+        <a href="#" class="mobile-footer__tab">
+          <span class="mobile-footer__tab-icon">☆</span>
+          Bookmarks
+        </a>
+        <a href="#" class="mobile-footer__tab">
+          <span class="mobile-footer__tab-icon">◎</span>
+          Sources
+        </a>
+      </div>
+    </div>
+
+    <div class="component-frame mobile-frame">
+      <div class="component-label">Mobile Footer · Bookmarks active</div>
+      <div class="mobile-footer">
+        <a href="#" class="mobile-footer__tab">
+          <span class="mobile-footer__tab-icon">◉</span>
+          Feed
+        </a>
+        <a href="#" class="mobile-footer__tab mobile-footer__tab--active">
+          <span class="mobile-footer__tab-icon">★</span>
+          Bookmarks
+        </a>
+        <a href="#" class="mobile-footer__tab">
+          <span class="mobile-footer__tab-icon">◎</span>
+          Sources
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ==========================================
+       SECTION 7: MOBILE FEED SCREEN
+       ========================================== -->
+  <div class="sheet-section">
+    <div class="section-title">07 — Mobile Feed Screen</div>
+
+    <div class="component-frame mobile-frame">
+      <div class="component-label">Feed · 375px · 3 Artikel</div>
+
+      <!-- Header -->
+      <div class="mobile-header">
+        <a href="#" class="mobile-header__wordmark">Currit<span>.</span></a>
+        <span class="mobile-header__count"><strong>3 / 5</strong> heute</span>
+        <div class="mobile-header__progress-track">
+          <div class="mobile-header__progress-bar" style="width: 60%;"></div>
+        </div>
+      </div>
+
+      <!-- Feed Cards -->
+      <div style="background: var(--c-bg); padding: var(--sp-16); display: flex; flex-direction: column; gap: var(--sp-12);">
+
+        <div class="feed-card" style="max-width: none;">
+          <div class="feed-card__top-row">
+            <div class="feed-card__source">
+              <span class="feed-card__source-tag feed-card__source-tag--reddit">RDT</span>
+              r/programming
+            </div>
+            <span class="feed-card__time">3h ago</span>
+          </div>
+          <a href="#" class="feed-card__title">SQLite is not a toy database – here's why it belongs in your production stack</a>
+          <div class="feed-card__summary">A deep dive into how SQLite handles concurrency, WAL mode, and why companies like Expensify serve billions of requests through it daily.</div>
+          <div class="feed-card__footer">
+            <div class="feed-card__actions">
+              <button class="icon-btn">♡</button>
+              <button class="icon-btn">☆</button>
+            </div>
+            <a href="#" class="feed-card__link"><span class="feed-card__arrow"></span></a>
+          </div>
+        </div>
+
+        <div class="feed-card" style="max-width: none;">
+          <div class="feed-card__top-row">
+            <div class="feed-card__source">
+              <span class="feed-card__source-tag feed-card__source-tag--hn">HN</span>
+              Hacker News
+            </div>
+            <span class="feed-card__time">5h ago</span>
+          </div>
+          <a href="#" class="feed-card__title">The end of the Redis open-source era: what Valkey means for the ecosystem</a>
+          <div class="feed-card__summary">After the license change, the Linux Foundation fork Valkey has gained massive traction. A look at who's switching and why it matters.</div>
+          <div class="feed-card__footer">
+            <div class="feed-card__actions">
+              <button class="icon-btn icon-btn--active-like">♥</button>
+              <button class="icon-btn">☆</button>
+            </div>
+            <a href="#" class="feed-card__link"><span class="feed-card__arrow"></span></a>
+          </div>
+        </div>
+
+        <div class="feed-card" style="max-width: none;">
+          <div class="feed-card__top-row">
+            <div class="feed-card__source">
+              <span class="feed-card__source-tag feed-card__source-tag--rss">RSS</span>
+              Hynek Schlawack
+            </div>
+            <span class="feed-card__time">7h ago</span>
+          </div>
+          <a href="#" class="feed-card__title">Why I still deploy on bare metal servers in 2026</a>
+          <div class="feed-card__summary">Cloud costs are out of control. Here's a practical guide on how to run your SaaS on Hetzner boxes with NixOS, saving 80% on infrastructure.</div>
+          <div class="feed-card__footer">
+            <div class="feed-card__actions">
+              <button class="icon-btn">♡</button>
+              <button class="icon-btn icon-btn--active-bookmark">★</button>
+            </div>
+            <a href="#" class="feed-card__link"><span class="feed-card__arrow"></span></a>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <div class="mobile-footer">
+        <a href="#" class="mobile-footer__tab mobile-footer__tab--active">
+          <span class="mobile-footer__tab-icon">◉</span>
+          Feed
+        </a>
+        <a href="#" class="mobile-footer__tab">
+          <span class="mobile-footer__tab-icon">☆</span>
+          Bookmarks
+        </a>
+        <a href="#" class="mobile-footer__tab">
+          <span class="mobile-footer__tab-icon">◎</span>
+          Sources
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+</html>

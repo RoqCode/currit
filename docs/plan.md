@@ -49,6 +49,41 @@ Späterer Lernschritt: Backend nach Go portieren, um die Sprache an einem bekann
 
 ---
 
+## 3.1 Design Direction: Industrial
+
+Richtung: Industrial / Teenage Engineering – utilitaristisch, technisch, klar.
+
+### Design Tokens
+
+| Token      | Wert      |
+| ---------- | --------- |
+| Primary    | `#FF5A1F` |
+| Accent     | `#FFB800` |
+| Dark       | `#1C1C1C` |
+| Background | `#F9F9F9` |
+| Surface    | `#F2F2F2` |
+| Border     | `#D9D9D9` |
+| Muted      | `#999999` |
+
+| Rolle     | Font           |
+| --------- | -------------- |
+| UI/Labels | Space Grotesk  |
+| Body/Text | Lora (Serif)   |
+
+### Stilregeln
+
+- Kein `border-radius` (0px überall)
+- Labels/Buttons: Uppercase + Letter-Spacing
+- Light Mode
+- Source-Tags farbcodiert: Reddit (#FF4500), HN (#FF6600), RSS (#0A84FF)
+- Mobile: Nav im Footer (Tab Bar), Read-Count + Progress Bar im Header
+
+### Referenz
+
+Component Sheet mit allen Tokens und Komponenten: [`design/industrial.html`](../design/industrial.html)
+
+---
+
 ## 4. Architektur – Datenfluss
 
 ### Phase 1: Ingest

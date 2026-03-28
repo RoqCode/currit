@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Currit – Style Tiles</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Instrument+Serif:ital@0;1&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=Karla:wght@300;400;500;600&family=Manrope:wght@300;400;500;600;700;800&family=Nunito:wght@300;400;500;600;700&family=Syne:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #1a1a1a;
+      color: #ccc;
+      font-family: 'Manrope', sans-serif;
+      padding: 40px 24px 80px;
+    }
+
+    .page-header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+    .page-header h1 {
+      font-family: 'Manrope', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #666;
+      margin-bottom: 8px;
+    }
+    .page-header p {
+      font-size: 13px;
+      color: #555;
+    }
+
+    .tiles-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 32px;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 1200px) {
+      .tiles-grid { grid-template-columns: 1fr; max-width: 600px; }
+    }
+
+    /* ============================================
+       TILE: SHARED STRUCTURE
+       ============================================ */
+    .tile {
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .tile-header {
+      padding: 28px 32px 24px;
+    }
+    .tile-header h2 {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .tile-header p {
+      font-size: 12px;
+      opacity: 0.5;
+    }
+    .tile-body {
+      padding: 0 32px 36px;
+    }
+    .section-label {
+      font-size: 9px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      display: block;
+    }
+    .section {
+      margin-bottom: 28px;
+    }
+    .section:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Swatches */
+    .swatches {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .swatch {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .swatch-color {
+      width: 52px;
+      height: 52px;
+      border-radius: 2px;
+    }
+    .swatch-label {
+      font-size: 9px;
+      letter-spacing: 0.05em;
+      opacity: 0.6;
+    }
+
+    /* Buttons row */
+    .buttons-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .buttons-row button {
+      cursor: pointer;
+      border: none;
+      font-size: 12px;
+      padding: 10px 20px;
+      transition: all 0.15s ease;
+    }
+
+    /* Tags row */
+    .tags-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .tags-row span {
+      font-size: 10px;
+      padding: 4px 10px;
+      border-radius: 2px;
+    }
+
+    /* Card skeleton */
+    .card-skeleton {
+      padding: 20px;
+      border-radius: 2px;
+    }
+    .skeleton-line {
+      border-radius: 2px;
+      margin-bottom: 8px;
+    }
+    .skeleton-line:last-child { margin-bottom: 0; }
+
+    /* ============================================
+       TILE 1: INDUSTRIAL
+       ============================================ */
+    .tile--industrial {
+      background: #F5F3EF;
+      border: 1px solid #D9D5CC;
+      position: relative;
+    }
+    .tile--industrial .tile-header {
+      border-bottom: 1px solid #D9D5CC;
+      position: relative;
+    }
+    .tile--industrial .tile-header h2 {
+      font-family: 'Space Mono', monospace;
+      color: #FF5A1F;
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 0.25em;
+    }
+    .tile--industrial .tile-header p {
+      font-family: 'Space Mono', monospace;
+      color: #999;
+      font-size: 11px;
+    }
+    .tile--industrial .tile-body {
+      position: relative;
+    }
+    .tile--industrial .section-label {
+      font-family: 'Space Mono', monospace;
+      color: #888;
+      font-size: 9px;
+      letter-spacing: 0.3em;
+    }
+    .tile--industrial .swatch-color { border-radius: 0; }
+    .tile--industrial .ind-primary { background: #FF5A1F; }
+    .tile--industrial .ind-secondary { background: #1C1C1C; }
+    .tile--industrial .ind-accent { background: #FFB800; }
+    .tile--industrial .ind-surface { background: #ECEAE4; }
+    .tile--industrial .ind-text { background: #1C1C1C; }
+    .tile--industrial .ind-muted { background: #999999; }
+    .tile--industrial .swatch-label {
+      font-family: 'Space Mono', monospace;
+      color: #888;
+      font-size: 8px;
+    }
+    .tile--industrial .type-sample-heading {
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+      font-size: 28px;
+      color: #1C1C1C;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      line-height: 1.1;
+      margin-bottom: 4px;
+    }
+    .tile--industrial .type-meta {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      color: #888;
+      margin-bottom: 16px;
+    }
+    .tile--industrial .type-sample-body {
+      font-family: 'Source Serif 4', serif;
+      font-size: 14px;
+      color: #3A3A3A;
+      line-height: 1.75;
+      margin-bottom: 4px;
+    }
+    .tile--industrial .type-sample-body-meta {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      color: #888;
+    }
+    .tile--industrial .btn-primary-ind {
+      background: #FF5A1F;
+      color: #fff;
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      font-size: 11px;
+      border-radius: 0;
+      padding: 12px 24px;
+    }
+    .tile--industrial .btn-primary-ind:hover { background: #e84e15; }
+    .tile--industrial .btn-secondary-ind {
+      background: transparent;
+      color: #1C1C1C;
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      font-size: 11px;
+      border: 1px solid #C4BFB6 !important;
+      border-radius: 0;
+      padding: 12px 24px;
+    }
+    .tile--industrial .btn-secondary-ind:hover { border-color: #FF5A1F !important; color: #FF5A1F; }
+    .tile--industrial .btn-ghost-ind {
+      background: transparent;
+      color: #888;
+      font-family: 'Space Mono', monospace;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      text-decoration: underline;
+      text-underline-offset: 4px;
+      padding: 12px 8px;
+    }
+    .tile--industrial .btn-ghost-ind:hover { color: #FF5A1F; }
+    .tile--industrial .tags-row span {
+      font-family: 'Space Mono', monospace;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      border-radius: 0;
+    }
+    .tile--industrial .tag-ind-1 { background: #FF5A1F; color: #000; }
+    .tile--industrial .tag-ind-2 { background: transparent; border: 1px solid #C4BFB6; color: #555; }
+    .tile--industrial .tag-ind-3 { background: #ECEAE4; color: #777; }
+    .tile--industrial .card-skeleton {
+      background: #ECEAE4;
+      border: 1px solid #D9D5CC;
+      border-radius: 0;
+    }
+    .tile--industrial .skeleton-line { background: #D9D5CC; border-radius: 0; }
+    .tile--industrial .skeleton-line.accent { background: #FF5A1F; opacity: 0.35; }
+
+    /* ============================================
+       TILE 2: EDITORIAL
+       ============================================ */
+    .tile--editorial {
+      background: #FAF7F2;
+      border: 1px solid #E8E2D8;
+    }
+    .tile--editorial .tile-header { border-bottom: 1px solid #E8E2D8; }
+    .tile--editorial .tile-header h2 {
+      font-family: 'Instrument Serif', serif;
+      color: #2C3E50;
+      font-weight: 400;
+      font-size: 14px;
+      letter-spacing: 0.15em;
+      font-style: italic;
+    }
+    .tile--editorial .tile-header p {
+      font-family: 'Karla', sans-serif;
+      color: #8B7E6A;
+      font-size: 11px;
+      letter-spacing: 0.05em;
+    }
+    .tile--editorial .section-label {
+      font-family: 'Karla', sans-serif;
+      color: #8B7E6A;
+      font-weight: 500;
+      font-size: 9px;
+      letter-spacing: 0.2em;
+    }
+    .tile--editorial .swatch-color { border-radius: 50%; }
+    .tile--editorial .ed-primary { background: #2C3E50; }
+    .tile--editorial .ed-secondary { background: #8B4513; }
+    .tile--editorial .ed-accent { background: #6B7F3E; }
+    .tile--editorial .ed-bg { background: #FAF7F2; border: 1px solid #E8E2D8; }
+    .tile--editorial .ed-surface { background: #F0EBE1; }
+    .tile--editorial .ed-text { background: #2A2520; }
+    .tile--editorial .swatch-label {
+      font-family: 'Karla', sans-serif;
+      color: #8B7E6A;
+      font-size: 8px;
+    }
+    .tile--editorial .type-sample-heading {
+      font-family: 'Instrument Serif', serif;
+      font-weight: 400;
+      font-size: 32px;
+      color: #2A2520;
+      line-height: 1.15;
+      margin-bottom: 4px;
+    }
+    .tile--editorial .type-meta {
+      font-family: 'Karla', sans-serif;
+      font-size: 9px;
+      color: #8B7E6A;
+      margin-bottom: 16px;
+      letter-spacing: 0.05em;
+    }
+    .tile--editorial .type-sample-body {
+      font-family: 'Source Serif 4', serif;
+      font-size: 14px;
+      color: #4A4340;
+      line-height: 1.75;
+      margin-bottom: 4px;
+    }
+    .tile--editorial .type-sample-body-meta {
+      font-family: 'Karla', sans-serif;
+      font-size: 9px;
+      color: #8B7E6A;
+    }
+    .tile--editorial .btn-primary-ed {
+      background: #2C3E50;
+      color: #FAF7F2;
+      font-family: 'Karla', sans-serif;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      font-size: 12px;
+      border-radius: 0;
+      padding: 11px 28px;
+    }
+    .tile--editorial .btn-primary-ed:hover { background: #1a2a38; }
+    .tile--editorial .btn-secondary-ed {
+      background: transparent;
+      color: #2C3E50;
+      font-family: 'Karla', sans-serif;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      font-size: 12px;
+      border: 1px solid #C4B9A8 !important;
+      border-radius: 0;
+      padding: 11px 28px;
+    }
+    .tile--editorial .btn-secondary-ed:hover { border-color: #2C3E50 !important; }
+    .tile--editorial .btn-ghost-ed {
+      background: transparent;
+      color: #8B7E6A;
+      font-family: 'Karla', sans-serif;
+      font-size: 12px;
+      letter-spacing: 0.05em;
+      text-decoration: underline;
+      text-decoration-color: #C4B9A8;
+      text-underline-offset: 4px;
+      padding: 11px 8px;
+    }
+    .tile--editorial .btn-ghost-ed:hover { color: #8B4513; text-decoration-color: #8B4513; }
+    .tile--editorial .tags-row span {
+      font-family: 'Karla', sans-serif;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      border-radius: 0;
+    }
+    .tile--editorial .tag-ed-1 { background: #2C3E50; color: #FAF7F2; }
+    .tile--editorial .tag-ed-2 { background: transparent; border: 1px solid #C4B9A8; color: #6B6156; }
+    .tile--editorial .tag-ed-3 { background: #F0EBE1; color: #8B7E6A; }
+    .tile--editorial .card-skeleton {
+      background: #F0EBE1;
+      border: none;
+      border-radius: 0;
+      border-left: 3px solid #8B4513;
+    }
+    .tile--editorial .skeleton-line { background: #E2DACE; }
+    .tile--editorial .skeleton-line.accent { background: #8B4513; opacity: 0.2; }
+
+    /* ============================================
+       TILE 3: SOFT / ORGANIC
+       ============================================ */
+    .tile--soft {
+      background: #F7F5F0;
+      border: 1px solid #E6E1D6;
+      border-radius: 16px;
+    }
+    .tile--soft .tile-header { border-bottom: 1px solid #E6E1D6; }
+    .tile--soft .tile-header h2 {
+      font-family: 'Nunito', sans-serif;
+      color: #7B8F6A;
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 0.15em;
+    }
+    .tile--soft .tile-header p {
+      font-family: 'Nunito', sans-serif;
+      color: #A89F8E;
+      font-size: 11px;
+    }
+    .tile--soft .section-label {
+      font-family: 'Nunito', sans-serif;
+      color: #A89F8E;
+      font-weight: 600;
+      font-size: 9px;
+      letter-spacing: 0.15em;
+    }
+    .tile--soft .swatch-color { border-radius: 12px; }
+    .tile--soft .so-primary { background: #7B8F6A; }
+    .tile--soft .so-secondary { background: #C4A882; }
+    .tile--soft .so-accent { background: #D4A0A0; }
+    .tile--soft .so-bg { background: #F7F5F0; border: 1px solid #E6E1D6; border-radius: 12px; }
+    .tile--soft .so-surface { background: #EDEADF; }
+    .tile--soft .so-text { background: #3D3A35; }
+    .tile--soft .swatch-label {
+      font-family: 'Nunito', sans-serif;
+      color: #A89F8E;
+      font-size: 8px;
+    }
+    .tile--soft .type-sample-heading {
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      font-size: 28px;
+      color: #3D3A35;
+      line-height: 1.2;
+      margin-bottom: 4px;
+    }
+    .tile--soft .type-meta {
+      font-family: 'Nunito', sans-serif;
+      font-size: 9px;
+      color: #A89F8E;
+      margin-bottom: 16px;
+    }
+    .tile--soft .type-sample-body {
+      font-family: 'Nunito', sans-serif;
+      font-size: 14px;
+      color: #5C5750;
+      line-height: 1.75;
+      font-weight: 400;
+      margin-bottom: 4px;
+    }
+    .tile--soft .type-sample-body-meta {
+      font-family: 'Nunito', sans-serif;
+      font-size: 9px;
+      color: #A89F8E;
+    }
+    .tile--soft .btn-primary-so {
+      background: #7B8F6A;
+      color: #fff;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      font-size: 13px;
+      border-radius: 24px;
+      padding: 11px 26px;
+    }
+    .tile--soft .btn-primary-so:hover { background: #6B7F5A; }
+    .tile--soft .btn-secondary-so {
+      background: #EDEADF;
+      color: #3D3A35;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 600;
+      font-size: 13px;
+      border-radius: 24px;
+      padding: 11px 26px;
+    }
+    .tile--soft .btn-secondary-so:hover { background: #E2DFD2; }
+    .tile--soft .btn-ghost-so {
+      background: transparent;
+      color: #A89F8E;
+      font-family: 'Nunito', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 11px 8px;
+    }
+    .tile--soft .btn-ghost-so:hover { color: #7B8F6A; }
+    .tile--soft .tags-row span {
+      font-family: 'Nunito', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .tile--soft .tag-so-1 { background: #7B8F6A; color: #fff; border-radius: 20px; }
+    .tile--soft .tag-so-2 { background: #EDEADF; color: #5C5750; border-radius: 20px; }
+    .tile--soft .tag-so-3 { background: rgba(212,160,160,0.15); color: #B07070; border-radius: 20px; }
+    .tile--soft .card-skeleton {
+      background: #EDEADF;
+      border: none;
+      border-radius: 12px;
+    }
+    .tile--soft .skeleton-line { background: #E0DCD0; border-radius: 8px; }
+    .tile--soft .skeleton-line.accent { background: #7B8F6A; opacity: 0.2; border-radius: 8px; }
+
+    /* ============================================
+       TILE 4: NEO BRUTALIST
+       ============================================ */
+    .tile--brutalist {
+      background: #FFFEF5;
+      border: 3px solid #1A1A1A;
+      border-radius: 0;
+    }
+    .tile--brutalist .tile-header {
+      border-bottom: 3px solid #1A1A1A;
+    }
+    .tile--brutalist .tile-header h2 {
+      font-family: 'Syne', sans-serif;
+      color: #1A1A1A;
+      font-weight: 800;
+      font-size: 13px;
+      letter-spacing: 0.1em;
+    }
+    .tile--brutalist .tile-header p {
+      font-family: 'Syne', sans-serif;
+      color: #888;
+      font-size: 11px;
+      font-weight: 500;
+    }
+    .tile--brutalist .section-label {
+      font-family: 'Syne', sans-serif;
+      color: #1A1A1A;
+      font-weight: 700;
+      font-size: 9px;
+      letter-spacing: 0.2em;
+    }
+    .tile--brutalist .swatch-color {
+      border-radius: 0;
+      border: 2px solid #1A1A1A;
+    }
+    .tile--brutalist .nb-primary { background: #FF6B35; }
+    .tile--brutalist .nb-secondary { background: #3D5AFE; }
+    .tile--brutalist .nb-accent { background: #FFD600; }
+    .tile--brutalist .nb-bg { background: #FFFEF5; }
+    .tile--brutalist .nb-surface { background: #F0F0E8; }
+    .tile--brutalist .nb-text { background: #1A1A1A; }
+    .tile--brutalist .swatch-label {
+      font-family: 'Syne', sans-serif;
+      color: #1A1A1A;
+      font-size: 8px;
+      font-weight: 600;
+    }
+    .tile--brutalist .type-sample-heading {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 30px;
+      color: #1A1A1A;
+      line-height: 1.05;
+      margin-bottom: 4px;
+    }
+    .tile--brutalist .type-meta {
+      font-family: 'Syne', sans-serif;
+      font-size: 9px;
+      color: #888;
+      margin-bottom: 16px;
+      font-weight: 500;
+    }
+    .tile--brutalist .type-sample-body {
+      font-family: 'Karla', sans-serif;
+      font-size: 14px;
+      color: #333;
+      line-height: 1.7;
+      margin-bottom: 4px;
+    }
+    .tile--brutalist .type-sample-body-meta {
+      font-family: 'Syne', sans-serif;
+      font-size: 9px;
+      color: #888;
+      font-weight: 500;
+    }
+    .tile--brutalist .btn-primary-nb {
+      background: #FF6B35;
+      color: #1A1A1A;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 12px;
+      border-radius: 0;
+      border: 2px solid #1A1A1A !important;
+      padding: 10px 22px;
+      box-shadow: 3px 3px 0 #1A1A1A;
+    }
+    .tile--brutalist .btn-primary-nb:hover {
+      box-shadow: 1px 1px 0 #1A1A1A;
+      transform: translate(2px, 2px);
+    }
+    .tile--brutalist .btn-secondary-nb {
+      background: #FFFEF5;
+      color: #1A1A1A;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 12px;
+      border-radius: 0;
+      border: 2px solid #1A1A1A !important;
+      padding: 10px 22px;
+      box-shadow: 3px 3px 0 #1A1A1A;
+    }
+    .tile--brutalist .btn-secondary-nb:hover {
+      background: #FFD600;
+      box-shadow: 1px 1px 0 #1A1A1A;
+      transform: translate(2px, 2px);
+    }
+    .tile--brutalist .btn-ghost-nb {
+      background: transparent;
+      color: #1A1A1A;
+      font-family: 'Syne', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      text-decoration: underline;
+      text-decoration-thickness: 2px;
+      text-underline-offset: 4px;
+      padding: 10px 8px;
+    }
+    .tile--brutalist .btn-ghost-nb:hover { color: #FF6B35; }
+    .tile--brutalist .tags-row span {
+      font-family: 'Syne', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      border-radius: 0;
+      border: 2px solid #1A1A1A;
+    }
+    .tile--brutalist .tag-nb-1 { background: #FF6B35; color: #1A1A1A; }
+    .tile--brutalist .tag-nb-2 { background: #3D5AFE; color: #fff; }
+    .tile--brutalist .tag-nb-3 { background: #FFD600; color: #1A1A1A; }
+    .tile--brutalist .card-skeleton {
+      background: #F0F0E8;
+      border: 2px solid #1A1A1A;
+      border-radius: 0;
+      box-shadow: 4px 4px 0 #1A1A1A;
+    }
+    .tile--brutalist .skeleton-line { background: #D8D8CC; border-radius: 0; }
+    .tile--brutalist .skeleton-line.accent { background: #FF6B35; opacity: 0.4; border-radius: 0; }
+
+    /* ============================================
+       TILE 5: JAPANESE MINIMAL
+       ============================================ */
+    .tile--jpmin {
+      background: #FCFBF8;
+      border: 1px solid #E8E6E0;
+    }
+    .tile--jpmin .tile-header {
+      border-bottom: 1px solid #E8E6E0;
+    }
+    .tile--jpmin .tile-header h2 {
+      font-family: 'Noto Sans JP', sans-serif;
+      color: #2A2A2A;
+      font-weight: 500;
+      font-size: 11px;
+      letter-spacing: 0.25em;
+    }
+    .tile--jpmin .tile-header p {
+      font-family: 'Noto Sans JP', sans-serif;
+      color: #B0ADA5;
+      font-size: 11px;
+      font-weight: 300;
+    }
+    .tile--jpmin .section-label {
+      font-family: 'Noto Sans JP', sans-serif;
+      color: #B0ADA5;
+      font-weight: 400;
+      font-size: 9px;
+      letter-spacing: 0.25em;
+    }
+    .tile--jpmin .swatch-color { border-radius: 1px; }
+    .tile--jpmin .jp-primary { background: #2A2A2A; }
+    .tile--jpmin .jp-secondary { background: #C23B3B; }
+    .tile--jpmin .jp-accent { background: #B0ADA5; }
+    .tile--jpmin .jp-bg { background: #FCFBF8; border: 1px solid #E8E6E0; }
+    .tile--jpmin .jp-surface { background: #F2F0EB; }
+    .tile--jpmin .jp-text { background: #2A2A2A; }
+    .tile--jpmin .swatch-label {
+      font-family: 'Noto Sans JP', sans-serif;
+      color: #B0ADA5;
+      font-size: 8px;
+      font-weight: 300;
+    }
+    .tile--jpmin .type-sample-heading {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-weight: 500;
+      font-size: 26px;
+      color: #2A2A2A;
+      line-height: 1.3;
+      letter-spacing: 0.02em;
+      margin-bottom: 4px;
+    }
+    .tile--jpmin .type-meta {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 9px;
+      color: #B0ADA5;
+      margin-bottom: 16px;
+      font-weight: 300;
+    }
+    .tile--jpmin .type-sample-body {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 13px;
+      color: #555;
+      line-height: 1.9;
+      font-weight: 300;
+      margin-bottom: 4px;
+    }
+    .tile--jpmin .type-sample-body-meta {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 9px;
+      color: #B0ADA5;
+      font-weight: 300;
+    }
+    .tile--jpmin .btn-primary-jp {
+      background: #2A2A2A;
+      color: #FCFBF8;
+      font-family: 'Noto Sans JP', sans-serif;
+      font-weight: 500;
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      border-radius: 1px;
+      padding: 11px 28px;
+    }
+    .tile--jpmin .btn-primary-jp:hover { background: #1a1a1a; }
+    .tile--jpmin .btn-secondary-jp {
+      background: transparent;
+      color: #2A2A2A;
+      font-family: 'Noto Sans JP', sans-serif;
+      font-weight: 400;
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      border: 1px solid #D5D2CC !important;
+      border-radius: 1px;
+      padding: 11px 28px;
+    }
+    .tile--jpmin .btn-secondary-jp:hover { border-color: #2A2A2A !important; }
+    .tile--jpmin .btn-ghost-jp {
+      background: transparent;
+      color: #B0ADA5;
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 12px;
+      font-weight: 400;
+      letter-spacing: 0.05em;
+      padding: 11px 8px;
+    }
+    .tile--jpmin .btn-ghost-jp:hover { color: #C23B3B; }
+    .tile--jpmin .tags-row span {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 10px;
+      font-weight: 400;
+      letter-spacing: 0.05em;
+      border-radius: 1px;
+    }
+    .tile--jpmin .tag-jp-1 { background: #2A2A2A; color: #FCFBF8; }
+    .tile--jpmin .tag-jp-2 { background: transparent; border: 1px solid #D5D2CC; color: #777; }
+    .tile--jpmin .tag-jp-3 { background: #F2F0EB; color: #888; }
+    .tile--jpmin .card-skeleton {
+      background: #F2F0EB;
+      border: none;
+      border-radius: 1px;
+      border-top: 2px solid #C23B3B;
+    }
+    .tile--jpmin .skeleton-line { background: #E5E3DC; border-radius: 1px; }
+    .tile--jpmin .skeleton-line.accent { background: #C23B3B; opacity: 0.15; border-radius: 1px; }
+  </style>
+</head>
+<body>
+
+  <div class="page-header">
+    <h1>Currit — Style Tiles</h1>
+    <p>5 Richtungen zum Vergleichen</p>
+  </div>
+
+  <div class="tiles-grid">
+
+    <!-- TILE 1: INDUSTRIAL -->
+    <div class="tile tile--industrial">
+      <div class="tile-header">
+        <h2>01 — Industrial</h2>
+        <p>Teenage Engineering / Work Louder</p>
+      </div>
+      <div class="tile-body">
+        <div class="section">
+          <span class="section-label">Farben</span>
+          <div class="swatches">
+            <div class="swatch"><div class="swatch-color ind-primary"></div><span class="swatch-label">#FF5A1F</span></div>
+            <div class="swatch"><div class="swatch-color ind-accent"></div><span class="swatch-label">#FFB800</span></div>
+            <div class="swatch"><div class="swatch-color ind-secondary"></div><span class="swatch-label">#1C1C1C</span></div>
+            <div class="swatch"><div class="swatch-color ind-surface"></div><span class="swatch-label">#ECEAE4</span></div>
+            <div class="swatch"><div class="swatch-color ind-text"></div><span class="swatch-label">#1C1C1C</span></div>
+            <div class="swatch"><div class="swatch-color ind-muted"></div><span class="swatch-label">#999999</span></div>
+          </div>
+        </div>
+        <div class="section">
+          <span class="section-label">Typografie</span>
+          <div class="type-sample-heading">DAILY FEED</div>
+          <div class="type-meta">Space Mono Bold · 28px · Uppercase</div>
+          <div class="type-sample-body">Dein täglicher Feed mit 3–7 kuratierten Inhalten. Weniger Rauschen, mehr Substanz.</div>
+          <div class="type-sample-body-meta">Source Serif 4 Regular · 14px</div>
+        </div>
+        <div class="section">
+          <span class="section-label">Buttons</span>
+          <div class="buttons-row">
+            <button class="btn-primary-ind">Quelle hinzufügen</button>
+            <button class="btn-secondary-ind">Abbrechen</button>
+            <button class="btn-ghost-ind">Mehr</button>
+          </div>
+        </div>
+        <div class="section">
+          <span class="section-label">Tags</span>
+          <div class="tags-row">
+            <span class="tag-ind-1">RSS</span>
+            <span class="tag-ind-2">Reddit</span>
+            <span class="tag-ind-3">Hacker News</span>
+          </div>
+        </div>
+        <div class="section">
+          <span class="section-label">Card</span>
+          <div class="card-skeleton">
+            <div class="skeleton-line accent" style="width: 35%; height: 8px;"></div>
+            <div class="skeleton-line" style="width: 85%; height: 14px;"></div>
+            <div class="skeleton-line" style="width: 100%; height: 10px;"></div>
+            <div class="skeleton-line" style="width: 72%; height: 10px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TILE 2: EDITORIAL -->
+    <div class="tile tile--editorial">
+      <div class="tile-header">
+        <h2>02 — Editorial</h2>
+        <p>Magazin / Reading-focused</p>
+      </div>
+      <div class="tile-body">
+        <div class="section">
+          <span class="section-label">Farben</span>
+          <div class="swatches">
+            <div class="swatch"><div class="swatch-color ed-primary"></div><span class="swatch-label">#2C3E50</span></div>
+            <div class="swatch"><div class="swatch-color ed-secondary"></div><span class="swatch-label">#8B4513</span></div>
+            <div class="swatch"><div class="swatch-color ed-accent"></div><span class="swatch-label">#6B7F3E</span></div>
+            <div class="swatch"><div class="swatch-color ed-bg"></div><span class="swatch-label">#FAF7F2</span></div>
+            <div class="swatch"><div class="swatch-color ed-surface"></div><span class="swatch-label">#F0EBE1</span></div>
+            <div class="swatch"><div class="swatch-color ed-text"></div><span class="swatch-label">#2A2520</span></div>
+          </div>
+        </div>
+        <div class="section">
+          <span class="section-label">Typografie</span>
+          <div class="type-sample-heading">Dein täglicher Feed</div>
+          <div class="type-meta">Instrument Serif Regular · 32px</div>
+          <div class="type-sample-body">Statt endlosem Doomscrolling bekommst du eine bewusst begrenzte Auswahl aus selbst gewählten Quellen.</div>
+          <div class="type-sample-body-meta">Source Serif 4 Regular · 14px</div>
+        </div>
+        <div class="section">
+          <span class="section-label">Buttons</span>
+          <div class="buttons-row">
+            <button class="btn-primary-ed">Quelle hinzufügen</button>
+            <button class="btn-secondary-ed">Abbrechen</button>
+            <button class="btn-ghost-ed">Mehr anzeigen</button>
+          </div>
+        </div>
+        <div class="section">
+          <span class="section-label">Tags</span>
+          <div class="tags-row">
+            <span class="tag-ed-1">RSS</span>
+            <span class="tag-ed-2">Reddit</span>
+            <span class="tag-ed-3">Hacker News</span>
+          </div>
+        </div>
+        <div class="section">
+          <span class="section-label">Card</span>
+          <div class="card-skeleton">
+            <div class="skeleton-line accent" style="width: 30%; height: 8px;"></div>
+            <div class="skeleton-line" style="width: 80%; height: 14px;"></div>
+            <div class="skeleton-line" style="width: 100%; height: 10px;"></div>
+            <div class="skeleton-line" style="width: 65%; height: 10px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TILE 3: SOFT / ORGANIC -->
+    <div class="tile tile--soft">
+      <div class="tile-header">
+        <h2>03 — Soft / Organic</h2>
+        <p>Calm / Anti-Doomscroll</p>
+      </div>
+      <div class="tile-body">
+        <div class="section">
+          <span class="section-label">Farben</span>
+          <div class="swatches">
+            <div class="swatch"><div class="swatch-color so-primary"></div><span class="swatch-label">#7B8F6A</span></div>
+            <div class="swatch"><div class="swatch-color so-secondary"></div><span class="swatch-label">#C4A882</span></div>
+            <div class="swatch"><div class="swatch-color so-accent"></div><span class="swatch-label">#D4A0A0</span></div>
+            <div class="swatch"><div class="swatch-color so-bg"></div><span class="swatch-label">#F7F5F0</span></div>
+            <div class="swatch"><div class="swatch-color so-surface"></div><span class="swatch-label">#EDEADF</span></div>
+            <div class="swatch"><div class="swatch-color so-text"></div><span class="swatch-label">#3D3A35</span></div>
+          </div>
+        </div>
+        <div class="section">
+          <span class="section-label">Typografie</span>
+          <div class="type-sample-heading">Dein täglicher Feed</div>
+          <div class="type-meta">Nunito Bold · 28px</div>
+          <div class="type-sample-body">Weniger Rauschen, mehr Substanz. Eine bewusst begrenzte Auswahl aus selbst gewählten Quellen.</div>
+          <div class="type-sample-body-meta">Nunito Regular · 14px</div>
+        </div>
+        <div class="section">
+          <span class="section-label">Buttons</span>
+          <div class="buttons-row">
+            <button class="btn-primary-so">Quelle hinzufügen</button>
+            <button class="btn-secondary-so">Abbrechen</button>
+            <button class="btn-ghost-so">Mehr</button>
+          </div>
+        </div>
+        <div class="section">
+          <span class="section-label">Tags</span>
+          <div class="tags-row">
+            <span class="tag-so-1">RSS</span>
+            <span class="tag-so-2">Reddit</span>
+            <span class="tag-so-3">Hacker News</span>
+          </div>
+        </div>
+        <div class="section">
+          <span class="section-label">Card</span>
+          <div class="card-skeleton">
+            <div class="skeleton-line accent" style="width: 32%; height: 8px;"></div>
+            <div class="skeleton-line" style="width: 80%; height: 14px;"></div>
+            <div class="skeleton-line" style="width: 100%; height: 10px;"></div>
+            <div class="skeleton-line" style="width: 68%; height: 10px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TILE 4: NEO BRUTALIST -->
+    <div class="tile tile--brutalist">
+      <div class="tile-header">
+        <h2>04 — Neo Brutalist</h2>
+        <p>Gumroad / Notion Calendar</p>
+      </div>
+      <div class="tile-body">
+        <div class="section">
+          <span class="section-label">Farben</span>
+          <div class="swatches">
+            <div class="swatch"><div class="swatch-color nb-primary"></div><span class="swatch-label">#FF6B35</span></div>
+            <div class="swatch"><div class="swatch-color nb-secondary"></div><span class="swatch-label">#3D5AFE</span></div>
+            <div class="swatch"><div class="swatch-color nb-accent"></div><span class="swatch-label">#FFD600</span></div>
+            <div class="swatch"><div class="swatch-color nb-bg"></div><span class="swatch-label">#FFFEF5</span></div>
+            <div class="swatch"><div class="swatch-color nb-surface"></div><span class="swatch-label">#F0F0E8</span></div>
+            <div class="swatch"><div class="swatch-color nb-text"></div><span class="swatch-label">#1A1A1A</span></div>
+          </div>
+        </div>
+        <div class="section">
+          <span class="section-label">Typografie</span>
+          <div class="type-sample-heading">Dein täglicher Feed</div>
+          <div class="type-meta">Syne ExtraBold · 30px</div>
+          <div class="type-sample-body">Statt endlosem Doomscrolling bekommst du eine bewusst begrenzte Auswahl aus selbst gewählten Quellen.</div>
+          <div class="type-sample-body-meta">Karla Regular · 14px</div>
+        </div>
+        <div class="section">
+          <span class="section-label">Buttons</span>
+          <div class="buttons-row">
+            <button class="btn-primary-nb">Quelle hinzufügen</button>
+            <button class="btn-secondary-nb">Abbrechen</button>
+            <button class="btn-ghost-nb">Mehr</button>
+          </div>
+        </div>
+        <div class="section">
+          <span class="section-label">Tags</span>
+          <div class="tags-row">
+            <span class="tag-nb-1">RSS</span>
+            <span class="tag-nb-2">Reddit</span>
+            <span class="tag-nb-3">Hacker News</span>
+          </div>
+        </div>
+        <div class="section">
+          <span class="section-label">Card</span>
+          <div class="card-skeleton">
+            <div class="skeleton-line accent" style="width: 35%; height: 8px;"></div>
+            <div class="skeleton-line" style="width: 85%; height: 14px;"></div>
+            <div class="skeleton-line" style="width: 100%; height: 10px;"></div>
+            <div class="skeleton-line" style="width: 70%; height: 10px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TILE 5: JAPANESE MINIMAL -->
+    <div class="tile tile--jpmin">
+      <div class="tile-header">
+        <h2>05 — Japanese Minimal</h2>
+        <p>Muji / Aesop</p>
+      </div>
+      <div class="tile-body">
+        <div class="section">
+          <span class="section-label">Farben</span>
+          <div class="swatches">
+            <div class="swatch"><div class="swatch-color jp-primary"></div><span class="swatch-label">#2A2A2A</span></div>
+            <div class="swatch"><div class="swatch-color jp-secondary"></div><span class="swatch-label">#C23B3B</span></div>
+            <div class="swatch"><div class="swatch-color jp-accent"></div><span class="swatch-label">#B0ADA5</span></div>
+            <div class="swatch"><div class="swatch-color jp-bg"></div><span class="swatch-label">#FCFBF8</span></div>
+            <div class="swatch"><div class="swatch-color jp-surface"></div><span class="swatch-label">#F2F0EB</span></div>
+            <div class="swatch"><div class="swatch-color jp-text"></div><span class="swatch-label">#2A2A2A</span></div>
+          </div>
+        </div>
+        <div class="section">
+          <span class="section-label">Typografie</span>
+          <div class="type-sample-heading">Dein täglicher Feed</div>
+          <div class="type-meta">Noto Sans JP Medium · 26px</div>
+          <div class="type-sample-body">Weniger Rauschen, mehr Substanz. Dein persönlicher, täglicher Feed mit kuratierten Inhalten.</div>
+          <div class="type-sample-body-meta">Noto Sans JP Light · 13px</div>
+        </div>
+        <div class="section">
+          <span class="section-label">Buttons</span>
+          <div class="buttons-row">
+            <button class="btn-primary-jp">Quelle hinzufügen</button>
+            <button class="btn-secondary-jp">Abbrechen</button>
+            <button class="btn-ghost-jp">Mehr</button>
+          </div>
+        </div>
+        <div class="section">
+          <span class="section-label">Tags</span>
+          <div class="tags-row">
+            <span class="tag-jp-1">RSS</span>
+            <span class="tag-jp-2">Reddit</span>
+            <span class="tag-jp-3">Hacker News</span>
+          </div>
+        </div>
+        <div class="section">
+          <span class="section-label">Card</span>
+          <div class="card-skeleton">
+            <div class="skeleton-line accent" style="width: 25%; height: 8px;"></div>
+            <div class="skeleton-line" style="width: 75%; height: 14px;"></div>
+            <div class="skeleton-line" style="width: 100%; height: 10px;"></div>
+            <div class="skeleton-line" style="width: 55%; height: 10px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</body>
+</html>
