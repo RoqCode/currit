@@ -24,6 +24,7 @@ Ein persönlicher, täglicher Feed mit 3–7 kuratierten Inhalten. Statt endlose
 | Ziel         | Reddit-Doomscrolling durch bessere Alternative reduzieren          |
 | Feed-Größe   | Minimum 3, Maximum 7 Items pro Tag                                 |
 | Quellen      | RSS-Feeds, ausgewählte Subreddits, Hacker News                     |
+| Interessen   | User pflegt eigene Themen als Keywords, KI-Vorschläge optional     |
 | Cold Start   | User konfiguriert eigene Quellen (URLs, Subreddits)                |
 | Scoring      | Heuristiken als Basis, KI optional obendrauf                       |
 | Feedback     | Like- und Bookmark-Feedback pro Item                               |
@@ -86,6 +87,12 @@ Component Sheet mit allen Tokens und Komponenten: [`design/industrial.html`](../
 
 ## 4. Architektur – Datenfluss
 
+### Phase 0: Profile Setup
+
+Vor dem ersten Feed pflegt der User seine Interessengebiete als Keywords, z.B. `typescript`, `indie web`, `self-hosting`, `design systems`. Diese Keywords sind bewusst leichtgewichtig, damit der Einstieg schnell bleibt und das Relevanzsignal früh nutzbar ist.
+
+Optional kann eine KI aus wenigen Seed-Keywords verwandte Vorschläge generieren, die der User übernehmen oder verwerfen kann. Wichtig für das MVP: KI macht nur Vorschläge, sie entscheidet nichts automatisch.
+
 ### Phase 1: Ingest
 
 Ein täglicher Job fragt alle konfigurierten Quellen ab. Jede Quelle bekommt einen eigenen Fetcher, weil die Formate unterschiedlich sind (RSS-XML, Reddit JSON API, HN API). Alle liefern am Ende ein normalisiertes Objekt.
@@ -96,7 +103,7 @@ Jeder Rohinhalt wird auf ein einheitliches Format gebracht: Titel, URL, Quelle, 
 
 ### Phase 3: Score + Rank
 
-Die Scoring Engine zieht alle heutigen Kandidaten aus der DB und bewertet sie anhand vier konfigurierbarer Gewichte:
+Die Scoring Engine zieht alle heutigen Kandidaten aus der DB und bewertet sie anhand vier konfigurierbarer Gewichte. Die User-Keywords sind dabei das erste Relevanzsignal und werden gegen Titel, Summary und verfügbare Metadaten gematcht:
 
 - **Relevanz** – passt der Inhalt zu den Interessen des Users?
 - **Frische** – wie aktuell ist der Inhalt?
@@ -105,11 +112,13 @@ Die Scoring Engine zieht alle heutigen Kandidaten aus der DB und bewertet sie an
 
 Wichtig: Gewichte als Konfiguration bauen, nicht als Hardcode. So kann nach der ersten Testwoche gezielt an einzelnen Stellschrauben gedreht werden.
 
-Optional: KI-Scoring für Summary-Generierung und Relevanz-Einschätzung.
+Optional: KI-Scoring für Summary-Generierung, Relevanz-Einschätzung und Keyword-Vorschläge.
 
 ### Phase 4: Serve
 
 Eine REST API mit einem Kern-Endpoint: `GET /feed/today` liefert die Top 3–7 Items als JSON. Kein GraphQL, kein WebSocket.
+
+Zusätzlich braucht das MVP einfache Endpunkte für Interessenverwaltung, damit Keywords nicht in einer versteckten Config leben, sondern Teil des Produkts sind.
 
 ### Phase 5: Display
 
@@ -140,10 +149,12 @@ React-Frontend zeigt die Items an. Jedes Item enthält: Titel, Quelle, kurzen Su
 ### Phase 3: Scoring Engine
 
 - [ ] Scoring-Funktion mit vier Kriterien implementieren · _Algorithmen-Design_
+- [ ] Relevanz-Basis über Keyword-Matching auf Titel, Summary und Metadaten bauen · _Information Retrieval_
 - [ ] Gewichte als Konfiguration (JSON/DB) statt Hardcode · _Konfigurationsmanagement_
 - [ ] Top-N-Selektion mit Diversitätscheck · _Ranking-Logik_
 - [ ] Optional: KI-Summary über Anthropic/OpenAI API · _LLM-APIs_
 - [ ] Optional: KI-Relevanzscore · _Prompt Engineering_
+- [ ] Optional: KI-Vorschläge für verwandte Interessen-Keywords · _LLM-APIs_
 
 ### Phase 4: API
 
@@ -151,6 +162,10 @@ React-Frontend zeigt die Items an. Jedes Item enthält: Titel, Quelle, kurzen Su
 - [ ] `POST /feed/:id/like` – Like-Feedback speichern · _API-Endpunkte_
 - [ ] `POST /feed/:id/bookmark` – Bookmark speichern oder entfernen · _API-Endpunkte_
 - [ ] `GET /bookmarks` – gespeicherte Bookmarks auflisten · _REST-API-Design_
+- [ ] `GET /interests` – gespeicherte Interessen-Keywords auflisten · _CRUD_
+- [ ] `POST /interests` – neue Interessen-Keywords hinzufügen · _Input-Validierung_
+- [ ] `DELETE /interests/:id` – Interesse entfernen · _CRUD_
+- [ ] `POST /interests/suggest` – optionale KI-Vorschläge erzeugen · _LLM-Integration_
 - [ ] `GET /sources` – konfigurierte Quellen auflisten · _CRUD_
 - [ ] `POST /sources` – neue Quelle hinzufügen · _Input-Validierung_
 - [ ] `DELETE /sources/:id` – Quelle entfernen · _CRUD_
@@ -162,6 +177,8 @@ React-Frontend zeigt die Items an. Jedes Item enthält: Titel, Quelle, kurzen Su
 - [ ] Bookmark-Button pro Item · _State Management_
 - [ ] Bookmark-Ansicht: alle gespeicherten Items gesammelt anzeigen · _Listen-UI, Navigation_
 - [ ] Leerer Zustand: "Du bist fertig für heute" · _UX-Design_
+- [ ] Interessen-Verwaltung: Keywords hinzufügen/entfernen · _Formulare, Tag-UI_
+- [ ] Optional: KI-Vorschläge für Interessen anzeigen und übernehmbar machen · _UX + LLM_
 - [ ] Quellen-Verwaltung: Hinzufügen/Entfernen von Quellen · _Formulare, CRUD-UI_
 - [ ] Responsive Design (Mobile-first – du wirst es am Handy nutzen) · _CSS, Responsive_
 
@@ -183,6 +200,8 @@ React-Frontend zeigt die Items an. Jedes Item enthält: Titel, Quelle, kurzen Su
 **Scoring-Opazität:** Vier Scoring-Signale gleichzeitig machen es schwer zu erkennen, welches Signal den Unterschied macht. Gewichte einzeln einstellbar halten.
 
 **Dünne Tage:** Je nach Interessenprofil kann die Schnittmenge "frisch + relevant + gehaltvoll" an manchen Tagen zu klein sein.
+
+**Keyword-Pflegeaufwand:** Wenn Interessen-Keywords zu grob, zu fein oder veraltet sind, leidet die Relevanz schnell. Deshalb sollten Bearbeitung und KI-Vorschläge möglichst leichtgewichtig sein.
 
 **RSS-Reader-Abgrenzung:** Wenn das Scoring nicht spürbar besser filtert als manuelles Durchscrollen, fehlt der Grund für das Tool. Die Scoring Engine ist das Differenzierungsmerkmal.
 
