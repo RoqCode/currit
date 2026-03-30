@@ -16,6 +16,7 @@ export const sources = pgTable("sources", {
   createdAt: timestamp().defaultNow().notNull(),
   type: sourceTypeEnum().notNull(),
   lastPolledAt: timestamp(),
+  lastCollectedFrom: timestamp(),
 });
 
 export const items = pgTable("items", {

@@ -139,7 +139,7 @@ React-Frontend zeigt die Items an. Jedes Item enthält: Titel, Quelle, kurzen Su
 
 ### Phase 2: Ingest-Pipeline
 
-- [ ] RSS-Fetcher bauen (rss-parser oder eigener XML-Parser) · _RSS, XML-Parsing_
+- [ ] RSS-Fetcher bauen (fürs MVP: Feed laden, neuestes datiertes Item bestimmen, nur dieses vergleichen/speichern) · _RSS, XML-Parsing_
 - [ ] Reddit-Fetcher bauen (JSON API, kein OAuth nötig für public Subreddits) · _REST APIs_
 - [ ] Hacker News-Fetcher bauen (Firebase API) · _API-Integration_
 - [ ] Content-Normalizer: einheitliches Datenformat für alle Quellen · _Datenmodellierung_

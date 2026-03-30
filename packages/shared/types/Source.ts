@@ -1,4 +1,4 @@
-import { SourceType } from "./CreateSourceInput";
+import type { SourceType } from "./CreateSourceInput";
 
 export type Source = {
   name: string;

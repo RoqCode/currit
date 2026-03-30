@@ -5,6 +5,7 @@ import { clearSources } from "./lib/clearSources";
 import { createSource } from "./lib/createSource";
 import { deleteSourceById } from "./lib/deleteSourceById";
 import { getAllSources } from "./lib/getAllSources";
+import { pollSources } from "./lib/pollSources";
 
 const app = new Hono();
 
@@ -83,8 +84,12 @@ app.get("/reset-db", async (c) => {
   }
 });
 
-app.get("/api/poll", async (_) => {
-  console.log("starting poll");
+app.get("/api/poll", async (c) => {
+  // TODO: Trigger a manual polling run for the current MVP
+  // TODO: Return the batch summary from pollSources to the caller
+  // TODO: Decide whether this route should stay GET or become POST
+  await pollSources();
+  return c.json({ message: "TODO: implement /api/poll" }, 501);
 });
 
 export default app;
