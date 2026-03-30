@@ -6,7 +6,7 @@ _Stand: März 2026_
 
 ## 1. Produktvision
 
-Ein persönlicher, täglicher Feed mit 3–7 kuratierten Inhalten. Statt endlosem Doomscrolling bekommt man eine bewusst begrenzte Auswahl aus selbst gewählten Quellen – gefiltert, gescored und auf Qualität reduziert.
+Ein persönlicher, täglicher Feed mit 5–10 kuratierten Inhalten. Statt endlosem Doomscrolling bekommt man eine bewusst begrenzte Auswahl aus selbst gewählten Quellen – gefiltert, gescored und auf Qualität reduziert.
 
 ### Kernprinzipien
 
@@ -66,10 +66,10 @@ Richtung: Industrial / Teenage Engineering – utilitaristisch, technisch, klar.
 | Border     | `#D9D9D9` |
 | Muted      | `#999999` |
 
-| Rolle     | Font           |
-| --------- | -------------- |
-| UI/Labels | Space Grotesk  |
-| Body/Text | Lora (Serif)   |
+| Rolle     | Font          |
+| --------- | ------------- |
+| UI/Labels | Space Grotesk |
+| Body/Text | Lora (Serif)  |
 
 ### Stilregeln
 
