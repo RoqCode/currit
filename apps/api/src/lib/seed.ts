@@ -1,5 +1,5 @@
 import db from "../db";
-import { sourcesTable } from "../db/schema";
+import { sources } from "../db/schema";
 
 export async function seedDB() {
   const inserts = [];
@@ -11,5 +11,5 @@ export async function seedDB() {
     });
   }
 
-  await db.insert(sourcesTable).values(inserts);
+  await db.insert(sources).values(inserts);
 }

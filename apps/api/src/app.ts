@@ -90,4 +90,8 @@ app.get("/reset-db", async (c) => {
   }
 });
 
+app.get("/api/poll", async (c) => {
+  console.log("starting poll");
+});
+
 export default app;
