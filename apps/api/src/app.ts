@@ -4,6 +4,8 @@ import { getAllSources } from "./lib/getAllSources";
 import type { CreateSourceInput } from "@currit/shared/types/CreateSourceInput";
 import { createSource } from "./lib/createSource";
 import { clearSources } from "./lib/clearSources";
+import isUuid from "@currit/shared/utils/isUuid";
+import { deleteSourceById } from "./lib/deleteSourceById";
 
 const app = new Hono();
 
@@ -50,6 +52,25 @@ app.post("/api/sources", async (c) => {
   } catch (e) {
     console.error(e);
     return c.json({ error: "failed to create source" }, 500);
+  }
+});
+
+app.delete("/api/sources/:id", async (c) => {
+  const itemId = c.req.param("id");
+
+  if (!itemId || !isUuid(itemId)) {
+    return c.json({ message: "not a valid id" }, 400);
+  }
+
+  try {
+    const deletedSourceId = await deleteSourceById(itemId);
+
+    if (!deletedSourceId) return c.json({ error: "source not found" }, 404);
+
+    return c.json({ ok: true }, 200);
+  } catch (e) {
+    console.error(`error while deleting source with id ${itemId}:`, e);
+    return c.json({ message: "could not delete item" }, 500);
   }
 });
 

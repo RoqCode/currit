@@ -35,14 +35,11 @@ export default function SourceForm(props: Props) {
         } as CreateSourceInput),
       });
 
-      console.log(res);
-
       if (!res.ok) {
         throw new Error("request failed");
       }
 
       await props.onCreated();
-      console.log("refetch sources");
     } catch (e) {
       console.error(e);
       setFetchError(true);

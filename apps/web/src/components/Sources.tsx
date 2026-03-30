@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Source } from "@currit/shared/types/Source";
 import SourceForm from "./SourceForm";
+import DeleteSourceButton from "./DeleteSourceButton";
 
 export default function Sources() {
   const [sources, setSources] = useState<Source[]>([]);
@@ -55,6 +56,7 @@ export default function Sources() {
           {sources.map((source) => (
             <li key={source.id}>
               {source.name} | {source.url}
+              <DeleteSourceButton uuid={source.id} onDeleted={fetchSources} />
             </li>
           ))}
         </ul>
