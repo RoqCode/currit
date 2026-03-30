@@ -55,6 +55,7 @@ export default function Sources() {
         <ul>
           {sources.map((source) => (
             <li key={source.id}>
+              <span style={{ fontStyle: "italic" }}>{source.type}</span> |{" "}
               {source.name} | {source.url}
               <DeleteSourceButton uuid={source.id} onDeleted={fetchSources} />
             </li>
