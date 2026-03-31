@@ -1,8 +1,12 @@
+import { integer } from "drizzle-orm/pg-core";
 import {
+  date,
   pgEnum,
   pgTable,
+  primaryKey,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
@@ -24,9 +28,47 @@ export const items = pgTable("items", {
   sourceId: uuid()
     .references(() => sources.id)
     .notNull(),
+  type: sourceTypeEnum().notNull(),
   title: varchar({ length: 512 }).notNull(),
+  author: varchar({ length: 255 }),
   description: text(),
   url: varchar({ length: 512 }).notNull(),
   publishedAt: timestamp().notNull(),
+  fetchedAt: timestamp().notNull(),
   createdAt: timestamp().defaultNow().notNull(),
+  itemScore: integer().default(0),
+  commentCount: integer().default(0),
 });
+
+export const feeds = pgTable(
+  "feeds",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    feedDate: date().notNull(),
+    createdAt: timestamp().defaultNow().notNull(),
+  },
+  (table) => [uniqueIndex("feeds_feed_date_idx").on(table.feedDate)],
+);
+
+export const feedItems = pgTable(
+  "feed_items",
+  {
+    feedId: uuid()
+      .references(() => feeds.id)
+      .notNull(),
+    itemId: uuid()
+      .references(() => items.id)
+      .notNull(),
+    position: integer().notNull(),
+    bucket: sourceTypeEnum().notNull(),
+    scoreAtSelection: integer(),
+    createdAt: timestamp().defaultNow().notNull(),
+  },
+  (table) => [
+    primaryKey({ columns: [table.feedId, table.itemId] }),
+    uniqueIndex("feed_items_feed_position_idx").on(
+      table.feedId,
+      table.position,
+    ),
+  ],
+);

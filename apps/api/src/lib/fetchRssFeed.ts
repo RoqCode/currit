@@ -1,17 +1,13 @@
 import { XMLParser } from "fast-xml-parser";
-import type { NormalizedItemInput } from "./pollTypes";
+import type { NormalizedItemInput, NormalizedRSSItem } from "./pollTypes";
 import buildUserAgent from "@currit/shared/utils/buildUserAgent";
 
 export async function fetchRssFeed(
   sourceUrl: string,
-): Promise<NormalizedItemInput[]> {
-  // TODO: Fetch the RSS payload for the provided source URL.
-  // We still return a normalized array, but the caller currently only needs the newest dated item.
-
+): Promise<NormalizedRSSItem[]> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10_000);
 
-  let body = null;
   try {
     const res = await fetch(sourceUrl, {
       method: "GET",
@@ -52,15 +48,10 @@ export async function fetchRssFeed(
     clearTimeout(timeout);
   }
 
-  // TODO: Validate that the response is suitable for parsing.
-  // TODO: Parse the RSS or Atom document into source entries.
-  // TODO: Normalize entries into the internal item shape.
-  // TODO: Skip entries that do not expose a usable publication date.
-  // TODO: Return normalized items so the caller can pick the newest published item.
   throw new Error("TODO: implement fetchRssFeed");
 }
 
-function getRssItems(parsedXmlFeed: unknown): NormalizedItemInput[] {
+function getRssItems(parsedXmlFeed: unknown): NormalizedRSSItem[] {
   if (!("rss" in parsedXmlFeed)) {
     console.warn("no rss field found in response");
     return [];
@@ -85,12 +76,19 @@ function getRssItems(parsedXmlFeed: unknown): NormalizedItemInput[] {
     items.push(channel.item);
   }
 
-  const normalizedItems: NormalizedItemInput[] = [];
+  const normalizedItems: NormalizedRSSItem[] = [];
   for (const item of items) {
+    let author: string | null = "";
     let title: string = "";
     let description: string | null = "";
     let url: string = "";
     let publishedAt: Date = new Date();
+
+    if ("dc:creator" in item && typeof item["dc:creator"] === "string") {
+      author = item["dc:creator"];
+    } else {
+      author = null;
+    }
 
     if ("title" in item && typeof item.title === "string") {
       title = item.title;
@@ -114,7 +112,7 @@ function getRssItems(parsedXmlFeed: unknown): NormalizedItemInput[] {
       }
     }
 
-    normalizedItems.push({ title, description, url, publishedAt });
+    normalizedItems.push({ title, description, url, publishedAt, author });
   }
 
   return normalizedItems;

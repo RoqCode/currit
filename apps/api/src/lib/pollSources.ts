@@ -1,34 +1,27 @@
+import buildFeed from "./buildFeed";
 import { getAllSources } from "./getAllSources";
 import { pollRssSource } from "./pollRssSource";
-import type { PollSourceResult, PollSourcesResult } from "./pollTypes";
+import type { NormalizedItemInput, PollSourcesResult } from "./pollTypes";
+import { savePolledItems } from "./savePolledItems";
 
-export async function pollSources(): Promise<PollSourcesResult> {
+export async function pollSources(): Promise<void> {
   const sources = await getAllSources();
 
-  // TODO: Keep only the source types that this MVP can actually poll.
-  // For now we only support RSS sources with a latest-item-only polling flow.
   const viableSources = sources.filter((source) => source.type === "rss");
 
-  // TODO: Decide how to report the case where no pollable sources exist.
   if (viableSources.length < 1) {
     throw new Error("No viable Sources found");
   }
 
-  // TODO: Run one polling job per source.
-  // Start sequentially so the per-source decision logic stays easy to debug.
-
-  const results: PollSourceResult[] = [];
+  const results: NormalizedItemInput[] = [];
 
   for (const source of viableSources) {
     switch (source.type) {
       case "rss":
-        const pollSourceResult = await pollRssSource({ source });
+        const newItems = await pollRssSource({ source });
 
-        if (pollSourceResult.status === "error") {
-          // do something?
-        } else {
-          results.push(pollSourceResult);
-        }
+        if (newItems?.length) results.push(...newItems);
+
         break;
       case "subreddit":
         console.warn(
@@ -43,10 +36,20 @@ export async function pollSources(): Promise<PollSourcesResult> {
         break;
     }
   }
+  // TODO: normalize scores - only after hn and reddit - RSS Feeds cant be scored
+  // normalizeItemScores(newItems)
 
-  // TODO: Aggregate per-source results into one batch summary.
-  // TODO: Return a summary object suitable for logs and the manual poll endpoint.
-  void sources;
-  void pollRssSource;
-  throw new Error("TODO: implement pollSources");
+  try {
+    await savePolledItems({ items: results });
+  } catch (e) {
+    console.error(e);
+    throw e;
+  }
+
+  try {
+    await buildFeed();
+  } catch (e) {
+    console.error(e);
+    throw e;
+  }
 }

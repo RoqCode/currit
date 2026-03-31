@@ -6,6 +6,7 @@ import { createSource } from "./lib/createSource";
 import { deleteSourceById } from "./lib/deleteSourceById";
 import { getAllSources } from "./lib/getAllSources";
 import { pollSources } from "./lib/pollSources";
+import getFeed from "./lib/getFeed";
 
 const app = new Hono();
 
@@ -85,11 +86,25 @@ app.get("/reset-db", async (c) => {
 });
 
 app.get("/api/poll", async (c) => {
-  // TODO: Trigger a manual polling run for the current MVP
-  // TODO: Return the batch summary from pollSources to the caller
-  // TODO: Decide whether this route should stay GET or become POST
-  await pollSources();
-  return c.json({ message: "TODO: implement /api/poll" }, 501);
+  try {
+    await pollSources();
+
+    return c.json({ ok: true }, 201);
+  } catch (e) {
+    console.error("failed to poll sources", e);
+    return c.json({ message: "failed to poll sources" }, 501);
+  }
+});
+
+app.get("/api/feed", async (c) => {
+  try {
+    const feed = await getFeed();
+
+    return c.json({ ok: true, feed }, 200);
+  } catch (e) {
+    console.error("failed to fetch feed", e);
+    return c.json({ message: "failed to fetch feed" }, 501);
+  }
 });
 
 export default app;

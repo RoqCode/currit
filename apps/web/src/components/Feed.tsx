@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Item } from "@currit/shared/types/Item";
 
 export default function Feed() {
@@ -13,8 +13,7 @@ export default function Feed() {
       if (!res.ok) {
         throw new Error("failed to fetch sources");
       }
-      const data = await res.json();
-      setFeedItems(data.sources);
+      await res.json();
     } catch (e) {
       console.error(e);
       setError(true);
@@ -22,6 +21,31 @@ export default function Feed() {
       setLoading(false);
     }
   }
+
+  async function fetchFeed() {
+    // get feed from db
+
+    setLoading(true);
+    try {
+      const res = await fetch("/api/feed");
+      if (!res.ok) {
+        throw new Error("failed to fetch feed");
+      }
+      const data = await res.json();
+
+      console.log(data);
+      setFeedItems(data.feed.items);
+    } catch (e) {
+      console.error(e);
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchFeed();
+  }, []);
 
   return (
     <>
@@ -32,7 +56,13 @@ export default function Feed() {
       {feedItems.length ? (
         <ul>
           {feedItems.map((item) => (
-            <li>{item.title}</li>
+            <li key={item.id}>
+              <h2>{item.title}</h2>
+              <p>{item.description}</p>
+              <a target="_blank" href={item.url}>
+                {item.url}
+              </a>
+            </li>
           ))}
         </ul>
       ) : (
