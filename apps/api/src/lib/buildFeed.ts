@@ -32,7 +32,7 @@ export default async function buildFeed() {
     .from(items)
     .where(and(eq(items.type, "rss"), gte(items.createdAt, startOfDay)))
     .orderBy(sql`random()`)
-    .limit(1);
+    .limit(2);
 
   const selectedItems = [...redditRows, ...hnRows, ...rssRows];
 

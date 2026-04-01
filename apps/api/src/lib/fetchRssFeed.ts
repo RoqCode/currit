@@ -86,6 +86,8 @@ function getRssItems(parsedXmlFeed: unknown): NormalizedRSSItem[] {
 
     if ("dc:creator" in item && typeof item["dc:creator"] === "string") {
       author = item["dc:creator"];
+    } else if ("author" in item && typeof item.author === "string") {
+      author = item.author;
     } else {
       author = null;
     }
