@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
-import db from "../db";
-import { sources } from "../db/schema";
+import db from "../../db";
+import { sources } from "../../db/schema";
 
 type UpdateSourceParams = {
   sourceId: string;

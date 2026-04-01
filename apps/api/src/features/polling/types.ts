@@ -37,6 +37,7 @@ export type PollSourcesResult = {
 export type NormalizedItemInput = {
   sourceId: string;
   sourceType: SourceType;
+  externalId?: string | null;
 
   title: string;
   description: string | null;
@@ -55,6 +56,16 @@ export type NormalizedRSSItem = {
   url: string;
   publishedAt: Date;
   author: string | null;
+};
+
+export type NormalizedHnItem = {
+  id: number | string;
+  title: string;
+  description: string | null;
+  url: string;
+  publishedAt: Date;
+  author: string | null;
+  score: number | null;
 };
 
 export type ScoredCandidate = {

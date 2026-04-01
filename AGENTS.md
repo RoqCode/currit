@@ -48,10 +48,14 @@
 - Drizzle schema for `sources`.
 - Simple API endpoints for health, seeding, listing sources, creating sources, and resetting source data in development.
 - A minimal frontend flow for submitting and displaying sources.
+- An early RSS polling MVP vertical slice.
+- Basic polled-item persistence as groundwork for later feed-building.
 
 ## What Is Not Built Yet
 
-- Real ingest pipelines for RSS, Reddit, and Hacker News.
+- A robust RSS ingest pipeline with stronger validation, dedupe, and edge-case handling.
+- Reddit ingest pipeline.
+- Hacker News ingest pipeline.
 - Normalized content pipeline for fetched items.
 - Ranking and scoring engine.
 - Feed endpoint such as `GET /feed/today`.
@@ -66,6 +70,7 @@
 - Existing code proves out stack and direction more than final architecture.
 - Some code is intentionally rough and should not be overinterpreted as settled design.
 - The user learns best by trying out rough ideas and polishing them later.
+- Current priority is functional vertical slices first, then polish and hardening.
 - Agents should avoid treating current structure as untouchable architecture.
 - At the same time, agents should avoid proposing premature abstractions.
 
@@ -122,7 +127,8 @@
 
 - Establishing the core stack and development workflow.
 - Building out source management as an early vertical slice.
-- Preparing groundwork for ingest, normalization, and ranking later.
+- Completing the ingest vertical slice across RSS, Reddit, and Hacker News before polishing edge cases.
+- Preparing groundwork for normalization, dedupe, and ranking after the source fetchers work end-to-end.
 - Keeping the system simple enough to learn from while still feeling like a real product.
 
 ## Repo Landmarks

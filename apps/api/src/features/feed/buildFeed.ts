@@ -1,7 +1,7 @@
 import { and, desc, eq, gte, sql } from "drizzle-orm";
-import db from "../db";
-import { items, feeds, feedItems } from "../db/schema";
-import { getTodayBounds } from "./getTodayBounds";
+import db from "../../db";
+import { items, feeds, feedItems } from "../../db/schema";
+import { getTodayBounds } from "../../shared/getTodayBounds";
 
 async function selectItemsForToday() {
   const { startOfDay } = getTodayBounds();
@@ -18,7 +18,7 @@ async function selectItemsForToday() {
     .from(items)
     .where(and(eq(items.type, "hn"), gte(items.createdAt, startOfDay)))
     .orderBy(desc(items.itemScore))
-    .limit(2);
+    .limit(5);
 
   const rssRows = await db
     .select()
@@ -27,7 +27,7 @@ async function selectItemsForToday() {
     .orderBy(sql`random()`)
     .limit(2);
 
-  return [...redditRows, ...hnRows, ...rssRows];
+  return [...redditRows, ...hnRows, ...rssRows].sort(() => Math.random() - 0.5);
 }
 
 export default async function buildFeed() {

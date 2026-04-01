@@ -1,6 +1,7 @@
 import { integer } from "drizzle-orm/pg-core";
 import {
   date,
+  index,
   pgEnum,
   pgTable,
   primaryKey,
@@ -29,6 +30,7 @@ export const items = pgTable("items", {
     .references(() => sources.id)
     .notNull(),
   type: sourceTypeEnum().notNull(),
+  externalId: varchar({ length: 255 }),
   title: varchar({ length: 512 }).notNull(),
   author: varchar({ length: 255 }),
   description: text(),
@@ -38,7 +40,8 @@ export const items = pgTable("items", {
   createdAt: timestamp().defaultNow().notNull(),
   itemScore: integer().default(0),
   commentCount: integer().default(0),
-});
+},
+(table) => [index("items_type_external_id_idx").on(table.type, table.externalId)]);
 
 export const feeds = pgTable(
   "feeds",

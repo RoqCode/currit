@@ -1,6 +1,6 @@
 # Curated Feed – MVP-Plan & Architektur
 
-_Stand: März 2026_
+_Stand: April 2026_
 
 ---
 
@@ -25,7 +25,7 @@ Ein persönlicher, täglicher Feed mit 5–10 kuratierten Inhalten. Statt endlos
 | Feed-Größe   | Minimum 3, Maximum 7 Items pro Tag                                 |
 | Quellen      | RSS-Feeds, ausgewählte Subreddits, Hacker News                     |
 | Interessen   | User pflegt eigene Themen als Keywords, KI-Vorschläge optional     |
-| Cold Start   | User konfiguriert eigene Quellen (URLs, Subreddits)                |
+| Cold Start   | User konfiguriert eigene Quellen; Hacker News ist standardmäßig da |
 | Scoring      | Heuristiken als Basis, KI optional obendrauf                       |
 | Feedback     | Like- und Bookmark-Feedback pro Item                               |
 | Leerer Feed  | "Du bist fertig für heute" (später: Mini-Reflexion)                |
@@ -97,9 +97,19 @@ Optional kann eine KI aus wenigen Seed-Keywords verwandte Vorschläge generieren
 
 Ein täglicher Job fragt alle konfigurierten Quellen ab. Jede Quelle bekommt einen eigenen Fetcher, weil die Formate unterschiedlich sind (RSS-XML, Reddit JSON API, HN API). Alle liefern am Ende ein normalisiertes Objekt.
 
+Für die UX sollte Hacker News dabei nicht wie eine normale manuell anzulegende Quelle behandelt werden, sondern als eingebaute Standardquelle vorhanden sein. RSS-Feeds und Subreddits bleiben user-konfigurierbar.
+
+Für die aktuelle Umsetzungsreihenfolge gilt bewusst: erst jede Quellart einmal end-to-end zum Laufen bringen, dann die ingest pipeline konsolidieren. Das heißt konkret: RSS zuerst als MVP-Slice, danach Reddit und Hacker News, und erst anschließend gezielt Robustheit, Validierung, Dedupe und Cross-Source-Vereinheitlichung nachziehen.
+
 ### Phase 2: Normalize + Store
 
-Jeder Rohinhalt wird auf ein einheitliches Format gebracht: Titel, URL, Quelle, Datum, Metadaten. Duplikate (gleiche URL) werden hier rausgefiltert. Alles landet in PostgreSQL.
+Jeder Rohinhalt wird auf ein einheitliches Format gebracht: Titel, URL, Quelle, Datum, Metadaten. Duplikate werden hier rausgefiltert. Alles landet in PostgreSQL.
+
+Für die aktuelle MVP-Realität darf die Dedupe-Strategie noch quellspezifisch sein: HN kann stabil über die externe HN-ID dedupliziert werden, während RSS und Reddit vorerst eher URL-basiert betrachtet werden.
+
+Zusätzlich brauchen Quellen einen einfachen Aktiv-Status (`active: true/false`), damit Polling und Feed-Building Quellen gezielt ein- oder ausschließen können, ohne sie löschen zu müssen.
+
+Wichtig für den aktuellen MVP: Diese Phase darf anfangs zwischen den Quellen noch etwas uneinheitlich sein. Perfekte Normalisierung ist nicht Voraussetzung für die ersten funktionierenden ingest slices, sondern ein bewusster Konsolidierungsschritt danach.
 
 ### Phase 3: Score + Rank
 
@@ -122,7 +132,7 @@ Zusätzlich braucht das MVP einfache Endpunkte für Interessenverwaltung, damit 
 
 ### Phase 5: Display
 
-React-Frontend zeigt die Items an. Jedes Item enthält: Titel, Quelle, kurzen Summary, Link zum Original. Like- und Bookmark-Button schicken Feedback zurück in die DB. Zusätzlich gibt es eine Ansicht, in der alle gespeicherten Bookmarks gesammelt sichtbar sind.
+React-Frontend zeigt die Items an. Jedes Item enthält: Titel, Quelle, kurzen Summary und die passenden Links. Für RSS reicht ein Link zum Original. Für Hacker News und Subreddit-Items sollen zwei Links vorhanden sein: einer zum Thread auf HN bzw. Reddit und einer zum verlinkten Original-Item. Like- und Bookmark-Button schicken Feedback zurück in die DB. Zusätzlich gibt es eine Ansicht, in der alle gespeicherten Bookmarks gesammelt sichtbar sind.
 
 ---
 
@@ -139,11 +149,14 @@ React-Frontend zeigt die Items an. Jedes Item enthält: Titel, Quelle, kurzen Su
 
 ### Phase 2: Ingest-Pipeline
 
-- [ ] RSS-Fetcher bauen (fürs MVP: Feed laden, neuestes datiertes Item bestimmen, nur dieses vergleichen/speichern) · _RSS, XML-Parsing_
+- [x] RSS polling MVP begonnen: Feed laden, parsen und erste Items persistieren · _RSS, XML-Parsing_
+- [ ] RSS polling härten: Validierung, Dedupe, Cursor-Logik, Edge Cases · _Robustheit, Datenkonsistenz_
 - [ ] Reddit-Fetcher bauen (JSON API, kein OAuth nötig für public Subreddits) · _REST APIs_
-- [ ] Hacker News-Fetcher bauen (Firebase API) · _API-Integration_
+- [x] Hacker News-Fetcher bauen (Firebase API) · _API-Integration_
+- [ ] Hacker News als eingebaute Default-Source behandeln statt als manuell anzulegende User-Source · _Produktmodell, UX_
 - [ ] Content-Normalizer: einheitliches Datenformat für alle Quellen · _Datenmodellierung_
 - [ ] Duplikat-Erkennung (URL-basiert) · _Algorithmen_
+- [x] HN-Dedupe über externe HN-ID im Polling/Store-Slice · _Datenkonsistenz_
 - [ ] Cron-Job oder manueller Trigger einrichten · _Scheduling, Cron_
 
 ### Phase 3: Scoring Engine
@@ -158,7 +171,8 @@ React-Frontend zeigt die Items an. Jedes Item enthält: Titel, Quelle, kurzen Su
 
 ### Phase 4: API
 
-- [ ] `GET /feed/today` – Tages-Feed abrufen · _REST-API-Design_
+- [x] `GET /feed/today`-ähnlichen Feed-Read-Slice als MVP gebaut (`GET /api/feed`) · _REST-API-Design_
+- [x] Dev-Endpoints zum Polling und Feed-Rebuild gebaut (`/api/poll`, `/api/poll/repoll`, `/api/feed/rebuild`) · _MVP-Workflow_
 - [ ] `POST /feed/:id/like` – Like-Feedback speichern · _API-Endpunkte_
 - [ ] `POST /feed/:id/bookmark` – Bookmark speichern oder entfernen · _API-Endpunkte_
 - [ ] `GET /bookmarks` – gespeicherte Bookmarks auflisten · _REST-API-Design_
@@ -169,17 +183,20 @@ React-Frontend zeigt die Items an. Jedes Item enthält: Titel, Quelle, kurzen Su
 - [ ] `GET /sources` – konfigurierte Quellen auflisten · _CRUD_
 - [ ] `POST /sources` – neue Quelle hinzufügen · _Input-Validierung_
 - [ ] `DELETE /sources/:id` – Quelle entfernen · _CRUD_
+- [ ] `PATCH /sources/:id/active` – Quelle aktivieren/deaktivieren · _CRUD, Produktverhalten_
 
 ### Phase 5: Frontend
 
-- [ ] Feed-Ansicht: Tages-Items als Karten/Liste darstellen · _React, Komponenten_
+- [x] Einfache Feed-Ansicht zum Anzeigen der Tages-Items als MVP gebaut · _React, Komponenten_
 - [ ] Like-Button pro Item · _State Management_
 - [ ] Bookmark-Button pro Item · _State Management_
 - [ ] Bookmark-Ansicht: alle gespeicherten Items gesammelt anzeigen · _Listen-UI, Navigation_
 - [ ] Leerer Zustand: "Du bist fertig für heute" · _UX-Design_
 - [ ] Interessen-Verwaltung: Keywords hinzufügen/entfernen · _Formulare, Tag-UI_
 - [ ] Optional: KI-Vorschläge für Interessen anzeigen und übernehmbar machen · _UX + LLM_
-- [ ] Quellen-Verwaltung: Hinzufügen/Entfernen von Quellen · _Formulare, CRUD-UI_
+- [x] Quellen-Verwaltung: Hinzufügen/Entfernen von Quellen als MVP gebaut · _Formulare, CRUD-UI_
+- [ ] Quellen-Verwaltung: Active-Toggle pro Source (`true/false`) · _Formulare, CRUD-UI_
+- [ ] HN- und Subreddit-Items im UI mit zwei Links darstellen: Thread + verlinktes Original · _Informationsarchitektur, UI_
 - [ ] Responsive Design (Mobile-first – du wirst es am Handy nutzen) · _CSS, Responsive_
 
 ### Phase 6: Test & Iterate
@@ -204,6 +221,8 @@ React-Frontend zeigt die Items an. Jedes Item enthält: Titel, Quelle, kurzen Su
 **Keyword-Pflegeaufwand:** Wenn Interessen-Keywords zu grob, zu fein oder veraltet sind, leidet die Relevanz schnell. Deshalb sollten Bearbeitung und KI-Vorschläge möglichst leichtgewichtig sein.
 
 **RSS-Reader-Abgrenzung:** Wenn das Scoring nicht spürbar besser filtert als manuelles Durchscrollen, fehlt der Grund für das Tool. Die Scoring Engine ist das Differenzierungsmerkmal.
+
+**Vertical-Slice-Bias:** Wenn erst alle Quellarten funktional gemacht werden, bevor Robustheit und Vereinheitlichung folgen, entstehen vorübergehend inkonsistente Validierung, Fehlerbehandlung und Dedupe-Strategien. Das ist für das MVP okay, sollte aber bewusst bleiben.
 
 ---
 
@@ -239,3 +258,6 @@ Diese Punkte dürfen im MVP heuristisch und iterativ gelöst werden:
 - Komplexes Feedbacksystem (nur Like reicht erstmal)
 - Perfekte Balance zwischen Relevanz und Serendipity
 - Wie stark das Produkt technisch vor Reddit-Rückfall schützt
+- Strenge Input-Validierung für Ingest-Quellen
+- Vollständige Edge-Case-Behandlung beim Polling
+- Robuste Retry- und Fehlerstrategie pro Quelle
