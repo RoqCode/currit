@@ -1,7 +1,6 @@
-import buildFeed from "./buildFeed";
 import { getAllSources } from "./getAllSources";
 import { pollRssSource } from "./pollRssSource";
-import type { NormalizedItemInput, PollSourcesResult } from "./pollTypes";
+import type { NormalizedItemInput } from "./pollTypes";
 import { savePolledItems } from "./savePolledItems";
 
 export async function pollSources(): Promise<void> {
@@ -41,13 +40,6 @@ export async function pollSources(): Promise<void> {
 
   try {
     await savePolledItems({ items: results });
-  } catch (e) {
-    console.error(e);
-    throw e;
-  }
-
-  try {
-    await buildFeed();
   } catch (e) {
     console.error(e);
     throw e;

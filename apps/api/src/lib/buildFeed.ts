@@ -1,16 +1,11 @@
-import { eq, and, gte, desc, sql } from "drizzle-orm";
+import { and, desc, eq, gte, sql } from "drizzle-orm";
 import db from "../db";
 import { items, feeds, feedItems } from "../db/schema";
+import { getTodayBounds } from "./getTodayBounds";
 
-export default async function buildFeed() {
-  // For testing:
-  // get 2 subreddit items with highest scores with createdAt today
-  // get 2 hn items with highest scores
-  // get 1 random rss feed item
-  const startOfDay = new Date(new Date().setHours(0, 0, 0, 0));
-  const feedDate = startOfDay.toISOString().slice(0, 10);
+async function selectItemsForToday() {
+  const { startOfDay } = getTodayBounds();
 
-  // subreddit items
   const redditRows = await db
     .select()
     .from(items)
@@ -18,7 +13,6 @@ export default async function buildFeed() {
     .orderBy(desc(items.itemScore))
     .limit(2);
 
-  // hn items
   const hnRows = await db
     .select()
     .from(items)
@@ -26,7 +20,6 @@ export default async function buildFeed() {
     .orderBy(desc(items.itemScore))
     .limit(2);
 
-  // rss items
   const rssRows = await db
     .select()
     .from(items)
@@ -34,7 +27,12 @@ export default async function buildFeed() {
     .orderBy(sql`random()`)
     .limit(2);
 
-  const selectedItems = [...redditRows, ...hnRows, ...rssRows];
+  return [...redditRows, ...hnRows, ...rssRows];
+}
+
+export default async function buildFeed() {
+  const { feedDate } = getTodayBounds();
+  const selectedItems = await selectItemsForToday();
 
   const feed = await db.transaction(async (tx) => {
     const [feedRow] = await tx
@@ -62,4 +60,9 @@ export default async function buildFeed() {
   console.log(
     `feed created with id ${feed.id} for date ${feed.feedDate}. Feed has ${selectedItems.length} items`,
   );
+
+  return {
+    feed,
+    selectedItemCount: selectedItems.length,
+  };
 }

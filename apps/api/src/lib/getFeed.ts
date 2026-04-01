@@ -1,16 +1,20 @@
 import { eq } from "drizzle-orm";
 import db from "../db";
 import { feedItems, feeds, items } from "../db/schema";
+import { getTodayBounds } from "./getTodayBounds";
 
 export default async function getFeed() {
-  const startOfDay = new Date(new Date().setHours(0, 0, 0, 0));
-  const feedDate = startOfDay.toISOString().slice(0, 10);
+  const { feedDate } = getTodayBounds();
 
   const [feed] = await db
     .select()
     .from(feeds)
     .where(eq(feeds.feedDate, feedDate))
     .limit(1);
+
+  if (!feed) {
+    return null;
+  }
 
   const rows = await db
     .select({
