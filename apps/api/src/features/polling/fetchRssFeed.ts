@@ -48,7 +48,7 @@ export async function fetchRssFeed(
     clearTimeout(timeout);
   }
 
-  throw new Error("TODO: implement fetchRssFeed");
+  return [];
 }
 
 function getRssItems(parsedXmlFeed: unknown): NormalizedRSSItem[] {

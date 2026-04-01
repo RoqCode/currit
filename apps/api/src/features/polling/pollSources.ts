@@ -32,6 +32,8 @@ export async function pollSources(): Promise<void> {
       case "hn":
         const newHNItems = await pollHnSource({ source });
 
+        if (newHNItems?.length) results.push(...newHNItems);
+
         break;
       default:
         console.error("unknown source type:", source.type, source);
