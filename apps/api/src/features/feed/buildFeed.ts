@@ -27,7 +27,7 @@ async function selectItemsForToday() {
     .orderBy(sql`random()`)
     .limit(2);
 
-  return [...redditRows, ...hnRows, ...rssRows];
+  return [...redditRows, ...hnRows, ...rssRows].sort(() => Math.random() - 0.5);
 }
 
 export default async function buildFeed() {
