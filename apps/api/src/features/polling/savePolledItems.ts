@@ -1,6 +1,6 @@
-import db from "../db";
-import { items } from "../db/schema";
-import type { NormalizedItemInput } from "./pollTypes";
+import db from "../../db";
+import { items } from "../../db/schema";
+import type { NormalizedItemInput } from "./types";
 
 type SavePolledItemsParams = {
   items: NormalizedItemInput[];

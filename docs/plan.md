@@ -97,9 +97,13 @@ Optional kann eine KI aus wenigen Seed-Keywords verwandte Vorschläge generieren
 
 Ein täglicher Job fragt alle konfigurierten Quellen ab. Jede Quelle bekommt einen eigenen Fetcher, weil die Formate unterschiedlich sind (RSS-XML, Reddit JSON API, HN API). Alle liefern am Ende ein normalisiertes Objekt.
 
+Für die aktuelle Umsetzungsreihenfolge gilt bewusst: erst jede Quellart einmal end-to-end zum Laufen bringen, dann die ingest pipeline konsolidieren. Das heißt konkret: RSS zuerst als MVP-Slice, danach Reddit und Hacker News, und erst anschließend gezielt Robustheit, Validierung, Dedupe und Cross-Source-Vereinheitlichung nachziehen.
+
 ### Phase 2: Normalize + Store
 
 Jeder Rohinhalt wird auf ein einheitliches Format gebracht: Titel, URL, Quelle, Datum, Metadaten. Duplikate (gleiche URL) werden hier rausgefiltert. Alles landet in PostgreSQL.
+
+Wichtig für den aktuellen MVP: Diese Phase darf anfangs zwischen den Quellen noch etwas uneinheitlich sein. Perfekte Normalisierung ist nicht Voraussetzung für die ersten funktionierenden ingest slices, sondern ein bewusster Konsolidierungsschritt danach.
 
 ### Phase 3: Score + Rank
 
@@ -139,7 +143,8 @@ React-Frontend zeigt die Items an. Jedes Item enthält: Titel, Quelle, kurzen Su
 
 ### Phase 2: Ingest-Pipeline
 
-- [ ] RSS-Fetcher bauen (fürs MVP: Feed laden, neuestes datiertes Item bestimmen, nur dieses vergleichen/speichern) · _RSS, XML-Parsing_
+- [x] RSS polling MVP begonnen: Feed laden, parsen und erste Items persistieren · _RSS, XML-Parsing_
+- [ ] RSS polling härten: Validierung, Dedupe, Cursor-Logik, Edge Cases · _Robustheit, Datenkonsistenz_
 - [ ] Reddit-Fetcher bauen (JSON API, kein OAuth nötig für public Subreddits) · _REST APIs_
 - [ ] Hacker News-Fetcher bauen (Firebase API) · _API-Integration_
 - [ ] Content-Normalizer: einheitliches Datenformat für alle Quellen · _Datenmodellierung_
@@ -205,6 +210,8 @@ React-Frontend zeigt die Items an. Jedes Item enthält: Titel, Quelle, kurzen Su
 
 **RSS-Reader-Abgrenzung:** Wenn das Scoring nicht spürbar besser filtert als manuelles Durchscrollen, fehlt der Grund für das Tool. Die Scoring Engine ist das Differenzierungsmerkmal.
 
+**Vertical-Slice-Bias:** Wenn erst alle Quellarten funktional gemacht werden, bevor Robustheit und Vereinheitlichung folgen, entstehen vorübergehend inkonsistente Validierung, Fehlerbehandlung und Dedupe-Strategien. Das ist für das MVP okay, sollte aber bewusst bleiben.
+
 ---
 
 ## 7. Erfolgsbenchmark
@@ -239,3 +246,6 @@ Diese Punkte dürfen im MVP heuristisch und iterativ gelöst werden:
 - Komplexes Feedbacksystem (nur Like reicht erstmal)
 - Perfekte Balance zwischen Relevanz und Serendipity
 - Wie stark das Produkt technisch vor Reddit-Rückfall schützt
+- Strenge Input-Validierung für Ingest-Quellen
+- Vollständige Edge-Case-Behandlung beim Polling
+- Robuste Retry- und Fehlerstrategie pro Quelle

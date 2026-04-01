@@ -1,7 +1,7 @@
-import { getAllSources } from "./getAllSources";
+import { getAllSources } from "../sources/getAllSources";
 import { fetchRssFeed } from "./fetchRssFeed";
-import type { NormalizedItemInput, NormalizedRSSItem } from "./pollTypes";
-import { updateSource } from "./updateSource";
+import type { NormalizedItemInput, NormalizedRSSItem } from "./types";
+import { updateSource } from "../sources/updateSource";
 
 type SourceRow = Awaited<ReturnType<typeof getAllSources>>[number];
 

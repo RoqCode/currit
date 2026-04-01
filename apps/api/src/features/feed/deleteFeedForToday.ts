@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
-import db from "../db";
-import { feedItems, feeds } from "../db/schema";
-import { getTodayBounds } from "./getTodayBounds";
+import db from "../../db";
+import { feedItems, feeds } from "../../db/schema";
+import { getTodayBounds } from "../../shared/getTodayBounds";
 
 export async function deleteFeedForToday() {
   const { feedDate } = getTodayBounds();

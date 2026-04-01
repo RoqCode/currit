@@ -1,6 +1,6 @@
 import { XMLParser } from "fast-xml-parser";
-import type { NormalizedItemInput, NormalizedRSSItem } from "./pollTypes";
 import buildUserAgent from "@currit/shared/utils/buildUserAgent";
+import type { NormalizedRSSItem } from "./types";
 
 export async function fetchRssFeed(
   sourceUrl: string,

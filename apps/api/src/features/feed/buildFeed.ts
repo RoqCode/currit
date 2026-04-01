@@ -1,7 +1,7 @@
 import { and, desc, eq, gte, sql } from "drizzle-orm";
-import db from "../db";
-import { items, feeds, feedItems } from "../db/schema";
-import { getTodayBounds } from "./getTodayBounds";
+import db from "../../db";
+import { items, feeds, feedItems } from "../../db/schema";
+import { getTodayBounds } from "../../shared/getTodayBounds";
 
 async function selectItemsForToday() {
   const { startOfDay } = getTodayBounds();

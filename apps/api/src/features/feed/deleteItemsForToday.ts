@@ -1,7 +1,7 @@
 import { and, gte, lt } from "drizzle-orm";
-import db from "../db";
-import { items } from "../db/schema";
-import { getTodayBounds } from "./getTodayBounds";
+import db from "../../db";
+import { items } from "../../db/schema";
+import { getTodayBounds } from "../../shared/getTodayBounds";
 
 export async function deleteItemsForToday() {
   const { startOfDay, endOfDay } = getTodayBounds();

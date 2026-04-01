@@ -1,11 +1,13 @@
-import { getAllSources } from "./getAllSources";
+import { getAllSources } from "../sources/getAllSources";
+import pollHnSource from "./pollHnSource";
 import { pollRssSource } from "./pollRssSource";
-import type { NormalizedItemInput } from "./pollTypes";
+import type { NormalizedItemInput } from "./types";
 import { savePolledItems } from "./savePolledItems";
 
 export async function pollSources(): Promise<void> {
   const sources = await getAllSources();
 
+  // TODO: Update guard
   const viableSources = sources.filter((source) => source.type === "rss");
 
   if (viableSources.length < 1) {
@@ -17,9 +19,9 @@ export async function pollSources(): Promise<void> {
   for (const source of viableSources) {
     switch (source.type) {
       case "rss":
-        const newItems = await pollRssSource({ source });
+        const newRSSItems = await pollRssSource({ source });
 
-        if (newItems?.length) results.push(...newItems);
+        if (newRSSItems?.length) results.push(...newRSSItems);
 
         break;
       case "subreddit":
@@ -28,7 +30,8 @@ export async function pollSources(): Promise<void> {
         );
         break;
       case "hn":
-        console.warn("source of type 'HN' is not supported at the moment");
+        const newHNItems = await pollHnSource({ source });
+
         break;
       default:
         console.error("unknown source type:", source.type, source);
