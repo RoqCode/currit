@@ -1,8 +1,8 @@
 import db from "../db";
-import { sourcesTable } from "../db/schema";
+import { sources } from "../db/schema";
 
 export async function getAllSources() {
-  const rows = await db.select().from(sourcesTable);
+  const rows = await db.select().from(sources);
 
   return rows;
 }

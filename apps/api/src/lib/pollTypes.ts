@@ -1,0 +1,71 @@
+import { SourceType } from "@currit/shared/types/CreateSourceInput";
+
+export type PollSourceStatus = "success" | "error";
+export type PollSourceErrorType =
+  | "network_error"
+  | "http_error"
+  | "parse_error"
+  | "db_error"
+  | "unknown_error";
+
+export type PollSourceSuccessResult = {
+  sourceId: string;
+  sourceName: string;
+  status: "success";
+  insertedCount: number;
+  skippedCount: number;
+};
+
+export type PollSourceErrorResult = {
+  sourceId: string;
+  sourceName: string;
+  status: "error";
+  errorType: PollSourceErrorType;
+  errorMessage: string;
+};
+
+export type PollSourceResult = PollSourceSuccessResult | PollSourceErrorResult;
+
+export type PollSourcesResult = {
+  totalSources: number;
+  processedSources: number;
+  successCount: number;
+  errorCount: number;
+  results: PollSourceResult[];
+};
+
+export type NormalizedItemInput = {
+  sourceId: string;
+  sourceType: SourceType;
+
+  title: string;
+  description: string | null;
+  url: string;
+  publishedAt: Date;
+  fetchedAt?: Date;
+
+  itemScore?: number | null;
+  commentCount?: number | null;
+  author?: string | null;
+};
+
+export type NormalizedRSSItem = {
+  title: string;
+  description: string | null;
+  url: string;
+  publishedAt: Date;
+  author: string | null;
+};
+
+export type ScoredCandidate = {
+  item: NormalizedItemInput;
+  freshnessScore: number;
+  sourceQualityScore: number;
+  relevanceScore: number;
+  finalScore: number;
+};
+
+export type SavePolledItemsResult = {
+  insertedCount: number;
+  skippedCount: number;
+};

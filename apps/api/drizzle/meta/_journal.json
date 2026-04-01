@@ -5,8 +5,29 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1774178436805,
-      "tag": "0000_tiny_titanium_man",
+      "when": 1774877917447,
+      "tag": "0000_heavy_bishop",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1774903861260,
+      "tag": "0001_gigantic_giant_girl",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1774963783594,
+      "tag": "0002_short_iron_fist",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1774967444751,
+      "tag": "0003_young_kid_colt",
       "breakpoints": true
     }
   ]

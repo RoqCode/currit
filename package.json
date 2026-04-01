@@ -4,6 +4,10 @@
   "version": "0.0.0",
   "scripts": {
     "db:start": "pnpm --dir infra/db run db:start",
-    "db:stop": "pnpm --dir infra/db run db:stop"
+    "db:stop": "pnpm --dir infra/db run db:stop",
+    "server:dev": "pnpm --dir apps/api dev",
+    "frontend:dev": "pnpm --dir apps/web dev",
+    "dev:up": "./scripts/dev-start.sh",
+    "dev:down": "./scripts/dev-stop.sh"
   }
 }

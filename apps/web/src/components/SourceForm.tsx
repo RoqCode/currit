@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { CreateSourceInput } from "@currit/shared/types/CreateSourceInput";
+import { parseSourceType } from "../utils/parseSourceType";
 
 type Props = {
   onCreated: () => void | Promise<void>;
@@ -7,6 +8,7 @@ type Props = {
 
 export default function SourceForm(props: Props) {
   const [formError, setFormError] = useState(false);
+  const [typeError, setTypeError] = useState(false);
   const [fetchError, setFetchError] = useState(false);
   const [pending, setPending] = useState(false);
 
@@ -14,6 +16,12 @@ export default function SourceForm(props: Props) {
     setPending(true);
     const name = formData.get("sourceName");
     const url = formData.get("sourceUrl");
+    const type = parseSourceType(String(url));
+
+    if (!type) {
+      setTypeError(true);
+      return;
+    }
 
     if (!name || !url) {
       setFormError(true);
@@ -32,17 +40,15 @@ export default function SourceForm(props: Props) {
         body: JSON.stringify({
           name: String(name),
           url: String(url),
+          type: String(type),
         } as CreateSourceInput),
       });
-
-      console.log(res);
 
       if (!res.ok) {
         throw new Error("request failed");
       }
 
       await props.onCreated();
-      console.log("refetch sources");
     } catch (e) {
       console.error(e);
       setFetchError(true);
@@ -63,6 +69,11 @@ export default function SourceForm(props: Props) {
         {formError && (
           <p style={{ color: "red" }}>
             You need to provide both a Name and a URL to proceed
+          </p>
+        )}
+        {typeError && (
+          <p style={{ color: "red" }}>
+            The source URL you provided is currently not supported
           </p>
         )}
       </form>

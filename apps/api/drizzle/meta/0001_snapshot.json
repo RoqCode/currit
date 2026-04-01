@@ -1,6 +1,6 @@
 {
-  "id": "b4778043-5ef7-405d-8ec2-67a93578d99b",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "5873ef12-d118-419c-a172-90e1d77382b6",
+  "prevId": "b4778043-5ef7-405d-8ec2-67a93578d99b",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -114,6 +114,12 @@
         },
         "lastPolledAt": {
           "name": "lastPolledAt",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lastCollectedFrom": {
+          "name": "lastCollectedFrom",
           "type": "timestamp",
           "primaryKey": false,
           "notNull": false
