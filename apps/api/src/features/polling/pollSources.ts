@@ -7,8 +7,9 @@ import { savePolledItems } from "./savePolledItems";
 export async function pollSources(): Promise<void> {
   const sources = await getAllSources();
 
-  // TODO: Update guard
-  const viableSources = sources.filter((source) => source.type === "rss");
+  const viableSources = sources.filter(
+    (source) => source.type === "rss" || source.type === "hn",
+  );
 
   if (viableSources.length < 1) {
     throw new Error("No viable Sources found");

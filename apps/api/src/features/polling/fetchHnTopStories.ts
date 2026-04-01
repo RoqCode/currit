@@ -113,7 +113,7 @@ function parseHnItems(items: unknown[]) {
       id,
       title: title ?? "unknown title",
       description,
-      url: url ?? "unknown url",
+      url: `https://news.ycombinator.com/item?id=${id}`,
       publishedAt: publishedAt ?? new Date(Date.now()),
       author,
       score,

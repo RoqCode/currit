@@ -18,7 +18,7 @@ async function selectItemsForToday() {
     .from(items)
     .where(and(eq(items.type, "hn"), gte(items.createdAt, startOfDay)))
     .orderBy(desc(items.itemScore))
-    .limit(2);
+    .limit(5);
 
   const rssRows = await db
     .select()

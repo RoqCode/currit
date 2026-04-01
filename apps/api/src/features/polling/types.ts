@@ -37,6 +37,7 @@ export type PollSourcesResult = {
 export type NormalizedItemInput = {
   sourceId: string;
   sourceType: SourceType;
+  externalId?: string | null;
 
   title: string;
   description: string | null;

@@ -27,6 +27,7 @@ export default async function pollHnSource(
     return items.map((item) => ({
       sourceId: params.source.id,
       sourceType: "hn",
+      externalId: String(item.id),
       title: item.title,
       description: item.description,
       url: item.url,
