@@ -371,6 +371,16 @@ Das klingt nach Over-Engineering, aber es ist die Voraussetzung dafür, dass du 
 
 ---
 
+## Konkreter MVP-Algorithmus
+
+Basierend auf diesem Research wurde ein konkreter Algorithmus empirisch getestet (487 Posts, 22 Subreddits, 700-Tage-Simulation). Die Ergebnisse und der finale Algorithmus sind dokumentiert in:
+
+**→ [scoring-and-selection-algorithm.md](./scoring-and-selection-algorithm.md)**
+
+Kurzfassung: Hybrid-Scoring (20% global log + 80% lokale Percentile) kombiniert mit gewichtetem Sampling und Source Cap. Kein deterministisches Top-N, sondern stochastische Auswahl für emergente Serendipity.
+
+---
+
 ## Die wichtigste Erkenntnis
 
 Kein einzelner Layer muss perfekt sein. Ein mittelmäßiger Time-Decay plus mittelmäßige Topic-Bandits plus mittelmäßiges LLM-Scoring, **kombiniert**, erzeugen einen Feed, der sich bemerkenswert kuratiert anfühlt. Das ist wie beim Kochen: Salz allein ist okay, Pfeffer allein ist okay, Säure allein ist okay – aber zusammen machen sie ein Gericht aus, das keins der Elemente allein hinbekäme.

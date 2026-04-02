@@ -17,7 +17,12 @@ export async function savePolledItems(
     return;
   }
 
-  const itemsToInsert = await filterDuplicateHnItems(params.items);
+  const itemsWithoutDuplicateHnItems = await filterDuplicateHnItems(
+    params.items,
+  );
+  const itemsToInsert = await filterDuplicateSubredditItems(
+    itemsWithoutDuplicateHnItems,
+  );
 
   if (itemsToInsert.length < 1) {
     console.log("0 items inserted");
@@ -105,4 +110,62 @@ async function filterDuplicateHnItems(itemsToCheck: NormalizedItemInput[]) {
   );
 
   return [...nonHnItems, ...newHnItems];
+}
+
+async function filterDuplicateSubredditItems(
+  itemsToCheck: NormalizedItemInput[],
+) {
+  const uniqueSubredditIdsInBatch = new Set<string>();
+  const subredditCandidates: NormalizedItemInput[] = [];
+  const nonSubredditItems: NormalizedItemInput[] = [];
+
+  for (const item of itemsToCheck) {
+    if (item.sourceType !== "subreddit") {
+      nonSubredditItems.push(item);
+      continue;
+    }
+
+    if (!item.externalId) {
+      subredditCandidates.push(item);
+      continue;
+    }
+
+    if (uniqueSubredditIdsInBatch.has(item.externalId)) {
+      continue;
+    }
+
+    uniqueSubredditIdsInBatch.add(item.externalId);
+    subredditCandidates.push(item);
+  }
+
+  if (subredditCandidates.length < 1) {
+    return nonSubredditItems;
+  }
+
+  const externalIds = subredditCandidates
+    .map((item) => item.externalId)
+    .filter((externalId): externalId is string => Boolean(externalId));
+
+  if (externalIds.length < 1) {
+    return [...nonSubredditItems, ...subredditCandidates];
+  }
+
+  const existingSubredditItems = await db
+    .select({ externalId: items.externalId })
+    .from(items)
+    .where(
+      and(eq(items.type, "subreddit"), inArray(items.externalId, externalIds)),
+    );
+
+  const existingExternalIds = new Set(
+    existingSubredditItems
+      .map((item) => item.externalId)
+      .filter((externalId): externalId is string => Boolean(externalId)),
+  );
+
+  const newSubredditItems = subredditCandidates.filter(
+    (item) => !item.externalId || !existingExternalIds.has(item.externalId),
+  );
+
+  return [...nonSubredditItems, ...newSubredditItems];
 }

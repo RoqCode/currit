@@ -7,6 +7,7 @@
     "db:stop": "pnpm --dir infra/db run db:stop",
     "server:dev": "pnpm --dir apps/api dev",
     "frontend:dev": "pnpm --dir apps/web dev",
+    "analyze:reddit-top": "node ./scripts/reddit/analyze-reddit-top.mjs ./scripts/reddit/reddit_top.txt",
     "dev:up": "./scripts/dev-start.sh",
     "dev:down": "./scripts/dev-stop.sh"
   }

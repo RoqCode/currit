@@ -11,14 +11,14 @@ async function selectItemsForToday() {
     .from(items)
     .where(and(eq(items.type, "subreddit"), gte(items.createdAt, startOfDay)))
     .orderBy(desc(items.itemScore))
-    .limit(2);
+    .limit(4);
 
   const hnRows = await db
     .select()
     .from(items)
     .where(and(eq(items.type, "hn"), gte(items.createdAt, startOfDay)))
     .orderBy(desc(items.itemScore))
-    .limit(5);
+    .limit(4);
 
   const rssRows = await db
     .select()
