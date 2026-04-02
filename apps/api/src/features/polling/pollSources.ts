@@ -3,21 +3,18 @@ import pollHnSource from "./pollHnSource";
 import { pollRssSource } from "./pollRssSource";
 import type { NormalizedItemInput } from "./types";
 import { savePolledItems } from "./savePolledItems";
+import pollSubredditSource from "./pollSubredditSource";
 
 export async function pollSources(): Promise<void> {
   const sources = await getAllSources();
 
-  const viableSources = sources.filter(
-    (source) => source.type === "rss" || source.type === "hn",
-  );
-
-  if (viableSources.length < 1) {
+  if (sources.length < 1) {
     throw new Error("No viable Sources found");
   }
 
   const results: NormalizedItemInput[] = [];
 
-  for (const source of viableSources) {
+  for (const source of sources) {
     switch (source.type) {
       case "rss":
         const newRSSItems = await pollRssSource({ source });
@@ -26,9 +23,10 @@ export async function pollSources(): Promise<void> {
 
         break;
       case "subreddit":
-        console.warn(
-          "source of type 'subreddit' is not supported at the moment",
-        );
+        const newSubredditItems = await pollSubredditSource({ source });
+
+        if (newSubredditItems?.length) results.push(...newSubredditItems);
+
         break;
       case "hn":
         const newHNItems = await pollHnSource({ source });

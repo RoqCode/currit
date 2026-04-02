@@ -99,13 +99,13 @@ Ein täglicher Job fragt alle konfigurierten Quellen ab. Jede Quelle bekommt ein
 
 Für die UX sollte Hacker News dabei nicht wie eine normale manuell anzulegende Quelle behandelt werden, sondern als eingebaute Standardquelle vorhanden sein. RSS-Feeds und Subreddits bleiben user-konfigurierbar.
 
-Für die aktuelle Umsetzungsreihenfolge gilt bewusst: erst jede Quellart einmal end-to-end zum Laufen bringen, dann die ingest pipeline konsolidieren. Das heißt konkret: RSS zuerst als MVP-Slice, danach Reddit und Hacker News, und erst anschließend gezielt Robustheit, Validierung, Dedupe und Cross-Source-Vereinheitlichung nachziehen.
+Für die aktuelle Umsetzungsreihenfolge gilt bewusst: erst jede Quellart einmal end-to-end zum Laufen bringen, dann die ingest pipeline konsolidieren. Das heißt konkret: RSS, Reddit und Hacker News jeweils als erste MVP-Slices zum Laufen bringen, und erst anschließend gezielt Robustheit, Validierung, Dedupe und Cross-Source-Vereinheitlichung nachziehen.
 
 ### Phase 2: Normalize + Store
 
 Jeder Rohinhalt wird auf ein einheitliches Format gebracht: Titel, URL, Quelle, Datum, Metadaten. Duplikate werden hier rausgefiltert. Alles landet in PostgreSQL.
 
-Für die aktuelle MVP-Realität darf die Dedupe-Strategie noch quellspezifisch sein: HN kann stabil über die externe HN-ID dedupliziert werden, während RSS und Reddit vorerst eher URL-basiert betrachtet werden.
+Für die aktuelle MVP-Realität darf die Dedupe-Strategie noch quellspezifisch sein: HN kann stabil über die externe HN-ID dedupliziert werden, Reddit über die externe Reddit-Post-ID und RSS vorerst eher URL-basiert.
 
 Zusätzlich brauchen Quellen einen einfachen Aktiv-Status (`active: true/false`), damit Polling und Feed-Building Quellen gezielt ein- oder ausschließen können, ohne sie löschen zu müssen.
 
@@ -149,14 +149,16 @@ React-Frontend zeigt die Items an. Jedes Item enthält: Titel, Quelle, kurzen Su
 
 ### Phase 2: Ingest-Pipeline
 
-- [x] RSS polling MVP begonnen: Feed laden, parsen und erste Items persistieren · _RSS, XML-Parsing_
+- [x] RSS polling MVP gebaut: Feed laden, parsen und erste Items persistieren · _RSS, XML-Parsing_
 - [ ] RSS polling härten: Validierung, Dedupe, Cursor-Logik, Edge Cases · _Robustheit, Datenkonsistenz_
-- [ ] Reddit-Fetcher bauen (JSON API, kein OAuth nötig für public Subreddits) · _REST APIs_
+- [x] Reddit polling MVP gebaut: `top.json` laden, normalisieren und erste Items persistieren · _REST APIs, JSON-Parsing_
+- [ ] Reddit polling härten: URL-Normalisierung, Validierung, Metadaten für Ranking, Edge Cases · _Robustheit, Datenkonsistenz_
 - [x] Hacker News-Fetcher bauen (Firebase API) · _API-Integration_
 - [ ] Hacker News als eingebaute Default-Source behandeln statt als manuell anzulegende User-Source · _Produktmodell, UX_
 - [ ] Content-Normalizer: einheitliches Datenformat für alle Quellen · _Datenmodellierung_
 - [ ] Duplikat-Erkennung (URL-basiert) · _Algorithmen_
 - [x] HN-Dedupe über externe HN-ID im Polling/Store-Slice · _Datenkonsistenz_
+- [x] Reddit-Dedupe über externe Reddit-ID im Polling/Store-Slice · _Datenkonsistenz_
 - [ ] Cron-Job oder manueller Trigger einrichten · _Scheduling, Cron_
 
 ### Phase 3: Scoring Engine

@@ -1,6 +1,5 @@
 import buildUserAgent from "@currit/shared/utils/buildUserAgent";
 import { NormalizedHnItem } from "./types";
-import { it } from "node:test";
 
 export default async function fetchHnTopStories(): Promise<NormalizedHnItem[]> {
   const controller = new AbortController();

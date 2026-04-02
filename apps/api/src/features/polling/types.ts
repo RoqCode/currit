@@ -68,6 +68,16 @@ export type NormalizedHnItem = {
   score: number | null;
 };
 
+export type NormalizedSubredditItem = {
+  id: number | string;
+  title: string;
+  description: string | null;
+  url: string;
+  publishedAt: Date;
+  author: string | null;
+  score: number | null;
+};
+
 export type ScoredCandidate = {
   item: NormalizedItemInput;
   freshnessScore: number;
