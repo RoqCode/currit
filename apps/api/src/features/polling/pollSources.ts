@@ -1,12 +1,12 @@
-import { getAllSources } from "../sources/getAllSources";
 import pollHnSource from "./pollHnSource";
 import { pollRssSource } from "./pollRssSource";
 import type { NormalizedItemInput } from "./types";
 import { savePolledItems } from "./savePolledItems";
 import pollSubredditSource from "./pollSubredditSource";
+import { getActiveSources } from "../sources/getActiveSources";
 
 export async function pollSources(): Promise<void> {
-  const sources = await getAllSources();
+  const sources = await getActiveSources();
 
   if (sources.length < 1) {
     throw new Error("No viable Sources found");
