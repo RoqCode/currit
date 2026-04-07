@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { Source } from "@currit/shared/types/Source";
 import SourceForm from "./SourceForm";
 import DeleteSourceButton from "./DeleteSourceButton";
+import SourceActiveToggle from "./SourceActiveToggle";
 
 export default function Sources() {
   const [sources, setSources] = useState<Source[]>([]);
@@ -57,6 +58,11 @@ export default function Sources() {
             <li key={source.id}>
               <span style={{ fontStyle: "italic" }}>{source.type}</span> |{" "}
               {source.name} | {source.url}
+              <SourceActiveToggle
+                uuid={source.id}
+                onActiveToggle={fetchSources}
+                isActive={source.active}
+              />
               <DeleteSourceButton uuid={source.id} onDeleted={fetchSources} />
             </li>
           ))}
