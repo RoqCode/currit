@@ -10,6 +10,7 @@ import {
   uniqueIndex,
   uuid,
   varchar,
+  boolean,
 } from "drizzle-orm/pg-core";
 
 export const sourceTypeEnum = pgEnum("type", ["rss", "subreddit", "hn"]);
@@ -22,26 +23,32 @@ export const sources = pgTable("sources", {
   type: sourceTypeEnum().notNull(),
   lastPolledAt: timestamp(),
   lastCollectedFrom: timestamp(),
+  active: boolean().notNull().default(true),
 });
 
-export const items = pgTable("items", {
-  id: uuid().primaryKey().defaultRandom(),
-  sourceId: uuid()
-    .references(() => sources.id)
-    .notNull(),
-  type: sourceTypeEnum().notNull(),
-  externalId: varchar({ length: 255 }),
-  title: varchar({ length: 512 }).notNull(),
-  author: varchar({ length: 255 }),
-  description: text(),
-  url: varchar({ length: 512 }).notNull(),
-  publishedAt: timestamp().notNull(),
-  fetchedAt: timestamp().notNull(),
-  createdAt: timestamp().defaultNow().notNull(),
-  itemScore: integer().default(0),
-  commentCount: integer().default(0),
-},
-(table) => [index("items_type_external_id_idx").on(table.type, table.externalId)]);
+export const items = pgTable(
+  "items",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    sourceId: uuid()
+      .references(() => sources.id)
+      .notNull(),
+    type: sourceTypeEnum().notNull(),
+    externalId: varchar({ length: 255 }),
+    title: varchar({ length: 512 }).notNull(),
+    author: varchar({ length: 255 }),
+    description: text(),
+    url: varchar({ length: 512 }).notNull(),
+    publishedAt: timestamp().notNull(),
+    fetchedAt: timestamp().notNull(),
+    createdAt: timestamp().defaultNow().notNull(),
+    itemScore: integer().default(0),
+    commentCount: integer().default(0),
+  },
+  (table) => [
+    index("items_type_external_id_idx").on(table.type, table.externalId),
+  ],
+);
 
 export const feeds = pgTable(
   "feeds",
