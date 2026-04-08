@@ -2,6 +2,7 @@ import { CreateSourceInput } from "@currit/shared/types/CreateSourceInput";
 import db from "../../db";
 import { sources } from "../../db/schema";
 import { eq } from "drizzle-orm";
+import normalizeSourceUrl from "./normalizeSourceUrl";
 
 const builtinSources: CreateSourceInput[] = [
   {
@@ -19,8 +20,10 @@ export default async function ensureBuiltinSources() {
     .where(eq(sources.isBuiltin, true));
 
   const missingSources = builtinSources.filter((builtin) => {
+    const normalizedBuiltinUrl = normalizeSourceUrl(builtin.url);
+
     return !rows.some((row) => {
-      return row.type === builtin.type && row.url === builtin.url;
+      return row.type === builtin.type && row.url === normalizedBuiltinUrl;
     });
   });
 
@@ -30,5 +33,10 @@ export default async function ensureBuiltinSources() {
 }
 
 async function insertBuiltinSources(missingSources: CreateSourceInput[]) {
-  await db.insert(sources).values(missingSources);
+  await db.insert(sources).values(
+    missingSources.map((source) => ({
+      ...source,
+      url: normalizeSourceUrl(source.url),
+    })),
+  );
 }

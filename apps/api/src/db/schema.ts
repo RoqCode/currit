@@ -15,17 +15,21 @@ import {
 
 export const sourceTypeEnum = pgEnum("type", ["rss", "subreddit", "hn"]);
 
-export const sources = pgTable("sources", {
-  id: uuid().primaryKey().defaultRandom(),
-  name: varchar({ length: 256 }).notNull(),
-  url: varchar({ length: 512 }).notNull(),
-  createdAt: timestamp().defaultNow().notNull(),
-  type: sourceTypeEnum().notNull(),
-  lastPolledAt: timestamp(),
-  lastCollectedFrom: timestamp(),
-  active: boolean().notNull().default(true),
-  isBuiltin: boolean().notNull().default(false),
-});
+export const sources = pgTable(
+  "sources",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    name: varchar({ length: 256 }).notNull(),
+    url: varchar({ length: 512 }).notNull(),
+    createdAt: timestamp().defaultNow().notNull(),
+    type: sourceTypeEnum().notNull(),
+    lastPolledAt: timestamp(),
+    lastCollectedFrom: timestamp(),
+    active: boolean().notNull().default(true),
+    isBuiltin: boolean().notNull().default(false),
+  },
+  (table) => [uniqueIndex("sources_type_url_idx").on(table.type, table.url)],
+);
 
 export const items = pgTable(
   "items",

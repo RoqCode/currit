@@ -9,7 +9,7 @@ type Props = {
 export default function SourceForm(props: Props) {
   const [formError, setFormError] = useState(false);
   const [typeError, setTypeError] = useState(false);
-  const [fetchError, setFetchError] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
   async function handleSubmit(formData: FormData) {
@@ -20,11 +20,13 @@ export default function SourceForm(props: Props) {
 
     if (!type) {
       setTypeError(true);
+      setPending(false);
       return;
     }
 
     if (!name || !url) {
       setFormError(true);
+      setPending(false);
       return;
     } else if (formError) {
       setFormError(false);
@@ -45,13 +47,28 @@ export default function SourceForm(props: Props) {
       });
 
       if (!res.ok) {
-        throw new Error("request failed");
+        let message = "Something went wrong while submitting source";
+        try {
+          const data = (await res.json()) as { error?: string };
+          if (res.status === 409) {
+            message = "This source already exists";
+          } else if (data.error) {
+            message = data.error;
+          }
+        } catch {
+          // ignore invalid error body
+        }
+        throw new Error(message);
       }
 
       await props.onCreated();
     } catch (e) {
       console.error(e);
-      setFetchError(true);
+      setFetchError(
+        e instanceof Error
+          ? e.message
+          : "Something went wrong while submitting source",
+      );
     } finally {
       setPending(false);
     }
@@ -78,7 +95,7 @@ export default function SourceForm(props: Props) {
         )}
       </form>
 
-      {fetchError && <p>Something went wrong while submitting source</p>}
+      {fetchError && <p style={{ color: "red" }}>{fetchError}</p>}
     </>
   );
 }

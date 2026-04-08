@@ -5,6 +5,7 @@ import { clearSources } from "../features/sources/clearSources";
 import { createSource } from "../features/sources/createSource";
 import { deleteSourceById } from "../features/sources/deleteSourceById";
 import { getAllSources } from "../features/sources/getAllSources";
+import isUniqueViolationError from "../features/sources/isUniqueViolationError";
 import setSourceActiveById from "../features/sources/setSourceActiveById";
 
 const sourcesRoutes = new Hono();
@@ -40,6 +41,10 @@ sourcesRoutes.post("/api/sources", async (c) => {
     await createSource(body.name, body.url, body.type);
     return c.json({ ok: true }, 201);
   } catch (e) {
+    if (isUniqueViolationError(e)) {
+      return c.json({ error: "source already exists" }, 409);
+    }
+
     console.error(e);
     return c.json({ error: "failed to create source" }, 500);
   }

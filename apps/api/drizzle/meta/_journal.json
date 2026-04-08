@@ -57,6 +57,13 @@
       "when": 1775644914138,
       "tag": "0007_modern_colleen_wing",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1775648281557,
+      "tag": "0008_pale_brother_voodoo",
+      "breakpoints": true
     }
   ]
 }
