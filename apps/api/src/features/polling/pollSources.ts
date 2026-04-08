@@ -13,6 +13,8 @@ export async function pollSources(): Promise<void> {
   if (sources.length < 1) {
     throw new Error("No viable Sources found");
   }
+  const start = performance.now();
+
   const rssSources = sources.filter((source) => source.type === "rss");
   const subredditSources = sources.filter(
     (source) => source.type === "subreddit",
@@ -40,6 +42,8 @@ export async function pollSources(): Promise<void> {
     console.error(e);
     throw e;
   }
+  const elapsed = ((performance.now() - start) / 1000).toFixed(4);
+  console.log(`\nDone in ${elapsed}s`);
 }
 
 async function pollHnSources(
