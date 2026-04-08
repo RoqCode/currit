@@ -4,4 +4,5 @@ export type CreateSourceInput = {
   name: string;
   url: string;
   type: SourceType;
+  isBuiltin?: boolean;
 };

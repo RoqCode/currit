@@ -19,7 +19,18 @@ export default function Sources() {
         throw new Error("failed to fetch sources");
       }
       const data = await res.json();
-      setSources(data.sources);
+
+      const sortedSources = [...data.sources].sort((a, b) => {
+        if (a.isBuiltin !== b.isBuiltin) {
+          return a.isBuiltin ? -1 : 1;
+        }
+        if (a.type !== b.type) {
+          return a.type.localeCompare(b.type);
+        }
+        return a.name.localeCompare(b.name);
+      });
+
+      setSources(sortedSources);
     } catch (e) {
       console.error(e);
       setError(true);
@@ -63,7 +74,11 @@ export default function Sources() {
                 onActiveToggle={fetchSources}
                 isActive={source.active}
               />
-              <DeleteSourceButton uuid={source.id} onDeleted={fetchSources} />
+              {source.isBuiltin ? (
+                ""
+              ) : (
+                <DeleteSourceButton uuid={source.id} onDeleted={fetchSources} />
+              )}
             </li>
           ))}
         </ul>

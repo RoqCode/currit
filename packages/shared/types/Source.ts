@@ -7,4 +7,5 @@ export type Source = {
   createdAt: string;
   type: SourceType;
   active: boolean;
+  isBuiltin: boolean;
 };

@@ -24,15 +24,14 @@ export const sources = pgTable("sources", {
   lastPolledAt: timestamp(),
   lastCollectedFrom: timestamp(),
   active: boolean().notNull().default(true),
+  isBuiltin: boolean().notNull().default(false),
 });
 
 export const items = pgTable(
   "items",
   {
     id: uuid().primaryKey().defaultRandom(),
-    sourceId: uuid()
-      .references(() => sources.id)
-      .notNull(),
+    sourceId: uuid().references(() => sources.id, { onDelete: "set null" }),
     type: sourceTypeEnum().notNull(),
     externalId: varchar({ length: 255 }),
     title: varchar({ length: 512 }).notNull(),
