@@ -4,10 +4,10 @@ _Stand: April 2026_
 
 ## Now
 
-- [ ] Add `active` flag to `sources` schema and migration
-- [ ] Treat Hacker News as a built-in default source instead of a normal user-created source
-- [ ] Add backend support for toggling source activity (`PATCH /api/sources/:id/active`)
-- [ ] Add source active toggle to the web UI
+- [x] Add `active` flag to `sources` schema and migration
+- [x] Treat Hacker News as a built-in default source instead of a normal user-created source
+- [x] Add backend support for toggling source activity (`PATCH /api/sources/:id/active`)
+- [x] Add source active toggle to the web UI
 
 ## Next
 

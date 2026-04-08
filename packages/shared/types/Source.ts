@@ -6,4 +6,6 @@ export type Source = {
   id: string;
   createdAt: string;
   type: SourceType;
+  active: boolean;
+  isBuiltin: boolean;
 };

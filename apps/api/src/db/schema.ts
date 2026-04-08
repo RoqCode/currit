@@ -10,38 +10,48 @@ import {
   uniqueIndex,
   uuid,
   varchar,
+  boolean,
 } from "drizzle-orm/pg-core";
 
 export const sourceTypeEnum = pgEnum("type", ["rss", "subreddit", "hn"]);
 
-export const sources = pgTable("sources", {
-  id: uuid().primaryKey().defaultRandom(),
-  name: varchar({ length: 256 }).notNull(),
-  url: varchar({ length: 512 }).notNull(),
-  createdAt: timestamp().defaultNow().notNull(),
-  type: sourceTypeEnum().notNull(),
-  lastPolledAt: timestamp(),
-  lastCollectedFrom: timestamp(),
-});
+export const sources = pgTable(
+  "sources",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    name: varchar({ length: 256 }).notNull(),
+    url: varchar({ length: 512 }).notNull(),
+    createdAt: timestamp().defaultNow().notNull(),
+    type: sourceTypeEnum().notNull(),
+    lastPolledAt: timestamp(),
+    lastCollectedFrom: timestamp(),
+    active: boolean().notNull().default(true),
+    isBuiltin: boolean().notNull().default(false),
+  },
+  (table) => [uniqueIndex("sources_type_url_idx").on(table.type, table.url)],
+);
 
-export const items = pgTable("items", {
-  id: uuid().primaryKey().defaultRandom(),
-  sourceId: uuid()
-    .references(() => sources.id)
-    .notNull(),
-  type: sourceTypeEnum().notNull(),
-  externalId: varchar({ length: 255 }),
-  title: varchar({ length: 512 }).notNull(),
-  author: varchar({ length: 255 }),
-  description: text(),
-  url: varchar({ length: 512 }).notNull(),
-  publishedAt: timestamp().notNull(),
-  fetchedAt: timestamp().notNull(),
-  createdAt: timestamp().defaultNow().notNull(),
-  itemScore: integer().default(0),
-  commentCount: integer().default(0),
-},
-(table) => [index("items_type_external_id_idx").on(table.type, table.externalId)]);
+export const items = pgTable(
+  "items",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    sourceId: uuid().references(() => sources.id, { onDelete: "set null" }),
+    type: sourceTypeEnum().notNull(),
+    externalId: varchar({ length: 255 }),
+    title: varchar({ length: 512 }).notNull(),
+    author: varchar({ length: 255 }),
+    description: text(),
+    url: varchar({ length: 512 }).notNull(),
+    publishedAt: timestamp().notNull(),
+    fetchedAt: timestamp().notNull(),
+    createdAt: timestamp().defaultNow().notNull(),
+    itemScore: integer().default(0),
+    commentCount: integer().default(0),
+  },
+  (table) => [
+    index("items_type_external_id_idx").on(table.type, table.externalId),
+  ],
+);
 
 export const feeds = pgTable(
   "feeds",

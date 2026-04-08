@@ -1,0 +1,1 @@
+ALTER TABLE "sources" ADD COLUMN "isBuiltin" boolean DEFAULT false NOT NULL;

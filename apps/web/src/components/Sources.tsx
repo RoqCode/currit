@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { Source } from "@currit/shared/types/Source";
 import SourceForm from "./SourceForm";
 import DeleteSourceButton from "./DeleteSourceButton";
+import SourceActiveToggle from "./SourceActiveToggle";
 
 export default function Sources() {
   const [sources, setSources] = useState<Source[]>([]);
@@ -18,7 +19,18 @@ export default function Sources() {
         throw new Error("failed to fetch sources");
       }
       const data = await res.json();
-      setSources(data.sources);
+
+      const sortedSources = [...data.sources].sort((a, b) => {
+        if (a.isBuiltin !== b.isBuiltin) {
+          return a.isBuiltin ? -1 : 1;
+        }
+        if (a.type !== b.type) {
+          return a.type.localeCompare(b.type);
+        }
+        return a.name.localeCompare(b.name);
+      });
+
+      setSources(sortedSources);
     } catch (e) {
       console.error(e);
       setError(true);
@@ -57,7 +69,16 @@ export default function Sources() {
             <li key={source.id}>
               <span style={{ fontStyle: "italic" }}>{source.type}</span> |{" "}
               {source.name} | {source.url}
-              <DeleteSourceButton uuid={source.id} onDeleted={fetchSources} />
+              <SourceActiveToggle
+                uuid={source.id}
+                onActiveToggle={fetchSources}
+                isActive={source.active}
+              />
+              {source.isBuiltin ? (
+                ""
+              ) : (
+                <DeleteSourceButton uuid={source.id} onDeleted={fetchSources} />
+              )}
             </li>
           ))}
         </ul>

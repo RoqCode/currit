@@ -9,6 +9,7 @@ export default function DeleteSourceButton(props: Props) {
   const [pending, setPending] = useState(false);
 
   async function handleDelete() {
+    console.log("deleting source");
     setPending(true);
 
     try {

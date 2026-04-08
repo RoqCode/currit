@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "sources_type_url_idx" ON "sources" USING btree ("type","url");

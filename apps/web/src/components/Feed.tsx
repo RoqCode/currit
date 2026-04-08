@@ -9,6 +9,7 @@ export default function Feed() {
   async function handlePoll() {
     setError(false);
     setLoading(true);
+    console.log("polling");
     try {
       const res = await fetch("/api/poll", { method: "GET" });
       if (!res.ok) {
@@ -73,7 +74,6 @@ export default function Feed() {
       }
       const data = await res.json();
 
-      console.log(data);
       setFeedItems(data.feed?.items ?? []);
     } catch (e) {
       console.error(e);

@@ -5,6 +5,8 @@ import { clearSources } from "../features/sources/clearSources";
 import { createSource } from "../features/sources/createSource";
 import { deleteSourceById } from "../features/sources/deleteSourceById";
 import { getAllSources } from "../features/sources/getAllSources";
+import isUniqueViolationError from "../features/sources/isUniqueViolationError";
+import setSourceActiveById from "../features/sources/setSourceActiveById";
 
 const sourcesRoutes = new Hono();
 
@@ -35,10 +37,18 @@ sourcesRoutes.post("/api/sources", async (c) => {
 
   const body = rawBody as CreateSourceInput;
 
+  if (body.type === "hn") {
+    return c.json({ error: "hn sources are builtin" }, 400);
+  }
+
   try {
     await createSource(body.name, body.url, body.type);
     return c.json({ ok: true }, 201);
   } catch (e) {
+    if (isUniqueViolationError(e)) {
+      return c.json({ error: "source already exists" }, 409);
+    }
+
     console.error(e);
     return c.json({ error: "failed to create source" }, 500);
   }
@@ -64,8 +74,6 @@ sourcesRoutes.delete("/api/sources/:id", async (c) => {
 });
 
 sourcesRoutes.get("/reset-db", async (c) => {
-  console.log(process.env.NODE_ENV);
-
   if (!isDev) {
     return c.json({ message: "no" }, 400);
   }
@@ -77,6 +85,25 @@ sourcesRoutes.get("/reset-db", async (c) => {
     console.error("failed to clear sources table", e);
     return c.json({ error: "failed to clear sources table" }, 500);
   }
+});
+
+sourcesRoutes.patch("/api/sources/:id/active", async (c) => {
+  const itemId = c.req.param("id");
+
+  if (!itemId || !isUuid(itemId)) {
+    return c.json({ message: "not a valid id" }, 400);
+  }
+
+  const rawBody = await c.req.json();
+
+  if (typeof rawBody.active !== "boolean") {
+    return c.json({ error: "invalid body" }, 400);
+  }
+
+  const updatedSource = await setSourceActiveById(itemId, rawBody.active);
+  if (!updatedSource) return c.json({ error: "source not found" }, 404);
+
+  return c.json({ ok: true, source: updatedSource }, 200);
 });
 
 export default sourcesRoutes;
