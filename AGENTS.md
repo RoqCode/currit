@@ -45,20 +45,24 @@
 
 - Basic frontend and backend project setup.
 - Local PostgreSQL via Docker Compose.
-- Drizzle schema for `sources`.
-- Simple API endpoints for health, seeding, listing sources, creating sources, and resetting source data in development.
-- A minimal frontend flow for submitting and displaying sources.
+- Drizzle schema for `sources`, `items`, and early feed-building groundwork.
+- Simple API endpoints for health, source management, polling, feed rebuilding, and resetting source data in development.
+- A minimal frontend flow for submitting, listing, deleting, and toggling sources.
 - An early RSS polling MVP vertical slice.
+- Reddit polling MVP vertical slice.
+- Hacker News polling MVP vertical slice.
+- Built-in Hacker News source with active toggle support.
 - Basic polled-item persistence as groundwork for later feed-building.
+- A simple feed read slice via `GET /api/feed`.
 
 ## What Is Not Built Yet
 
 - A robust RSS ingest pipeline with stronger validation, dedupe, and edge-case handling.
-- Reddit ingest pipeline.
-- Hacker News ingest pipeline.
+- Hardened Reddit ingest behavior with stronger validation, normalization, and edge-case handling.
+- Hardened Hacker News ingest behavior and clearer source-model constraints beyond the current MVP slice.
 - Normalized content pipeline for fetched items.
 - Ranking and scoring engine.
-- Feed endpoint such as `GET /feed/today`.
+- A final product-shaped feed endpoint such as `GET /feed/today`.
 - Interests management.
 - Likes, bookmarks, and feedback loop.
 - Auth, multi-user concerns, and deployment pipeline.

@@ -24,7 +24,7 @@ Ein persönlicher, täglicher Feed mit 5–10 kuratierten Inhalten. Statt endlos
 | Ziel         | Reddit-Doomscrolling durch bessere Alternative reduzieren          |
 | Feed-Größe   | Minimum 3, Maximum 7 Items pro Tag                                 |
 | Quellen      | RSS-Feeds, ausgewählte Subreddits, Hacker News                     |
-| Interessen   | User pflegt eigene Themen als Keywords, KI-Vorschläge optional     |
+| Interessen   | Startet zunächst quellenbasiert; Keywords bleiben als nächster Schritt geplant |
 | Cold Start   | User konfiguriert eigene Quellen; Hacker News ist standardmäßig da |
 | Scoring      | Heuristiken als Basis, KI optional obendrauf                       |
 | Feedback     | Like- und Bookmark-Feedback pro Item                               |
@@ -89,7 +89,7 @@ Component Sheet mit allen Tokens und Komponenten: [`design/industrial.html`](../
 
 ### Phase 0: Profile Setup
 
-Vor dem ersten Feed pflegt der User seine Interessengebiete als Keywords, z.B. `typescript`, `indie web`, `self-hosting`, `design systems`. Diese Keywords sind bewusst leichtgewichtig, damit der Einstieg schnell bleibt und das Relevanzsignal früh nutzbar ist.
+Vor dem ersten Feed kann der User später seine Interessengebiete als Keywords pflegen, z.B. `typescript`, `indie web`, `self-hosting`, `design systems`. Für den aktuellen MVP startet das Produkt aber zunächst quellenbasiert; Keywords sind ein geplanter nächster Produkt-Schritt.
 
 Optional kann eine KI aus wenigen Seed-Keywords verwandte Vorschläge generieren, die der User übernehmen oder verwerfen kann. Wichtig für das MVP: KI macht nur Vorschläge, sie entscheidet nichts automatisch.
 
@@ -97,7 +97,7 @@ Optional kann eine KI aus wenigen Seed-Keywords verwandte Vorschläge generieren
 
 Ein täglicher Job fragt alle konfigurierten Quellen ab. Jede Quelle bekommt einen eigenen Fetcher, weil die Formate unterschiedlich sind (RSS-XML, Reddit JSON API, HN API). Alle liefern am Ende ein normalisiertes Objekt.
 
-Für die UX sollte Hacker News dabei nicht wie eine normale manuell anzulegende Quelle behandelt werden, sondern als eingebaute Standardquelle vorhanden sein. RSS-Feeds und Subreddits bleiben user-konfigurierbar.
+Für die UX wird Hacker News nicht wie eine normale manuell anzulegende Quelle behandelt, sondern als eingebaute Standardquelle vorhanden sein. RSS-Feeds und Subreddits bleiben user-konfigurierbar.
 
 Für die aktuelle Umsetzungsreihenfolge gilt bewusst: erst jede Quellart einmal end-to-end zum Laufen bringen, dann die ingest pipeline konsolidieren. Das heißt konkret: RSS, Reddit und Hacker News jeweils als erste MVP-Slices zum Laufen bringen, und erst anschließend gezielt Robustheit, Validierung, Dedupe und Cross-Source-Vereinheitlichung nachziehen.
 
@@ -107,7 +107,7 @@ Jeder Rohinhalt wird auf ein einheitliches Format gebracht: Titel, URL, Quelle, 
 
 Für die aktuelle MVP-Realität darf die Dedupe-Strategie noch quellspezifisch sein: HN kann stabil über die externe HN-ID dedupliziert werden, Reddit über die externe Reddit-Post-ID und RSS vorerst eher URL-basiert.
 
-Zusätzlich brauchen Quellen einen einfachen Aktiv-Status (`active: true/false`), damit Polling und Feed-Building Quellen gezielt ein- oder ausschließen können, ohne sie löschen zu müssen.
+Quellen haben einen einfachen Aktiv-Status (`active: true/false`), damit Polling und Feed-Building Quellen gezielt ein- oder ausschließen können, ohne sie löschen zu müssen.
 
 Wichtig für den aktuellen MVP: Diese Phase darf anfangs zwischen den Quellen noch etwas uneinheitlich sein. Perfekte Normalisierung ist nicht Voraussetzung für die ersten funktionierenden ingest slices, sondern ein bewusster Konsolidierungsschritt danach.
 
@@ -154,7 +154,7 @@ React-Frontend zeigt die Items an. Jedes Item enthält: Titel, Quelle, kurzen Su
 - [x] Reddit polling MVP gebaut: `top.json` laden, normalisieren und erste Items persistieren · _REST APIs, JSON-Parsing_
 - [ ] Reddit polling härten: URL-Normalisierung, Validierung, Metadaten für Ranking, Edge Cases · _Robustheit, Datenkonsistenz_
 - [x] Hacker News-Fetcher bauen (Firebase API) · _API-Integration_
-- [ ] Hacker News als eingebaute Default-Source behandeln statt als manuell anzulegende User-Source · _Produktmodell, UX_
+- [x] Hacker News als eingebaute Default-Source behandeln statt als manuell anzulegende User-Source · _Produktmodell, UX_
 - [ ] Content-Normalizer: einheitliches Datenformat für alle Quellen · _Datenmodellierung_
 - [ ] Duplikat-Erkennung (URL-basiert) · _Algorithmen_
 - [x] HN-Dedupe über externe HN-ID im Polling/Store-Slice · _Datenkonsistenz_
@@ -182,10 +182,10 @@ React-Frontend zeigt die Items an. Jedes Item enthält: Titel, Quelle, kurzen Su
 - [ ] `POST /interests` – neue Interessen-Keywords hinzufügen · _Input-Validierung_
 - [ ] `DELETE /interests/:id` – Interesse entfernen · _CRUD_
 - [ ] `POST /interests/suggest` – optionale KI-Vorschläge erzeugen · _LLM-Integration_
-- [ ] `GET /sources` – konfigurierte Quellen auflisten · _CRUD_
-- [ ] `POST /sources` – neue Quelle hinzufügen · _Input-Validierung_
-- [ ] `DELETE /sources/:id` – Quelle entfernen · _CRUD_
-- [ ] `PATCH /sources/:id/active` – Quelle aktivieren/deaktivieren · _CRUD, Produktverhalten_
+- [x] `GET /sources` – konfigurierte Quellen auflisten · _CRUD_
+- [x] `POST /sources` – neue Quelle hinzufügen · _Input-Validierung_
+- [x] `DELETE /sources/:id` – Quelle entfernen · _CRUD_
+- [x] `PATCH /sources/:id/active` – Quelle aktivieren/deaktivieren · _CRUD, Produktverhalten_
 
 ### Phase 5: Frontend
 
@@ -197,7 +197,7 @@ React-Frontend zeigt die Items an. Jedes Item enthält: Titel, Quelle, kurzen Su
 - [ ] Interessen-Verwaltung: Keywords hinzufügen/entfernen · _Formulare, Tag-UI_
 - [ ] Optional: KI-Vorschläge für Interessen anzeigen und übernehmbar machen · _UX + LLM_
 - [x] Quellen-Verwaltung: Hinzufügen/Entfernen von Quellen als MVP gebaut · _Formulare, CRUD-UI_
-- [ ] Quellen-Verwaltung: Active-Toggle pro Source (`true/false`) · _Formulare, CRUD-UI_
+- [x] Quellen-Verwaltung: Active-Toggle pro Source (`true/false`) · _Formulare, CRUD-UI_
 - [ ] HN- und Subreddit-Items im UI mit zwei Links darstellen: Thread + verlinktes Original · _Informationsarchitektur, UI_
 - [ ] Responsive Design (Mobile-first – du wirst es am Handy nutzen) · _CSS, Responsive_
 
