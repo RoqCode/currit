@@ -5,20 +5,17 @@ import { updateSource } from "../sources/updateSource";
 
 type SourceRow = Awaited<ReturnType<typeof getAllSources>>[number];
 
-type PollRssSourceParams = {
-  source: SourceRow;
-};
-
 export async function pollRssSource(
-  params: PollRssSourceParams,
+  source: SourceRow,
 ): Promise<NormalizedItemInput[] | null> {
-  const feedItems = await fetchRssFeed(params.source.url);
+  const feedItems = await fetchRssFeed(source.url);
+  const now = new Date(Date.now());
 
   let newFeedItems: NormalizedRSSItem[];
 
-  if (params.source.lastCollectedFrom) {
+  if (source.lastCollectedFrom) {
     newFeedItems = feedItems.filter(
-      (item) => item.publishedAt > params.source.lastCollectedFrom!,
+      (item) => item.publishedAt > source.lastCollectedFrom!,
     );
   } else {
     const newestItem = feedItems.reduce<(typeof feedItems)[number] | null>(
@@ -35,18 +32,24 @@ export async function pollRssSource(
     newFeedItems = newestItem ? [newestItem] : [];
   }
 
-  if (newFeedItems.length < 1) return null;
-
-  const now = new Date(Date.now());
-  if (!params.source.lastCollectedFrom || newFeedItems.length >= 1) {
+  if (newFeedItems.length < 1) {
     await updateSource({
-      sourceId: params.source.id,
+      sourceId: source.id,
+      lastPolledFrom: now,
+    });
+
+    return null;
+  }
+
+  if (!source.lastCollectedFrom || newFeedItems.length >= 1) {
+    await updateSource({
+      sourceId: source.id,
       lastPolledFrom: now,
       lastCollectedFrom: now,
     });
 
     return newFeedItems.map((item) => ({
-      sourceId: params.source.id,
+      sourceId: source.id,
       sourceType: "rss",
       title: item.title,
       url: item.url,
@@ -57,7 +60,7 @@ export async function pollRssSource(
     }));
   } else {
     await updateSource({
-      sourceId: params.source.id,
+      sourceId: source.id,
       lastPolledFrom: now,
     });
     return null;

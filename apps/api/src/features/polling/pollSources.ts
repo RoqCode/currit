@@ -4,6 +4,8 @@ import type { NormalizedItemInput } from "./types";
 import { savePolledItems } from "./savePolledItems";
 import pollSubredditSource from "./pollSubredditSource";
 import { getActiveSources } from "../sources/getActiveSources";
+import mapWithConcurrency from "./mapWithConcurrency";
+import fetchHnTopStories from "./fetchHnTopStories";
 
 export async function pollSources(): Promise<void> {
   const sources = await getActiveSources();
@@ -11,34 +13,24 @@ export async function pollSources(): Promise<void> {
   if (sources.length < 1) {
     throw new Error("No viable Sources found");
   }
+  const rssSources = sources.filter((source) => source.type === "rss");
+  const subredditSources = sources.filter(
+    (source) => source.type === "subreddit",
+  );
+  const hnSource = sources.find((source) => source.type === "hn");
 
-  const results: NormalizedItemInput[] = [];
+  const [hnItems, rssItems, redditItems] = await Promise.all([
+    pollHnSources(hnSource),
+    pollRssSources(rssSources),
+    pollSubredditSources(subredditSources),
+  ]);
 
-  for (const source of sources) {
-    switch (source.type) {
-      case "rss":
-        const newRSSItems = await pollRssSource({ source });
+  const results: NormalizedItemInput[] = [
+    ...hnItems,
+    ...rssItems,
+    ...redditItems,
+  ];
 
-        if (newRSSItems?.length) results.push(...newRSSItems);
-
-        break;
-      case "subreddit":
-        const newSubredditItems = await pollSubredditSource({ source });
-
-        if (newSubredditItems?.length) results.push(...newSubredditItems);
-
-        break;
-      case "hn":
-        const newHNItems = await pollHnSource({ source });
-
-        if (newHNItems?.length) results.push(...newHNItems);
-
-        break;
-      default:
-        console.error("unknown source type:", source.type, source);
-        break;
-    }
-  }
   // TODO: normalize scores - only after hn and reddit - RSS Feeds cant be scored
   // normalizeItemScores(newItems)
 
@@ -48,4 +40,47 @@ export async function pollSources(): Promise<void> {
     console.error(e);
     throw e;
   }
+}
+
+async function pollHnSources(
+  hnSource: Awaited<ReturnType<typeof getActiveSources>>[number] | undefined,
+): Promise<NormalizedItemInput[]> {
+  if (!hnSource) return [];
+
+  const hnTopPostIds = await fetchHnTopStories(hnSource);
+  const hnItemsWithPossibleFailures = await mapWithConcurrency(
+    hnTopPostIds,
+    (itemId) => pollHnSource(hnSource.id, itemId),
+    20,
+  );
+
+  return hnItemsWithPossibleFailures.filter((item) => item !== null);
+}
+
+async function pollRssSources(
+  rssSources: Awaited<ReturnType<typeof getActiveSources>>,
+): Promise<NormalizedItemInput[]> {
+  const rssItemsWithPossibleFailures = await mapWithConcurrency(
+    rssSources,
+    pollRssSource,
+    20,
+  );
+
+  return rssItemsWithPossibleFailures
+    .filter((item) => item !== null)
+    .flatMap((item) => item);
+}
+
+async function pollSubredditSources(
+  subredditSources: Awaited<ReturnType<typeof getActiveSources>>,
+): Promise<NormalizedItemInput[]> {
+  const redditItemsWithPossibleFailures = await mapWithConcurrency(
+    subredditSources,
+    pollSubredditSource,
+    5,
+  );
+
+  return redditItemsWithPossibleFailures
+    .filter((item) => item !== null)
+    .flatMap((item) => item);
 }

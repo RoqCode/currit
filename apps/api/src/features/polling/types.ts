@@ -66,6 +66,7 @@ export type NormalizedHnItem = {
   publishedAt: Date;
   author: string | null;
   score: number | null;
+  sourceType: "hn";
 };
 
 export type NormalizedSubredditItem = {

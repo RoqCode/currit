@@ -5,29 +5,32 @@ import { NormalizedItemInput } from "./types";
 
 type SourceRow = Awaited<ReturnType<typeof getAllSources>>[number];
 
-type PollSubredditSourceParams = {
-  source: SourceRow;
-};
-
 export default async function pollSubredditSources(
-  params: PollSubredditSourceParams,
+  source: SourceRow,
 ): Promise<NormalizedItemInput[] | null> {
-  const items = await fetchSubredditTopPosts(params.source.url);
+  const items = await fetchSubredditTopPosts(source.url);
+  const now = new Date(Date.now());
 
   if (!items) return null;
 
-  if (items.length < 1) return null;
-
-  const now = new Date(Date.now());
-  if (!params.source.lastCollectedFrom || items.length >= 1) {
+  if (items.length < 1) {
     await updateSource({
-      sourceId: params.source.id,
+      sourceId: source.id,
+      lastPolledFrom: now,
+    });
+
+    return null;
+  }
+
+  if (!source.lastCollectedFrom || items.length >= 1) {
+    await updateSource({
+      sourceId: source.id,
       lastPolledFrom: now,
       lastCollectedFrom: now,
     });
 
     return items.map((item) => ({
-      sourceId: params.source.id,
+      sourceId: source.id,
       sourceType: "subreddit",
       externalId: String(item.id),
       title: item.title,
@@ -40,7 +43,7 @@ export default async function pollSubredditSources(
     }));
   } else {
     await updateSource({
-      sourceId: params.source.id,
+      sourceId: source.id,
       lastPolledFrom: now,
     });
 
