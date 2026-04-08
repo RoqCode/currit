@@ -1,7 +1,6 @@
 import { CreateSourceInput } from "@currit/shared/types/CreateSourceInput";
 import db from "../../db";
 import { sources } from "../../db/schema";
-import { eq } from "drizzle-orm";
 import normalizeSourceUrl from "./normalizeSourceUrl";
 
 const builtinSources: CreateSourceInput[] = [
@@ -14,12 +13,13 @@ const builtinSources: CreateSourceInput[] = [
 ];
 
 export default async function ensureBuiltinSources() {
-  const rows = await db
-    .select()
-    .from(sources)
-    .where(eq(sources.isBuiltin, true));
+  const rows = await db.select().from(sources);
 
   const missingSources = builtinSources.filter((builtin) => {
+    if (builtin.type === "hn") {
+      return !rows.some((row) => row.type === "hn");
+    }
+
     const normalizedBuiltinUrl = normalizeSourceUrl(builtin.url);
 
     return !rows.some((row) => {

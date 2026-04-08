@@ -37,6 +37,10 @@ sourcesRoutes.post("/api/sources", async (c) => {
 
   const body = rawBody as CreateSourceInput;
 
+  if (body.type === "hn") {
+    return c.json({ error: "hn sources are builtin" }, 400);
+  }
+
   try {
     await createSource(body.name, body.url, body.type);
     return c.json({ ok: true }, 201);
