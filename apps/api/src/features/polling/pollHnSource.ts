@@ -1,4 +1,5 @@
 import buildUserAgent from "@currit/shared/utils/buildUserAgent";
+import isRecord from "@currit/shared/utils/isRecord";
 import type { NormalizedItemInput } from "./types";
 
 export default async function pollHnSource(
@@ -93,8 +94,4 @@ function parseHnItem(sourceId: string, item: unknown) {
     itemScore: score,
     sourceType: "hn",
   } satisfies NormalizedItemInput;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
 }

@@ -1,4 +1,5 @@
 import buildUserAgent from "@currit/shared/utils/buildUserAgent";
+import isRecord from "@currit/shared/utils/isRecord";
 import { NormalizedSubredditItem } from "./types";
 
 type SubredditPostKind =
@@ -103,10 +104,6 @@ function parseTopItems(body: unknown) {
   }
 
   return parsedItems;
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
 }
 
 function getPostKind(item: Record<string, unknown>): SubredditPostKind {

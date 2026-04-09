@@ -1,5 +1,6 @@
 import { XMLParser } from "fast-xml-parser";
 import buildUserAgent from "@currit/shared/utils/buildUserAgent";
+import isRecord from "@currit/shared/utils/isRecord";
 import type { NormalizedRSSItem } from "./types";
 
 export async function fetchRssFeed(
@@ -52,18 +53,33 @@ export async function fetchRssFeed(
 }
 
 function getRssItems(parsedXmlFeed: unknown): NormalizedRSSItem[] {
+  if (!isRecord(parsedXmlFeed)) {
+    console.warn("rss response is not an object");
+    return [];
+  }
+
   if (!("rss" in parsedXmlFeed)) {
     console.warn("no rss field found in response");
     return [];
   }
 
   const rss = parsedXmlFeed.rss;
+  if (!isRecord(rss)) {
+    console.warn("rss field is not an object");
+    return [];
+  }
+
   if (!("channel" in rss)) {
     console.warn("no channel field found in response");
     return [];
   }
 
   const channel = rss.channel;
+  if (!isRecord(channel)) {
+    console.warn("channel field is not an object");
+    return [];
+  }
+
   if (!("item" in channel)) {
     console.warn("no item field found in response");
     return [];
@@ -78,6 +94,8 @@ function getRssItems(parsedXmlFeed: unknown): NormalizedRSSItem[] {
 
   const normalizedItems: NormalizedRSSItem[] = [];
   for (const item of items) {
+    if (!isRecord(item)) continue;
+
     let author: string | null = "";
     let title: string = "";
     let description: string | null = "";
