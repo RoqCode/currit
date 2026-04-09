@@ -2,6 +2,7 @@ import { XMLParser } from "fast-xml-parser";
 import buildUserAgent from "@currit/shared/utils/buildUserAgent";
 import isRecord from "@currit/shared/utils/isRecord";
 import type { NormalizedRSSItem } from "./types";
+import { isAbortError, PollingError } from "../../shared/errors";
 
 export async function fetchRssFeed(
   sourceUrl: string,
@@ -21,7 +22,10 @@ export async function fetchRssFeed(
     });
 
     if (!res.ok) {
-      throw new Error(`HTTP ${res.status}`);
+      throw new PollingError(
+        "http_error",
+        `RSS fetch failed with HTTP ${res.status}`,
+      );
     }
 
     const parser = new XMLParser({
@@ -37,52 +41,55 @@ export async function fetchRssFeed(
     });
 
     const xml = await res.text();
+
     const parsed = parser.parse(xml);
 
     const items = getRssItems(parsed);
 
     return items;
-  } catch (e) {
-    console.error("error while fetching url", sourceUrl, e);
-    // TODO: handle error
+  } catch (err) {
+    if (isAbortError(err)) {
+      throw new PollingError("network_error", "RSS request timed out");
+    }
+
+    if (err instanceof PollingError) {
+      throw err;
+    }
+
+    throw new PollingError(
+      "unknown_error",
+      `Unexpected RSS polling error: ${err}`,
+    );
   } finally {
     clearTimeout(timeout);
   }
-
-  return [];
 }
 
 function getRssItems(parsedXmlFeed: unknown): NormalizedRSSItem[] {
   if (!isRecord(parsedXmlFeed)) {
-    console.warn("rss response is not an object");
-    return [];
+    throw new PollingError("parse_error", "RSS response is not an object");
   }
 
   if (!("rss" in parsedXmlFeed)) {
-    console.warn("no rss field found in response");
-    return [];
+    throw new PollingError("parse_error", "RSS response has no rss field");
   }
 
   const rss = parsedXmlFeed.rss;
   if (!isRecord(rss)) {
-    console.warn("rss field is not an object");
-    return [];
+    throw new PollingError("parse_error", "RSS field is not an object");
   }
 
   if (!("channel" in rss)) {
-    console.warn("no channel field found in response");
-    return [];
+    throw new PollingError("parse_error", "RSS response has no channel field");
   }
 
   const channel = rss.channel;
   if (!isRecord(channel)) {
-    console.warn("channel field is not an object");
-    return [];
+    throw new PollingError("parse_error", "RSS channel field is not an object");
   }
 
   if (!("item" in channel)) {
-    console.warn("no item field found in response");
-    return [];
+    throw new PollingError("parse_error", "RSS item field is not present");
   }
 
   const items: unknown[] = [];

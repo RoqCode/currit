@@ -1,14 +1,35 @@
 import { getAllSources } from "../sources/getAllSources";
 import { fetchRssFeed } from "./fetchRssFeed";
-import type { NormalizedItemInput, NormalizedRSSItem } from "./types";
+import type { NormalizedRSSItem, PollSourceResult } from "./types";
 import { updateSource } from "../sources/updateSource";
+import { PollingError } from "../../shared/errors";
 
 type SourceRow = Awaited<ReturnType<typeof getAllSources>>[number];
 
 export async function pollRssSource(
   source: SourceRow,
-): Promise<NormalizedItemInput[] | null> {
-  const feedItems = await fetchRssFeed(source.url);
+): Promise<PollSourceResult> {
+  const start = performance.now();
+
+  let feedItems: NormalizedRSSItem[];
+  try {
+    feedItems = await fetchRssFeed(source.url);
+  } catch (err) {
+    if (err instanceof PollingError) {
+      return {
+        status: "error",
+        errorMessage: err.message,
+        errorType: err.code,
+        sourceId: source.id,
+        sourceName: source.name,
+        sourceType: "rss",
+        durationMs: performance.now() - start,
+      };
+    }
+
+    throw err;
+  }
+
   const now = new Date(Date.now());
 
   let newFeedItems: NormalizedRSSItem[];
@@ -38,17 +59,41 @@ export async function pollRssSource(
       lastPolledFrom: now,
     });
 
-    return null;
+    return {
+      status: "success",
+      items: [],
+      fetchedCount: feedItems.length,
+      sourceId: source.id,
+      sourceName: source.name,
+      sourceType: "rss",
+      durationMs: performance.now() - start,
+    };
   }
 
-  if (!source.lastCollectedFrom || newFeedItems.length >= 1) {
-    await updateSource({
-      sourceId: source.id,
-      lastPolledFrom: now,
-      lastCollectedFrom: now,
-    });
+  const newestCollectedItem = newFeedItems.reduce<
+    (typeof newFeedItems)[number]
+  >((newest, item) => {
+    if (item.publishedAt > newest.publishedAt) {
+      return item;
+    }
 
-    return newFeedItems.map((item) => ({
+    return newest;
+  }, newFeedItems[0]);
+
+  await updateSource({
+    sourceId: source.id,
+    lastPolledFrom: now,
+    lastCollectedFrom: newestCollectedItem.publishedAt,
+  });
+
+  return {
+    status: "success",
+    fetchedCount: feedItems.length,
+    sourceId: source.id,
+    sourceName: source.name,
+    sourceType: "rss",
+    durationMs: performance.now() - start,
+    items: newFeedItems.map((item) => ({
       sourceId: source.id,
       sourceType: "rss",
       title: item.title,
@@ -57,12 +102,6 @@ export async function pollRssSource(
       publishedAt: item.publishedAt,
       fetchedAt: now,
       author: item.author,
-    }));
-  } else {
-    await updateSource({
-      sourceId: source.id,
-      lastPolledFrom: now,
-    });
-    return null;
-  }
+    })),
+  };
 }

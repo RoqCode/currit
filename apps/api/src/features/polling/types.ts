@@ -1,6 +1,5 @@
 import { SourceType } from "@currit/shared/types/CreateSourceInput";
 
-export type PollSourceStatus = "success" | "error";
 export type PollSourceErrorType =
   | "network_error"
   | "http_error"
@@ -18,8 +17,7 @@ export type PollSourceBaseResult = {
 export type PollSourceSuccessResult = PollSourceBaseResult & {
   status: "success";
   fetchedCount: number;
-  insertedCount: number;
-  skippedCount: number;
+  items: NormalizedItemInput[];
 };
 
 export type PollSourceErrorResult = PollSourceBaseResult & {
