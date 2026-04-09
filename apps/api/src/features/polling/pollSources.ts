@@ -37,7 +37,9 @@ export async function pollSources(): Promise<void> {
   // normalizeItemScores(newItems)
 
   try {
-    await savePolledItems({ items: results });
+    const insertResults = await savePolledItems({ items: results });
+    console.log(`\nInserted ${insertResults.insertedCount} new items`);
+    console.log(`Skipped ${insertResults.skippedCount} items duplicate items`);
   } catch (e) {
     console.error(e);
     throw e;

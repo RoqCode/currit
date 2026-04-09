@@ -8,17 +8,21 @@ export type PollSourceErrorType =
   | "db_error"
   | "unknown_error";
 
-export type PollSourceSuccessResult = {
+export type PollSourceBaseResult = {
   sourceId: string;
   sourceName: string;
+  sourceType: SourceType;
+  durationMs: number;
+};
+
+export type PollSourceSuccessResult = PollSourceBaseResult & {
   status: "success";
+  fetchedCount: number;
   insertedCount: number;
   skippedCount: number;
 };
 
-export type PollSourceErrorResult = {
-  sourceId: string;
-  sourceName: string;
+export type PollSourceErrorResult = PollSourceBaseResult & {
   status: "error";
   errorType: PollSourceErrorType;
   errorMessage: string;
@@ -30,6 +34,7 @@ export type PollSourcesResult = {
   totalSources: number;
   processedSources: number;
   successCount: number;
+  durationMS: number;
   errorCount: number;
   results: PollSourceResult[];
 };

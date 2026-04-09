@@ -1,7 +1,7 @@
 import { and, eq, inArray } from "drizzle-orm";
 import db from "../../db";
 import { items } from "../../db/schema";
-import type { NormalizedItemInput } from "./types";
+import type { NormalizedItemInput, SavePolledItemsResult } from "./types";
 
 type SavePolledItemsParams = {
   items: NormalizedItemInput[];
@@ -11,10 +11,14 @@ type ItemInsert = typeof items.$inferInsert;
 
 export async function savePolledItems(
   params: SavePolledItemsParams,
-): Promise<void> {
-  // TODO: Return enough information for the caller to build a source-level summary.
+): Promise<SavePolledItemsResult> {
+  const inputCount = params.items.length;
+
   if (params.items.length < 1) {
-    return;
+    return {
+      skippedCount: 0,
+      insertedCount: 0,
+    };
   }
 
   const itemsWithoutDuplicateHnItems = await filterDuplicateHnItems(
@@ -25,11 +29,10 @@ export async function savePolledItems(
   );
 
   if (itemsToInsert.length < 1) {
-    console.log("0 items inserted");
-    console.log("0 of type 'rss'");
-    console.log("0 of type 'subreddit'");
-    console.log("0 of type 'hnItems'");
-    return;
+    return {
+      skippedCount: inputCount,
+      insertedCount: 0,
+    };
   }
 
   const itemRows = itemsToInsert.map((item) => ({
@@ -56,6 +59,11 @@ export async function savePolledItems(
   console.log(`${rssItems.length} of type 'rss'`);
   console.log(`${redditItems.length} of type 'subreddit'`);
   console.log(`${hnItems.length} of type 'hnItems'`);
+
+  return {
+    skippedCount: inputCount - rows.length,
+    insertedCount: rows.length,
+  };
 }
 
 async function filterDuplicateHnItems(itemsToCheck: NormalizedItemInput[]) {
@@ -75,6 +83,9 @@ async function filterDuplicateHnItems(itemsToCheck: NormalizedItemInput[]) {
     }
 
     if (uniqueHnIdsInBatch.has(item.externalId)) {
+      console.log(
+        `Skipped item of type 'hn' with id ${item.externalId} : duplicate in batch`,
+      );
       continue;
     }
 
@@ -105,9 +116,18 @@ async function filterDuplicateHnItems(itemsToCheck: NormalizedItemInput[]) {
       .filter((externalId): externalId is string => Boolean(externalId)),
   );
 
-  const newHnItems = hnCandidates.filter(
-    (item) => !item.externalId || !existingExternalIds.has(item.externalId),
-  );
+  const newHnItems: NormalizedItemInput[] = [];
+
+  for (const item of hnCandidates) {
+    if (item.externalId && existingExternalIds.has(item.externalId)) {
+      console.log(
+        `Skipped item of type 'hn' with id ${item.externalId} : already in db`,
+      );
+      continue;
+    }
+
+    newHnItems.push(item);
+  }
 
   return [...nonHnItems, ...newHnItems];
 }
@@ -131,6 +151,9 @@ async function filterDuplicateSubredditItems(
     }
 
     if (uniqueSubredditIdsInBatch.has(item.externalId)) {
+      console.log(
+        `Skipped item of type 'subreddit' with id ${item.externalId} : duplicate in batch`,
+      );
       continue;
     }
 
@@ -163,9 +186,18 @@ async function filterDuplicateSubredditItems(
       .filter((externalId): externalId is string => Boolean(externalId)),
   );
 
-  const newSubredditItems = subredditCandidates.filter(
-    (item) => !item.externalId || !existingExternalIds.has(item.externalId),
-  );
+  const newSubredditItems: NormalizedItemInput[] = [];
+
+  for (const item of subredditCandidates) {
+    if (item.externalId && existingExternalIds.has(item.externalId)) {
+      console.log(
+        `Skipped item of type 'subreddit' with id ${item.externalId} : already in db`,
+      );
+      continue;
+    }
+
+    newSubredditItems.push(item);
+  }
 
   return [...nonSubredditItems, ...newSubredditItems];
 }
