@@ -2,28 +2,33 @@ import { and, desc, eq, gte, sql } from "drizzle-orm";
 import db from "../../db";
 import { items, feeds, feedItems } from "../../db/schema";
 import { getTodayBounds } from "../../shared/getTodayBounds";
+import { getCandidateWindow } from "../../shared/getCandidateWindow";
+
+const candidateWindowDays = 2;
 
 async function selectItemsForToday() {
-  const { startOfDay } = getTodayBounds();
+  const { startOfWindow } = getCandidateWindow(candidateWindowDays);
 
   const redditRows = await db
     .select()
     .from(items)
-    .where(and(eq(items.type, "subreddit"), gte(items.createdAt, startOfDay)))
+    .where(
+      and(eq(items.type, "subreddit"), gte(items.createdAt, startOfWindow)),
+    )
     .orderBy(desc(items.itemScore))
     .limit(4);
 
   const hnRows = await db
     .select()
     .from(items)
-    .where(and(eq(items.type, "hn"), gte(items.createdAt, startOfDay)))
+    .where(and(eq(items.type, "hn"), gte(items.createdAt, startOfWindow)))
     .orderBy(desc(items.itemScore))
     .limit(4);
 
   const rssRows = await db
     .select()
     .from(items)
-    .where(and(eq(items.type, "rss"), gte(items.createdAt, startOfDay)))
+    .where(and(eq(items.type, "rss"), gte(items.createdAt, startOfWindow)))
     .orderBy(sql`random()`)
     .limit(2);
 
@@ -32,6 +37,7 @@ async function selectItemsForToday() {
 
 export default async function buildFeed() {
   const { feedDate } = getTodayBounds();
+  const { feedDateRange } = getCandidateWindow(candidateWindowDays);
   const selectedItems = await selectItemsForToday();
 
   const feed = await db.transaction(async (tx) => {
@@ -58,7 +64,7 @@ export default async function buildFeed() {
   });
 
   console.log(
-    `feed created with id ${feed.id} for date ${feed.feedDate}. Feed has ${selectedItems.length} items`,
+    `feed created with id ${feed.id} for date ${feed.feedDate}. Feed has ${selectedItems.length} items from candidate range ${feedDateRange}`,
   );
 
   return {
