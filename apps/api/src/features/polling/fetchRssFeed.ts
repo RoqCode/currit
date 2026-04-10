@@ -3,6 +3,9 @@ import buildUserAgent from "@currit/shared/utils/buildUserAgent";
 import isRecord from "@currit/shared/utils/isRecord";
 import type { NormalizedRSSItem } from "./types";
 import { isAbortError, PollingError } from "../../shared/errors";
+import validateSourceUrl, {
+  InvalidSourceUrlError,
+} from "../sources/validateSourceUrl";
 
 export async function fetchRssFeed(
   sourceUrl: string,
@@ -11,9 +14,12 @@ export async function fetchRssFeed(
   const timeout = setTimeout(() => controller.abort(), 10_000);
 
   try {
-    const res = await fetch(sourceUrl, {
+    const validatedSourceUrl = validateSourceUrl(sourceUrl, "rss");
+
+    const res = await fetch(validatedSourceUrl, {
       method: "GET",
       signal: controller.signal,
+      redirect: "error",
       headers: {
         "User-Agent": buildUserAgent(),
         Accept:
@@ -54,6 +60,10 @@ export async function fetchRssFeed(
 
     if (err instanceof PollingError) {
       throw err;
+    }
+
+    if (err instanceof InvalidSourceUrlError) {
+      throw new PollingError("unknown_error", err.message);
     }
 
     throw new PollingError(

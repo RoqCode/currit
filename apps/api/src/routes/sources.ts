@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { createSourceRequestSchema } from "@currit/shared/validation/sourceInput";
 import { z } from "zod";
 import { clearSources } from "../features/sources/clearSources";
 import { createSource } from "../features/sources/createSource";
@@ -6,6 +7,7 @@ import { deleteSourceById } from "../features/sources/deleteSourceById";
 import { getAllSources } from "../features/sources/getAllSources";
 import isUniqueViolationError from "../features/sources/isUniqueViolationError";
 import setSourceActiveById from "../features/sources/setSourceActiveById";
+import { InvalidSourceUrlError } from "../features/sources/validateSourceUrl";
 
 const sourcesRoutes = new Hono();
 
@@ -13,12 +15,6 @@ const isDev = process.env.NODE_ENV === "development";
 
 const sourceIdParamsSchema = z.object({
   id: z.uuid(),
-});
-
-const createSourceBodySchema = z.object({
-  name: z.string(),
-  url: z.string(),
-  type: z.enum(["rss", "subreddit", "hn"]),
 });
 
 const setSourceActiveBodySchema = z.object({
@@ -39,7 +35,7 @@ sourcesRoutes.get("/api/sources", async (c) => {
 
 sourcesRoutes.post("/api/sources", async (c) => {
   const rawBody = await c.req.json();
-  const parsedBody = createSourceBodySchema.safeParse(rawBody);
+  const parsedBody = createSourceRequestSchema.safeParse(rawBody);
 
   if (!parsedBody.success) {
     return c.json({ error: "invalid body" }, 400);
@@ -55,6 +51,10 @@ sourcesRoutes.post("/api/sources", async (c) => {
     await createSource(body.name, body.url, body.type);
     return c.json({ ok: true }, 201);
   } catch (e) {
+    if (e instanceof InvalidSourceUrlError) {
+      return c.json({ error: e.message }, 400);
+    }
+
     if (isUniqueViolationError(e)) {
       return c.json({ error: "source already exists" }, 409);
     }

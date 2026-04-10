@@ -2,6 +2,9 @@ import buildUserAgent from "@currit/shared/utils/buildUserAgent";
 import isRecord from "@currit/shared/utils/isRecord";
 import { NormalizedSubredditItem } from "./types";
 import { isAbortError, PollingError } from "../../shared/errors";
+import validateSourceUrl, {
+  InvalidSourceUrlError,
+} from "../sources/validateSourceUrl";
 
 type SubredditPostKind =
   | "self"
@@ -23,14 +26,15 @@ export default async function fetchSubredditTopPosts(url: string) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10_000);
 
-  const normalizedUrl = url.endsWith("/") ? url : `${url}/`;
-
   try {
+    const normalizedUrl = `${validateSourceUrl(url, "subreddit")}/`;
+
     const res = await fetch(
       `${normalizedUrl}top.json?t=day&limit=20&raw_json=1`,
       {
         method: "GET",
         signal: controller.signal,
+        redirect: "error",
         headers: {
           "User-Agent": buildUserAgent(),
           Accept: "application/json",
@@ -69,6 +73,10 @@ export default async function fetchSubredditTopPosts(url: string) {
 
     if (e instanceof PollingError) {
       throw e;
+    }
+
+    if (e instanceof InvalidSourceUrlError) {
+      throw new PollingError("unknown_error", e.message);
     }
 
     throw new PollingError(

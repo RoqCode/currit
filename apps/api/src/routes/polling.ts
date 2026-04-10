@@ -9,6 +9,12 @@ const pollingRoutes = new Hono();
 const isDev = process.env.NODE_ENV === "development";
 
 pollingRoutes.get("/api/poll", async (c) => {
+  if (!isDev) {
+    return c.json({ message: "not available outside development" }, 403);
+  }
+
+  // TODO: Replace this dev-only guard with a dedicated machine-to-machine auth check
+  // before enabling the polling endpoint for cron-triggered production runs.
   try {
     await pollSources();
 

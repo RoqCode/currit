@@ -1,7 +1,7 @@
 import { CreateSourceInput } from "@currit/shared/types/CreateSourceInput";
+import { normalizeSourceUrl } from "@currit/shared/validation/sourceInput";
 import db from "../../db";
 import { sources } from "../../db/schema";
-import normalizeSourceUrl from "./normalizeSourceUrl";
 
 const builtinSources: CreateSourceInput[] = [
   {
@@ -20,7 +20,7 @@ export default async function ensureBuiltinSources() {
       return !rows.some((row) => row.type === "hn");
     }
 
-    const normalizedBuiltinUrl = normalizeSourceUrl(builtin.url);
+    const normalizedBuiltinUrl = normalizeSourceUrl(builtin.url, builtin.type);
 
     return !rows.some((row) => {
       return row.type === builtin.type && row.url === normalizedBuiltinUrl;
@@ -33,10 +33,10 @@ export default async function ensureBuiltinSources() {
 }
 
 async function insertBuiltinSources(missingSources: CreateSourceInput[]) {
-  await db.insert(sources).values(
-    missingSources.map((source) => ({
-      ...source,
-      url: normalizeSourceUrl(source.url),
-    })),
-  );
+    await db.insert(sources).values(
+      missingSources.map((source) => ({
+        ...source,
+        url: normalizeSourceUrl(source.url, source.type),
+      })),
+    );
 }
