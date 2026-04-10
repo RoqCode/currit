@@ -48,7 +48,7 @@ export default function validateSourceUrl(url: string, type: SourceType): string
 
   parsedUrl.hash = "";
 
-  if (parsedUrl.pathname !== "/") {
+  if (type === "subreddit" && parsedUrl.pathname !== "/") {
     parsedUrl.pathname = parsedUrl.pathname.replace(/\/+$/, "") || "/";
   }
 
