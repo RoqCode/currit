@@ -22,6 +22,9 @@ importers:
       drizzle-orm:
         specifier: ^0.45.1
         version: 0.45.1(@types/pg@8.20.0)(pg@8.20.0)
+      entities:
+        specifier: ^8.0.0
+        version: 8.0.0
       fast-xml-parser:
         specifier: ^5.5.9
         version: 5.5.9
@@ -1120,6 +1123,10 @@ packages:
   entities@7.0.1:
     resolution: {integrity: sha512-TWrgLOFUQTH994YUyl1yT4uyavY5nNB5muff+RtWaqNVCAK408b5ZnnbNAUEWLTCpum9w6arT70i1XdQ4UeOPA==}
     engines: {node: '>=0.12'}
+
+  entities@8.0.0:
+    resolution: {integrity: sha512-zwfzJecQ/Uej6tusMqwAqU/6KL2XaB2VZ2Jg54Je6ahNBGNH6Ek6g3jjNCF0fG9EWQKGZNddNjU5F1ZQn/sBnA==}
+    engines: {node: '>=20.19.0'}
 
   esbuild@0.18.20:
     resolution: {integrity: sha512-ceqxoedUrcayh7Y7ZX6NdbbDzGROiyVBgC4PriJThBKSVPWnnFHZAkfI1lJT8QFkOwH4qOS2SJkS4wvpGl8BpA==}
@@ -2444,6 +2451,8 @@ snapshots:
   electron-to-chromium@1.5.321: {}
 
   entities@7.0.1: {}
+
+  entities@8.0.0: {}
 
   esbuild@0.18.20:
     optionalDependencies:
