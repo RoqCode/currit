@@ -6,14 +6,19 @@ import { PollingError } from "../../shared/errors";
 
 type SourceRow = Awaited<ReturnType<typeof getAllSources>>[number];
 
+export type PollSubredditSourceResult = PollSourceResult & {
+  stopPollingAfter?: boolean;
+  stopPollingMessage?: string;
+};
+
 export default async function pollSubredditSources(
   source: SourceRow,
-): Promise<PollSourceResult> {
+): Promise<PollSubredditSourceResult> {
   const start = performance.now();
 
-  let items;
+  let fetchResult;
   try {
-    items = await fetchSubredditTopPosts(source.url);
+    fetchResult = await fetchSubredditTopPosts(source.url);
   } catch (err) {
     if (err instanceof PollingError) {
       return {
@@ -24,11 +29,16 @@ export default async function pollSubredditSources(
         sourceName: source.name,
         sourceType: "subreddit",
         durationMs: performance.now() - start,
+        stopPollingAfter: err.code === "rate_limit_error",
+        stopPollingMessage:
+          err.code === "rate_limit_error" ? err.message : undefined,
       };
     }
 
     throw err;
   }
+
+  const { items, rateLimit } = fetchResult;
 
   const now = new Date(Date.now());
 
@@ -48,6 +58,8 @@ export default async function pollSubredditSources(
       candidateItemCount: 0,
       failedItemCount: 0,
       items: [],
+      stopPollingAfter: rateLimit.shouldStopPolling,
+      stopPollingMessage: buildStopPollingMessage(rateLimit),
     };
   }
 
@@ -79,6 +91,8 @@ export default async function pollSubredditSources(
         itemScore: item.score,
         author: item.author,
       })),
+      stopPollingAfter: rateLimit.shouldStopPolling,
+      stopPollingMessage: buildStopPollingMessage(rateLimit),
     };
   }
 
@@ -109,5 +123,26 @@ export default async function pollSubredditSources(
       itemScore: item.score,
       author: item.author,
     })),
+    stopPollingAfter: rateLimit.shouldStopPolling,
+    stopPollingMessage: buildStopPollingMessage(rateLimit),
   };
+}
+
+function buildStopPollingMessage(rateLimit: {
+  remaining: number | null;
+  resetSeconds: number | null;
+  shouldStopPolling: boolean;
+}) {
+  if (!rateLimit.shouldStopPolling) {
+    return undefined;
+  }
+
+  const remaining =
+    rateLimit.remaining === null ? "unknown" : rateLimit.remaining.toString();
+  const resetSeconds =
+    rateLimit.resetSeconds === null
+      ? "unknown"
+      : rateLimit.resetSeconds.toString();
+
+  return `Stopped starting new Reddit requests because remaining budget dropped below worker limit (remaining ${remaining}, reset ${resetSeconds}s)`;
 }

@@ -10,6 +10,15 @@ type SubredditPostKind =
   | "video"
   | "unknown";
 
+const REDDIT_CONCURRENCY_LIMIT = 5;
+
+type RedditRateLimitInfo = {
+  used: number | null;
+  remaining: number | null;
+  resetSeconds: number | null;
+  shouldStopPolling: boolean;
+};
+
 export default async function fetchSubredditTopPosts(url: string) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10_000);
@@ -29,17 +38,30 @@ export default async function fetchSubredditTopPosts(url: string) {
       },
     );
     if (!res.ok) {
+      if (res.status === 429) {
+        const rateLimit = parseRateLimitHeaders(res.headers);
+        throw new PollingError(
+          "rate_limit_error",
+          buildRateLimitMessage(res.status, rateLimit),
+        );
+      }
+
       throw new PollingError(
         "http_error",
         `Subreddit fetch failed with HTTP ${res.status}`,
       );
     }
 
+    const rateLimit = parseRateLimitHeaders(res.headers);
+
     const jsonBody = await res.json();
 
     const topItems = parseTopItems(jsonBody);
 
-    return topItems;
+    return {
+      items: topItems,
+      rateLimit,
+    };
   } catch (e) {
     if (isAbortError(e)) {
       throw new PollingError("network_error", "Subreddit request timed out");
@@ -56,6 +78,39 @@ export default async function fetchSubredditTopPosts(url: string) {
   } finally {
     clearTimeout(timeout);
   }
+}
+
+function parseRateLimitHeaders(headers: Headers): RedditRateLimitInfo {
+  const used = parseHeaderNumber(headers.get("x-ratelimit-used"));
+  const remaining = parseHeaderNumber(headers.get("x-ratelimit-remaining"));
+  const resetSeconds = parseHeaderNumber(headers.get("x-ratelimit-reset"));
+
+  return {
+    used,
+    remaining,
+    resetSeconds,
+    shouldStopPolling:
+      remaining !== null && remaining < REDDIT_CONCURRENCY_LIMIT,
+  };
+}
+
+function parseHeaderNumber(value: string | null): number | null {
+  if (value === null) return null;
+
+  const parsed = Number(value);
+
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function buildRateLimitMessage(status: number, rateLimit: RedditRateLimitInfo) {
+  const remaining =
+    rateLimit.remaining === null ? "unknown" : rateLimit.remaining.toString();
+  const resetSeconds =
+    rateLimit.resetSeconds === null
+      ? "unknown"
+      : rateLimit.resetSeconds.toString();
+
+  return `Subreddit fetch failed with HTTP ${status} due to Reddit rate limit (remaining ${remaining}, reset ${resetSeconds}s)`;
 }
 
 function parseTopItems(body: unknown) {

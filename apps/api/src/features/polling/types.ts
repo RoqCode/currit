@@ -3,9 +3,12 @@ import { SourceType } from "@currit/shared/types/CreateSourceInput";
 export type PollSourceErrorType =
   | "network_error"
   | "http_error"
+  | "rate_limit_error"
   | "parse_error"
   | "db_error"
   | "unknown_error";
+
+export type PollSourceSkipReason = "rate_limit";
 
 export type PollSourceBaseResult = {
   sourceId: string;
@@ -28,7 +31,16 @@ export type PollSourceErrorResult = PollSourceBaseResult & {
   errorMessage: string;
 };
 
-export type PollSourceResult = PollSourceSuccessResult | PollSourceErrorResult;
+export type PollSourceSkippedResult = PollSourceBaseResult & {
+  status: "skipped";
+  skipReason: PollSourceSkipReason;
+  skipMessage: string;
+};
+
+export type PollSourceResult =
+  | PollSourceSuccessResult
+  | PollSourceErrorResult
+  | PollSourceSkippedResult;
 
 export type PollSourcesResult = {
   totalSources: number;
@@ -55,6 +67,7 @@ export type PollRunReport = {
   polling: {
     successCount: number;
     errorCount: number;
+    skippedCount: number;
     fetchedCount: number;
     candidateItemCount: number;
     failedItemCount: number;
@@ -62,6 +75,7 @@ export type PollRunReport = {
       sourceCount: number;
       successCount: number;
       errorCount: number;
+      skippedCount: number;
       fetchedCount: number;
       candidateItemCount: number;
       failedItemCount: number;
@@ -81,6 +95,13 @@ export type PollRunReport = {
     sourceType: SourceType;
     errorType: PollSourceErrorType;
     errorMessage: string;
+  }>;
+  skipped: Array<{
+    sourceId: string;
+    sourceName: string;
+    sourceType: SourceType;
+    skipReason: PollSourceSkipReason;
+    skipMessage: string;
   }>;
 };
 

@@ -14,12 +14,12 @@ export default function logPollRunReport(report: PollRunReport): void {
   console.log("");
   console.log("polling");
   console.log(
-    `  overall    success ${report.polling.successCount}  error ${report.polling.errorCount}  fetched ${report.polling.fetchedCount}  candidates ${report.polling.candidateItemCount}  failed ${report.polling.failedItemCount}`,
+    `  overall    success ${report.polling.successCount}  error ${report.polling.errorCount}  skipped ${report.polling.skippedCount}  fetched ${report.polling.fetchedCount}  candidates ${report.polling.candidateItemCount}  failed ${report.polling.failedItemCount}`,
   );
 
   for (const [sourceType, stats] of Object.entries(report.polling.byType)) {
     console.log(
-      `  ${sourceType.padEnd(10)}sources ${stats.sourceCount}  success ${stats.successCount}  error ${stats.errorCount}  fetched ${stats.fetchedCount}  candidates ${stats.candidateItemCount}  failed ${stats.failedItemCount}  batch ${formatDuration(stats.batchDurationMs)}`,
+      `  ${sourceType.padEnd(10)}sources ${stats.sourceCount}  success ${stats.successCount}  error ${stats.errorCount}  skipped ${stats.skippedCount}  fetched ${stats.fetchedCount}  candidates ${stats.candidateItemCount}  failed ${stats.failedItemCount}  batch ${formatDuration(stats.batchDurationMs)}`,
     );
   }
 
@@ -54,6 +54,16 @@ export default function logPollRunReport(report: PollRunReport): void {
     for (const error of report.errors) {
       console.log(
         `  ${error.sourceType.padEnd(10)}${error.sourceName}  ${error.errorType}  ${error.errorMessage}`,
+      );
+    }
+  }
+
+  if (report.skipped.length > 0) {
+    console.log("");
+    console.log("skipped");
+    for (const skipped of report.skipped) {
+      console.log(
+        `  ${skipped.sourceType.padEnd(10)}${skipped.sourceName}  ${skipped.skipReason}  ${skipped.skipMessage}`,
       );
     }
   }
