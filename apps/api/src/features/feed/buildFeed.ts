@@ -1,10 +1,10 @@
-import { and, desc, eq, gte, sql } from "drizzle-orm";
+import { and, desc, eq, gte, notExists, sql } from "drizzle-orm";
 import db from "../../db";
 import { items, feeds, feedItems } from "../../db/schema";
 import { getTodayBounds } from "../../shared/getTodayBounds";
 import { getCandidateWindow } from "../../shared/getCandidateWindow";
 
-const candidateWindowDays = 2;
+const candidateWindowDays = 4;
 
 async function selectItemsForToday() {
   const { startOfWindow } = getCandidateWindow(candidateWindowDays);
@@ -13,7 +13,13 @@ async function selectItemsForToday() {
     .select()
     .from(items)
     .where(
-      and(eq(items.type, "subreddit"), gte(items.createdAt, startOfWindow)),
+      and(
+        eq(items.type, "subreddit"),
+        gte(items.createdAt, startOfWindow),
+        notExists(
+          db.select().from(feedItems).where(eq(feedItems.itemId, items.id)),
+        ),
+      ),
     )
     .orderBy(desc(items.itemScore))
     .limit(4);
@@ -21,14 +27,30 @@ async function selectItemsForToday() {
   const hnRows = await db
     .select()
     .from(items)
-    .where(and(eq(items.type, "hn"), gte(items.createdAt, startOfWindow)))
+    .where(
+      and(
+        eq(items.type, "hn"),
+        gte(items.createdAt, startOfWindow),
+        notExists(
+          db.select().from(feedItems).where(eq(feedItems.itemId, items.id)),
+        ),
+      ),
+    )
     .orderBy(desc(items.itemScore))
     .limit(4);
 
   const rssRows = await db
     .select()
     .from(items)
-    .where(and(eq(items.type, "rss"), gte(items.createdAt, startOfWindow)))
+    .where(
+      and(
+        eq(items.type, "rss"),
+        gte(items.createdAt, startOfWindow),
+        notExists(
+          db.select().from(feedItems).where(eq(feedItems.itemId, items.id)),
+        ),
+      ),
+    )
     .orderBy(sql`random()`)
     .limit(2);
 
