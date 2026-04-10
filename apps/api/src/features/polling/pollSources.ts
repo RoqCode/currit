@@ -146,20 +146,24 @@ async function pollSubredditSources(
   const start = performance.now();
   let shouldStopPolling = false;
   let stopPollingMessage: string | undefined;
-  const results = await mapWithConcurrency(subredditSources, async (source) => {
-    if (shouldStopPolling) {
-      return createRateLimitSkippedResult(source, stopPollingMessage);
-    }
+  const results = await mapWithConcurrency(
+    subredditSources,
+    async (source) => {
+      if (shouldStopPolling) {
+        return createRateLimitSkippedResult(source, stopPollingMessage);
+      }
 
-    const result = await pollSubredditSource(source);
+      const result = await pollSubredditSource(source);
 
-    if (result.stopPollingAfter) {
-      shouldStopPolling = true;
-      stopPollingMessage = result.stopPollingMessage;
-    }
+      if (result.stopPollingAfter) {
+        shouldStopPolling = true;
+        stopPollingMessage = result.stopPollingMessage;
+      }
 
-    return stripSubredditControlFields(result);
-  }, 5);
+      return stripSubredditControlFields(result);
+    },
+    5,
+  );
 
   return {
     results,
@@ -183,7 +187,10 @@ function buildPollRunReport(params: {
   };
 
   const byType: PollRunReport["polling"]["byType"] = {
-    rss: createEmptyPollingTypeStats(sourceCounts.rss, params.batchDurations.rss),
+    rss: createEmptyPollingTypeStats(
+      sourceCounts.rss,
+      params.batchDurations.rss,
+    ),
     subreddit: createEmptyPollingTypeStats(
       sourceCounts.subreddit,
       params.batchDurations.subreddit,
