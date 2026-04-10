@@ -18,10 +18,9 @@ _Stand: April 2026_
 
 ## After That
 
-- [ ] Implement better parsing and validation by using Zod especially in RSS and Atom feeds
-- [ ] Harden feed parsing for real-world RSS and Atom feeds
+- [x] Harden feed parsing for real-world RSS and Atom feeds
 - [x] Improve polling error handling so known source-level failures surface as per-source results instead of degrading the whole run
-- [ ] Revisit duplicate handling for RSS URLs and rough normalization gaps between source types
+- [x] Revisit duplicate handling for RSS URLs and rough normalization gaps between source types
 
 ## Ranking
 

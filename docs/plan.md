@@ -103,6 +103,8 @@ Das Polling läuft inzwischen nicht mehr rein sequentiell, sondern mit bewusst k
 
 Zusätzlich gibt es bereits einen strukturierten Poll-Run-Report mit Erfolgen, Fehlern, Skips, Batch-Dauern und Persistenz-Zahlen pro Quelltyp. Das ist noch kein finales Observability-System, aber eine wichtige MVP-Hilfe für Debugging und Tuning.
 
+Der RSS-Slice wurde inzwischen deutlich robuster gemacht: Statt handgerolltem XML-Shape-Parsing wird eine dedizierte Feed-Parsing-Library verwendet, Redirects und reale Feed-URL-Eigenheiten werden toleriert, und Feed-Beschreibungen werden für die UI auf kurze Plain-Text-Summaries normalisiert statt als HTML oder Volltext weitergereicht.
+
 Reddit wird absichtlich konservativer behandelt als andere Quellen: Für den MVP gibt es kein Retry/Backoff, weil das verfügbare Rate-Limit-Budget zu klein ist. Stattdessen werden 429-Antworten als explizite Polling-Fehler geloggt, und danach werden für den restlichen Run keine weiteren Reddit-Requests mehr gestartet.
 
 Für die aktuelle Umsetzungsreihenfolge gilt bewusst: erst jede Quellart einmal end-to-end zum Laufen bringen, dann die ingest pipeline konsolidieren. Das heißt konkret: RSS, Reddit und Hacker News jeweils als erste MVP-Slices zum Laufen bringen, und erst anschließend gezielt Robustheit, Validierung, Dedupe und Cross-Source-Vereinheitlichung nachziehen.
@@ -158,7 +160,7 @@ React-Frontend zeigt die Items an. Jedes Item enthält: Titel, Quelle, kurzen Su
 - [x] RSS polling MVP gebaut: Feed laden, parsen und erste Items persistieren · _RSS, XML-Parsing_
 - [x] Polling-Orchestrierung auf kontrollierte, quellspezifische Concurrency umgestellt · _Nebenläufigkeit, Orchestrierung_
 - [x] Strukturierte Poll-Run-Logs mit Erfolgen, Fehlern, Skips, Dauer und Persistenz gebaut · _Debugging, Observability_
-- [ ] RSS polling härten: Validierung, Dedupe, Cursor-Logik, Edge Cases · _Robustheit, Datenkonsistenz_
+- [ ] RSS polling weiter härten: Cursor-Logik und verbleibende Edge Cases · _Robustheit, Datenkonsistenz_
 - [x] Reddit polling MVP gebaut: `top.json` laden, normalisieren und erste Items persistieren · _REST APIs, JSON-Parsing_
 - [x] Reddit-MVP bewusst konservativ halten: 429 als Fehler loggen und restliche Reddit-Fetches für den Run skippen · _API-Robustheit_
 - [ ] Reddit polling weiter härten: URL-Normalisierung, Validierung, Metadaten für Ranking, Edge Cases · _Robustheit, Datenkonsistenz_
