@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { CreateSourceInput } from "@currit/shared/types/CreateSourceInput";
-import { parseSourceType } from "../utils/parseSourceType";
+import { createSourceDraftSchema } from "@currit/shared/validation/sourceInput";
 
 type Props = {
   onCreated: () => void | Promise<void>;
@@ -16,21 +16,30 @@ export default function SourceForm(props: Props) {
     setPending(true);
     const name = formData.get("sourceName");
     const url = formData.get("sourceUrl");
-    const type = parseSourceType(String(url));
+    const parsedDraft = createSourceDraftSchema.safeParse({
+      name: typeof name === "string" ? name : "",
+      url: typeof url === "string" ? url : "",
+    });
 
-    if (!type) {
-      setTypeError(true);
+    if (!parsedDraft.success) {
+      const hasMissingField = parsedDraft.error.issues.some(
+        (issue: { message: string }) =>
+          issue.message === "name is required" ||
+          issue.message === "source url is required",
+      );
+
+      setFormError(hasMissingField);
+      setTypeError(!hasMissingField);
       setPending(false);
       return;
     }
 
-    if (!name || !url) {
-      setFormError(true);
-      setPending(false);
-      return;
-    } else if (formError) {
+    if (formError || typeError) {
       setFormError(false);
+      setTypeError(false);
     }
+
+    const payload = parsedDraft.data;
 
     try {
       const res = await fetch("/api/sources", {
@@ -40,9 +49,9 @@ export default function SourceForm(props: Props) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name: String(name),
-          url: String(url),
-          type: String(type),
+          name: payload.name,
+          url: payload.url,
+          type: payload.type,
         } as CreateSourceInput),
       });
 

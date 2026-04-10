@@ -1,19 +1,32 @@
-import { XMLParser } from "fast-xml-parser";
+import { parseFeed } from "feedsmith";
 import buildUserAgent from "@currit/shared/utils/buildUserAgent";
-import isRecord from "@currit/shared/utils/isRecord";
-import type { NormalizedRSSItem } from "./types";
+import {
+  normalizeAtomEntry,
+  normalizeFeedItems,
+  normalizeRdfItem,
+  normalizeRssItem,
+  type NormalizedFeedItemsResult,
+} from "./rssNormalization";
 import { isAbortError, PollingError } from "../../shared/errors";
+import validateSourceUrl, {
+  InvalidSourceUrlError,
+} from "../sources/validateSourceUrl";
+
+export type FetchRssFeedResult = NormalizedFeedItemsResult;
 
 export async function fetchRssFeed(
   sourceUrl: string,
-): Promise<NormalizedRSSItem[]> {
+): Promise<FetchRssFeedResult> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10_000);
 
   try {
-    const res = await fetch(sourceUrl, {
+    const validatedSourceUrl = validateSourceUrl(sourceUrl, "rss");
+
+    const res = await fetch(validatedSourceUrl, {
       method: "GET",
       signal: controller.signal,
+      redirect: "follow",
       headers: {
         "User-Agent": buildUserAgent(),
         Accept:
@@ -28,25 +41,14 @@ export async function fetchRssFeed(
       );
     }
 
-    const parser = new XMLParser({
-      ignoreAttributes: false,
-      attributeNamePrefix: "@_",
-      processEntities: {
-        enabled: true,
-        maxTotalExpansions: 10_000,
-        maxEntityCount: 1_000,
-        maxEntitySize: 50_000,
-        maxExpandedLength: 500_000,
-      },
-    });
-
+    const contentType = res.headers.get("content-type");
     const xml = await res.text();
 
-    const parsed = parser.parse(xml);
-
-    const items = getRssItems(parsed);
-
-    return items;
+    return parseFeedItems({
+      xml,
+      sourceUrl: validatedSourceUrl,
+      contentType,
+    });
   } catch (err) {
     if (isAbortError(err)) {
       throw new PollingError("network_error", "RSS request timed out");
@@ -56,91 +58,93 @@ export async function fetchRssFeed(
       throw err;
     }
 
+    if (err instanceof InvalidSourceUrlError) {
+      throw new PollingError("unknown_error", err.message);
+    }
+
     throw new PollingError(
-      "unknown_error",
-      `Unexpected RSS polling error: ${err}`,
+      "parse_error",
+      err instanceof Error ? err.message : `Unexpected RSS polling error: ${err}`,
     );
   } finally {
     clearTimeout(timeout);
   }
 }
 
-function getRssItems(parsedXmlFeed: unknown): NormalizedRSSItem[] {
-  if (!isRecord(parsedXmlFeed)) {
-    throw new PollingError("parse_error", "RSS response is not an object");
+function parseFeedItems(params: {
+  xml: string;
+  sourceUrl: string;
+  contentType: string | null;
+}): FetchRssFeedResult {
+  let parsedFeed: ReturnType<typeof parseFeed>;
+
+  try {
+    parsedFeed = parseFeed(params.xml);
+  } catch (error) {
+    throw new PollingError(
+      "parse_error",
+      buildRssParseErrorMessage({
+        sourceUrl: params.sourceUrl,
+        contentType: params.contentType,
+        body: params.xml,
+        error,
+      }),
+    );
   }
 
-  if (!("rss" in parsedXmlFeed)) {
-    throw new PollingError("parse_error", "RSS response has no rss field");
+  if (parsedFeed.format === "rss") {
+    return normalizeFeedItems(parsedFeed.feed.items ?? [], normalizeRssItem);
   }
 
-  const rss = parsedXmlFeed.rss;
-  if (!isRecord(rss)) {
-    throw new PollingError("parse_error", "RSS field is not an object");
+  if (parsedFeed.format === "atom") {
+    return normalizeFeedItems(parsedFeed.feed.entries ?? [], normalizeAtomEntry);
   }
 
-  if (!("channel" in rss)) {
-    throw new PollingError("parse_error", "RSS response has no channel field");
+  if (parsedFeed.format === "rdf") {
+    return normalizeFeedItems(parsedFeed.feed.items ?? [], normalizeRdfItem);
   }
 
-  const channel = rss.channel;
-  if (!isRecord(channel)) {
-    throw new PollingError("parse_error", "RSS channel field is not an object");
+  throw new PollingError(
+    "parse_error",
+    `Unsupported feed format for RSS source: ${parsedFeed.format}`,
+  );
+}
+
+function buildRssParseErrorMessage(params: {
+  sourceUrl: string;
+  contentType: string | null;
+  body: string;
+  error: unknown;
+}) {
+  const details = [
+    `RSS parse failed for ${params.sourceUrl}`,
+    params.contentType ? `(content-type ${params.contentType})` : "(content-type unknown)",
+    `: ${getErrorMessage(params.error)}`,
+  ].join(" ");
+
+  const bodyPreview = getBodyPreview(params.body);
+
+  return bodyPreview ? `${details} | body preview: ${bodyPreview}` : details;
+}
+
+function getErrorMessage(error: unknown) {
+  if (error instanceof Error && error.message) {
+    return error.message;
   }
 
-  if (!("item" in channel)) {
-    throw new PollingError("parse_error", "RSS item field is not present");
+  return String(error);
+}
+
+function getBodyPreview(body: string) {
+  const normalizedBody = body.replace(/\s+/g, " ").trim();
+
+  if (!normalizedBody) {
+    return null;
   }
 
-  const items: unknown[] = [];
-  if (Array.isArray(channel.item)) {
-    items.push(...channel.item);
-  } else if (channel.item) {
-    items.push(channel.item);
-  }
+  const truncatedBody = normalizedBody.slice(0, 220);
 
-  const normalizedItems: NormalizedRSSItem[] = [];
-  for (const item of items) {
-    if (!isRecord(item)) continue;
-
-    let author: string | null = "";
-    let title: string = "";
-    let description: string | null = "";
-    let url: string = "";
-    let publishedAt: Date = new Date();
-
-    if ("dc:creator" in item && typeof item["dc:creator"] === "string") {
-      author = item["dc:creator"];
-    } else if ("author" in item && typeof item.author === "string") {
-      author = item.author;
-    } else {
-      author = null;
-    }
-
-    if ("title" in item && typeof item.title === "string") {
-      title = item.title;
-    }
-
-    if ("description" in item && typeof item.description === "string") {
-      description = item.description;
-    } else {
-      description = null;
-    }
-
-    if ("link" in item && typeof item.link === "string") {
-      url = item.link;
-    }
-
-    if ("pubDate" in item && typeof item.pubDate === "string") {
-      const parsedPublishedAt = new Date(item.pubDate);
-
-      if (!Number.isNaN(parsedPublishedAt.getTime())) {
-        publishedAt = parsedPublishedAt;
-      }
-    }
-
-    normalizedItems.push({ title, description, url, publishedAt, author });
-  }
-
-  return normalizedItems;
+  return normalizedBody.length > truncatedBody.length
+    ? `${truncatedBody}…`
+    : truncatedBody;
 }

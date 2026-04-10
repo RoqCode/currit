@@ -33,8 +33,11 @@ export async function savePolledItems(
   const itemsWithoutDuplicateHnItems = await filterDuplicateHnItems(
     params.items,
   );
-  const itemsToInsert = await filterDuplicateSubredditItems(
+  const itemsWithoutDuplicateSubredditItems = await filterDuplicateSubredditItems(
     itemsWithoutDuplicateHnItems,
+  );
+  const itemsToInsert = await filterDuplicateRssItems(
+    itemsWithoutDuplicateSubredditItems,
   );
 
   if (itemsToInsert.length < 1) {
@@ -221,4 +224,49 @@ async function filterDuplicateSubredditItems(
   }
 
   return [...nonSubredditItems, ...newSubredditItems];
+}
+
+async function filterDuplicateRssItems(itemsToCheck: NormalizedItemInput[]) {
+  const uniqueRssUrlsInBatch = new Set<string>();
+  const rssCandidates: NormalizedItemInput[] = [];
+  const nonRssItems: NormalizedItemInput[] = [];
+
+  for (const item of itemsToCheck) {
+    if (item.sourceType !== "rss") {
+      nonRssItems.push(item);
+      continue;
+    }
+
+    if (uniqueRssUrlsInBatch.has(item.url)) {
+      continue;
+    }
+
+    uniqueRssUrlsInBatch.add(item.url);
+    rssCandidates.push(item);
+  }
+
+  if (rssCandidates.length < 1) {
+    return nonRssItems;
+  }
+
+  const urls = rssCandidates.map((item) => item.url);
+
+  const existingRssItems = await db
+    .select({ url: items.url })
+    .from(items)
+    .where(and(eq(items.type, "rss"), inArray(items.url, urls)));
+
+  const existingUrls = new Set(existingRssItems.map((item) => item.url));
+
+  const newRssItems: NormalizedItemInput[] = [];
+
+  for (const item of rssCandidates) {
+    if (existingUrls.has(item.url)) {
+      continue;
+    }
+
+    newRssItems.push(item);
+  }
+
+  return [...nonRssItems, ...newRssItems];
 }

@@ -1,6 +1,18 @@
 import buildUserAgent from "@currit/shared/utils/buildUserAgent";
-import isRecord from "@currit/shared/utils/isRecord";
+import { z } from "zod";
 import type { NormalizedItemInput } from "./types";
+
+const hnItemSchema = z.object({
+  by: z.string().nullish(),
+  id: z.union([z.string(), z.number()]).optional(),
+  score: z.number().nullish(),
+  text: z.string().nullish(),
+  time: z.number().nullish(),
+  title: z.string().nullish(),
+  url: z.string().nullish(),
+});
+
+type HnItem = z.infer<typeof hnItemSchema>;
 
 export default async function pollHnSource(
   sourceId: string,
@@ -41,7 +53,11 @@ async function fetchHnItem(id: number | string): Promise<Response> {
 }
 
 function parseHnItem(sourceId: string, item: unknown) {
-  if (!isRecord(item)) return null;
+  const parsedItem = hnItemSchema.safeParse(item);
+
+  if (!parsedItem.success) return null;
+
+  const parsedHnItem = parsedItem.data;
 
   let author: string | null = null;
   let id: number | string = 0;
@@ -51,35 +67,32 @@ function parseHnItem(sourceId: string, item: unknown) {
   let title: string | null = null;
   let url: string | null = null;
 
-  if ("by" in item && typeof item.by === "string") {
-    author = item.by;
+  if (typeof parsedHnItem.by === "string") {
+    author = parsedHnItem.by;
   }
 
-  if (
-    "id" in item &&
-    (typeof item.id === "string" || typeof item.id === "number")
-  ) {
-    id = item.id;
+  if (typeof parsedHnItem.id === "string" || typeof parsedHnItem.id === "number") {
+    id = parsedHnItem.id;
   }
 
-  if ("score" in item && typeof item.score === "number") {
-    score = item.score;
+  if (typeof parsedHnItem.score === "number") {
+    score = parsedHnItem.score;
   }
 
-  if ("text" in item && typeof item.text === "string") {
-    description = item.text;
+  if (typeof parsedHnItem.text === "string") {
+    description = parsedHnItem.text;
   }
 
-  if ("time" in item && typeof item.time === "number") {
-    publishedAt = new Date(item.time * 1000);
+  if (typeof parsedHnItem.time === "number") {
+    publishedAt = new Date(parsedHnItem.time * 1000);
   }
 
-  if ("title" in item && typeof item.title === "string") {
-    title = item.title;
+  if (typeof parsedHnItem.title === "string") {
+    title = parsedHnItem.title;
   }
 
-  if ("url" in item && typeof item.url === "string") {
-    url = item.url;
+  if (typeof parsedHnItem.url === "string") {
+    url = parsedHnItem.url;
   }
 
   return {

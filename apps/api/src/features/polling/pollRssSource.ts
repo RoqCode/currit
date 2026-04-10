@@ -12,8 +12,15 @@ export async function pollRssSource(
   const start = performance.now();
 
   let feedItems: NormalizedRSSItem[];
+  let fetchedCount = 0;
+  let failedItemCount = 0;
+
   try {
-    feedItems = await fetchRssFeed(source.url);
+    const result = await fetchRssFeed(source.url);
+
+    feedItems = result.items;
+    fetchedCount = result.fetchedCount;
+    failedItemCount = result.failedItemCount;
   } catch (err) {
     if (err instanceof PollingError) {
       return {
@@ -62,9 +69,9 @@ export async function pollRssSource(
     return {
       status: "success",
       items: [],
-      fetchedCount: feedItems.length,
+      fetchedCount,
       candidateItemCount: 0,
-      failedItemCount: 0,
+      failedItemCount,
       sourceId: source.id,
       sourceName: source.name,
       sourceType: "rss",
@@ -90,9 +97,9 @@ export async function pollRssSource(
 
   return {
     status: "success",
-    fetchedCount: feedItems.length,
+    fetchedCount,
     candidateItemCount: newFeedItems.length,
-    failedItemCount: 0,
+    failedItemCount,
     sourceId: source.id,
     sourceName: source.name,
     sourceType: "rss",

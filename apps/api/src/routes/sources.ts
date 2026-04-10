@@ -1,16 +1,25 @@
-import type { CreateSourceInput } from "@currit/shared/types/CreateSourceInput";
-import isUuid from "@currit/shared/utils/isUuid";
 import { Hono } from "hono";
+import { createSourceRequestSchema } from "@currit/shared/validation/sourceInput";
+import { z } from "zod";
 import { clearSources } from "../features/sources/clearSources";
 import { createSource } from "../features/sources/createSource";
 import { deleteSourceById } from "../features/sources/deleteSourceById";
 import { getAllSources } from "../features/sources/getAllSources";
 import isUniqueViolationError from "../features/sources/isUniqueViolationError";
 import setSourceActiveById from "../features/sources/setSourceActiveById";
+import { InvalidSourceUrlError } from "../features/sources/validateSourceUrl";
 
 const sourcesRoutes = new Hono();
 
 const isDev = process.env.NODE_ENV === "development";
+
+const sourceIdParamsSchema = z.object({
+  id: z.uuid(),
+});
+
+const setSourceActiveBodySchema = z.object({
+  active: z.boolean(),
+});
 
 sourcesRoutes.get("/api/sources", async (c) => {
   try {
@@ -26,16 +35,13 @@ sourcesRoutes.get("/api/sources", async (c) => {
 
 sourcesRoutes.post("/api/sources", async (c) => {
   const rawBody = await c.req.json();
+  const parsedBody = createSourceRequestSchema.safeParse(rawBody);
 
-  if (
-    typeof rawBody.name !== "string" ||
-    typeof rawBody.url !== "string" ||
-    typeof rawBody.type !== "string"
-  ) {
+  if (!parsedBody.success) {
     return c.json({ error: "invalid body" }, 400);
   }
 
-  const body = rawBody as CreateSourceInput;
+  const body = parsedBody.data;
 
   if (body.type === "hn") {
     return c.json({ error: "hn sources are builtin" }, 400);
@@ -45,6 +51,10 @@ sourcesRoutes.post("/api/sources", async (c) => {
     await createSource(body.name, body.url, body.type);
     return c.json({ ok: true }, 201);
   } catch (e) {
+    if (e instanceof InvalidSourceUrlError) {
+      return c.json({ error: e.message }, 400);
+    }
+
     if (isUniqueViolationError(e)) {
       return c.json({ error: "source already exists" }, 409);
     }
@@ -55,11 +65,13 @@ sourcesRoutes.post("/api/sources", async (c) => {
 });
 
 sourcesRoutes.delete("/api/sources/:id", async (c) => {
-  const itemId = c.req.param("id");
+  const parsedParams = sourceIdParamsSchema.safeParse(c.req.param());
 
-  if (!itemId || !isUuid(itemId)) {
+  if (!parsedParams.success) {
     return c.json({ message: "not a valid id" }, 400);
   }
+
+  const itemId = parsedParams.data.id;
 
   try {
     const deletedSourceId = await deleteSourceById(itemId);
@@ -88,19 +100,22 @@ sourcesRoutes.get("/reset-db", async (c) => {
 });
 
 sourcesRoutes.patch("/api/sources/:id/active", async (c) => {
-  const itemId = c.req.param("id");
+  const parsedParams = sourceIdParamsSchema.safeParse(c.req.param());
 
-  if (!itemId || !isUuid(itemId)) {
+  if (!parsedParams.success) {
     return c.json({ message: "not a valid id" }, 400);
   }
 
-  const rawBody = await c.req.json();
+  const itemId = parsedParams.data.id;
 
-  if (typeof rawBody.active !== "boolean") {
+  const rawBody = await c.req.json();
+  const parsedBody = setSourceActiveBodySchema.safeParse(rawBody);
+
+  if (!parsedBody.success) {
     return c.json({ error: "invalid body" }, 400);
   }
 
-  const updatedSource = await setSourceActiveById(itemId, rawBody.active);
+  const updatedSource = await setSourceActiveById(itemId, parsedBody.data.active);
   if (!updatedSource) return c.json({ error: "source not found" }, 404);
 
   return c.json({ ok: true, source: updatedSource }, 200);
