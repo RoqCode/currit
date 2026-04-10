@@ -165,8 +165,10 @@ export type ScoredCandidate = {
 export type SavePolledItemsResult = {
   inputCount: number;
   insertedCount: number;
+  updatedCount: number;
   skippedCount: number;
   inputByType: ItemCountsByType;
   insertedByType: ItemCountsByType;
+  updatedByType: ItemCountsByType;
   skippedByType: ItemCountsByType;
 };
