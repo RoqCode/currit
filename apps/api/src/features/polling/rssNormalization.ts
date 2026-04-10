@@ -42,11 +42,7 @@ export function normalizeRssItem(
   item: DeepPartial<Rss.Item<string>>,
 ): NormalizedRSSItem | null {
   const title = item.title?.trim() || "Untitled RSS item";
-  const description = getFirstString(
-    item.content?.encoded,
-    item.description,
-    item.dc?.description,
-  );
+  const description = getFirstString(item.description, item.dc?.description);
   const url = getFirstUrl(
     item.link,
     item.guid?.isPermaLink === false ? null : item.guid?.value,
@@ -104,11 +100,7 @@ export function normalizeRdfItem(
   item: DeepPartial<Rdf.Item<string>>,
 ): NormalizedRSSItem | null {
   const title = item.title?.trim() || "Untitled RSS item";
-  const description = getFirstString(
-    item.content?.encoded,
-    item.description,
-    item.dc?.description,
-  );
+  const description = getFirstString(item.description, item.dc?.description);
   const url = getFirstUrl(item.link);
   const author = getFirstString(item.dc?.creator);
   const publishedAt =
