@@ -1,6 +1,5 @@
-import type { CreateSourceInput } from "@currit/shared/types/CreateSourceInput";
-import isUuid from "@currit/shared/utils/isUuid";
 import { Hono } from "hono";
+import { z } from "zod";
 import { clearSources } from "../features/sources/clearSources";
 import { createSource } from "../features/sources/createSource";
 import { deleteSourceById } from "../features/sources/deleteSourceById";
@@ -11,6 +10,20 @@ import setSourceActiveById from "../features/sources/setSourceActiveById";
 const sourcesRoutes = new Hono();
 
 const isDev = process.env.NODE_ENV === "development";
+
+const sourceIdParamsSchema = z.object({
+  id: z.uuid(),
+});
+
+const createSourceBodySchema = z.object({
+  name: z.string(),
+  url: z.string(),
+  type: z.enum(["rss", "subreddit", "hn"]),
+});
+
+const setSourceActiveBodySchema = z.object({
+  active: z.boolean(),
+});
 
 sourcesRoutes.get("/api/sources", async (c) => {
   try {
@@ -26,16 +39,13 @@ sourcesRoutes.get("/api/sources", async (c) => {
 
 sourcesRoutes.post("/api/sources", async (c) => {
   const rawBody = await c.req.json();
+  const parsedBody = createSourceBodySchema.safeParse(rawBody);
 
-  if (
-    typeof rawBody.name !== "string" ||
-    typeof rawBody.url !== "string" ||
-    typeof rawBody.type !== "string"
-  ) {
+  if (!parsedBody.success) {
     return c.json({ error: "invalid body" }, 400);
   }
 
-  const body = rawBody as CreateSourceInput;
+  const body = parsedBody.data;
 
   if (body.type === "hn") {
     return c.json({ error: "hn sources are builtin" }, 400);
@@ -55,11 +65,13 @@ sourcesRoutes.post("/api/sources", async (c) => {
 });
 
 sourcesRoutes.delete("/api/sources/:id", async (c) => {
-  const itemId = c.req.param("id");
+  const parsedParams = sourceIdParamsSchema.safeParse(c.req.param());
 
-  if (!itemId || !isUuid(itemId)) {
+  if (!parsedParams.success) {
     return c.json({ message: "not a valid id" }, 400);
   }
+
+  const itemId = parsedParams.data.id;
 
   try {
     const deletedSourceId = await deleteSourceById(itemId);
@@ -88,19 +100,22 @@ sourcesRoutes.get("/reset-db", async (c) => {
 });
 
 sourcesRoutes.patch("/api/sources/:id/active", async (c) => {
-  const itemId = c.req.param("id");
+  const parsedParams = sourceIdParamsSchema.safeParse(c.req.param());
 
-  if (!itemId || !isUuid(itemId)) {
+  if (!parsedParams.success) {
     return c.json({ message: "not a valid id" }, 400);
   }
 
-  const rawBody = await c.req.json();
+  const itemId = parsedParams.data.id;
 
-  if (typeof rawBody.active !== "boolean") {
+  const rawBody = await c.req.json();
+  const parsedBody = setSourceActiveBodySchema.safeParse(rawBody);
+
+  if (!parsedBody.success) {
     return c.json({ error: "invalid body" }, 400);
   }
 
-  const updatedSource = await setSourceActiveById(itemId, rawBody.active);
+  const updatedSource = await setSourceActiveById(itemId, parsedBody.data.active);
   if (!updatedSource) return c.json({ error: "source not found" }, 404);
 
   return c.json({ ok: true, source: updatedSource }, 200);
