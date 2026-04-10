@@ -22,7 +22,7 @@ Ein persönlicher, täglicher Feed mit 5–10 kuratierten Inhalten. Statt endlos
 | Entscheidung | Festlegung                                                         |
 | ------------ | ------------------------------------------------------------------ |
 | Ziel         | Reddit-Doomscrolling durch bessere Alternative reduzieren          |
-| Feed-Größe   | Minimum 3, Maximum 7 Items pro Tag                                 |
+| Feed-Größe   | Etwa 5 bis 10 Items pro Tag                                         |
 | Quellen      | RSS-Feeds, ausgewählte Subreddits, Hacker News                     |
 | Interessen   | Startet zunächst quellenbasiert; Keywords bleiben als nächster Schritt geplant |
 | Cold Start   | User konfiguriert eigene Quellen; Hacker News ist standardmäßig da |
@@ -99,6 +99,12 @@ Ein täglicher Job fragt alle konfigurierten Quellen ab. Jede Quelle bekommt ein
 
 Für die UX wird Hacker News nicht wie eine normale manuell anzulegende Quelle behandelt, sondern als eingebaute Standardquelle vorhanden sein. RSS-Feeds und Subreddits bleiben user-konfigurierbar.
 
+Das Polling läuft inzwischen nicht mehr rein sequentiell, sondern mit bewusst kontrollierter Concurrency pro Quelltyp. RSS, Reddit und HN werden getrennt orchestriert, damit Performance verbessert werden kann, ohne blind maximale Parallelität zu fahren.
+
+Zusätzlich gibt es bereits einen strukturierten Poll-Run-Report mit Erfolgen, Fehlern, Skips, Batch-Dauern und Persistenz-Zahlen pro Quelltyp. Das ist noch kein finales Observability-System, aber eine wichtige MVP-Hilfe für Debugging und Tuning.
+
+Reddit wird absichtlich konservativer behandelt als andere Quellen: Für den MVP gibt es kein Retry/Backoff, weil das verfügbare Rate-Limit-Budget zu klein ist. Stattdessen werden 429-Antworten als explizite Polling-Fehler geloggt, und danach werden für den restlichen Run keine weiteren Reddit-Requests mehr gestartet.
+
 Für die aktuelle Umsetzungsreihenfolge gilt bewusst: erst jede Quellart einmal end-to-end zum Laufen bringen, dann die ingest pipeline konsolidieren. Das heißt konkret: RSS, Reddit und Hacker News jeweils als erste MVP-Slices zum Laufen bringen, und erst anschließend gezielt Robustheit, Validierung, Dedupe und Cross-Source-Vereinheitlichung nachziehen.
 
 ### Phase 2: Normalize + Store
@@ -126,7 +132,7 @@ Optional: KI-Scoring für Summary-Generierung, Relevanz-Einschätzung und Keywor
 
 ### Phase 4: Serve
 
-Eine REST API mit einem Kern-Endpoint: `GET /feed/today` liefert die Top 3–7 Items als JSON. Kein GraphQL, kein WebSocket.
+Eine REST API mit einem Kern-Endpoint: `GET /feed/today` liefert etwa 5–10 Items als JSON. Kein GraphQL, kein WebSocket.
 
 Zusätzlich braucht das MVP einfache Endpunkte für Interessenverwaltung, damit Keywords nicht in einer versteckten Config leben, sondern Teil des Produkts sind.
 
@@ -150,9 +156,12 @@ React-Frontend zeigt die Items an. Jedes Item enthält: Titel, Quelle, kurzen Su
 ### Phase 2: Ingest-Pipeline
 
 - [x] RSS polling MVP gebaut: Feed laden, parsen und erste Items persistieren · _RSS, XML-Parsing_
+- [x] Polling-Orchestrierung auf kontrollierte, quellspezifische Concurrency umgestellt · _Nebenläufigkeit, Orchestrierung_
+- [x] Strukturierte Poll-Run-Logs mit Erfolgen, Fehlern, Skips, Dauer und Persistenz gebaut · _Debugging, Observability_
 - [ ] RSS polling härten: Validierung, Dedupe, Cursor-Logik, Edge Cases · _Robustheit, Datenkonsistenz_
 - [x] Reddit polling MVP gebaut: `top.json` laden, normalisieren und erste Items persistieren · _REST APIs, JSON-Parsing_
-- [ ] Reddit polling härten: URL-Normalisierung, Validierung, Metadaten für Ranking, Edge Cases · _Robustheit, Datenkonsistenz_
+- [x] Reddit-MVP bewusst konservativ halten: 429 als Fehler loggen und restliche Reddit-Fetches für den Run skippen · _API-Robustheit_
+- [ ] Reddit polling weiter härten: URL-Normalisierung, Validierung, Metadaten für Ranking, Edge Cases · _Robustheit, Datenkonsistenz_
 - [x] Hacker News-Fetcher bauen (Firebase API) · _API-Integration_
 - [x] Hacker News als eingebaute Default-Source behandeln statt als manuell anzulegende User-Source · _Produktmodell, UX_
 - [ ] Content-Normalizer: einheitliches Datenformat für alle Quellen · _Datenmodellierung_

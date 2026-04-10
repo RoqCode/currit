@@ -14,12 +14,13 @@ _Stand: April 2026_
 - [x] Refactor polling orchestration to use controlled concurrency instead of fully sequential polling
 - [x] Group polling by source type and define separate concurrency rules for RSS, HN, and Reddit
 - [x] Add per-source poll result logging: duration, status, inserted count, skipped count, error type
-- [ ] Add safer Reddit polling behavior with basic retry/backoff and rate-limit awareness
+- [x] For the Reddit MVP, treat 429 as a typed polling error and skip all remaining Reddit fetches for the current run
 
 ## After That
 
+- [ ] Implement better parsing and validation by using Zod especially in RSS and Atom feeds
 - [ ] Harden feed parsing for real-world RSS and Atom feeds
-- [ ] Improve polling error handling so one broken source does not degrade the whole run
+- [x] Improve polling error handling so known source-level failures surface as per-source results instead of degrading the whole run
 - [ ] Revisit duplicate handling for RSS URLs and rough normalization gaps between source types
 
 ## Ranking
@@ -47,5 +48,5 @@ _Stand: April 2026_
 
 - Performance matters now because polling currently takes about 30 seconds for roughly 12 sources
 - Performance work should optimize for controlled orchestration, not maximum parallelism
-- Reddit should stay conservative to reduce rate-limit and blacklist risk
+- Reddit should stay conservative to reduce rate-limit and blacklist risk; for the MVP we log rate-limit errors and skip all remaining Reddit fetches for that run instead of retrying
 - Keywords are intentionally postponed; the first product test should answer whether source selection + ranking + a finite feed already has enough pull

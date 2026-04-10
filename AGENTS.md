@@ -52,13 +52,16 @@
 - Reddit polling MVP vertical slice.
 - Hacker News polling MVP vertical slice.
 - Built-in Hacker News source with active toggle support.
+- Polling orchestration grouped by source type with controlled concurrency.
+- Structured poll run logging for duration, success/error/skipped counts, and persistence results.
+- First conservative Reddit MVP rate-limit handling: log 429-style failures and stop starting further Reddit requests for the current run.
 - Basic polled-item persistence as groundwork for later feed-building.
 - A simple feed read slice via `GET /api/feed`.
 
 ## What Is Not Built Yet
 
 - A robust RSS ingest pipeline with stronger validation, dedupe, and edge-case handling.
-- Hardened Reddit ingest behavior with stronger validation, normalization, and edge-case handling.
+- Fully hardened Reddit ingest behavior with stronger validation, normalization, and edge-case handling.
 - Hardened Hacker News ingest behavior and clearer source-model constraints beyond the current MVP slice.
 - Normalized content pipeline for fetched items.
 - Ranking and scoring engine.
@@ -132,6 +135,7 @@
 - Establishing the core stack and development workflow.
 - Building out source management as an early vertical slice.
 - Completing the ingest vertical slice across RSS, Reddit, and Hacker News before polishing edge cases.
+- Hardening polling orchestration, logging, and conservative rate-limit behavior after the first ingest slices landed.
 - Preparing groundwork for normalization, dedupe, and ranking after the source fetchers work end-to-end.
 - Keeping the system simple enough to learn from while still feeling like a real product.
 
