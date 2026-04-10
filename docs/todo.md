@@ -11,9 +11,9 @@ _Stand: April 2026_
 
 ## Next
 
-- [ ] Refactor polling orchestration to use controlled concurrency instead of fully sequential polling
-- [ ] Group polling by source type and define separate concurrency rules for RSS, HN, and Reddit
-- [ ] Add per-source poll result logging: duration, status, inserted count, skipped count, error type
+- [x] Refactor polling orchestration to use controlled concurrency instead of fully sequential polling
+- [x] Group polling by source type and define separate concurrency rules for RSS, HN, and Reddit
+- [x] Add per-source poll result logging: duration, status, inserted count, skipped count, error type
 - [ ] Add safer Reddit polling behavior with basic retry/backoff and rate-limit awareness
 
 ## After That
