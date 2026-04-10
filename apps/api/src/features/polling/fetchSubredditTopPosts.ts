@@ -1,5 +1,5 @@
 import buildUserAgent from "@currit/shared/utils/buildUserAgent";
-import isRecord from "@currit/shared/utils/isRecord";
+import { z } from "zod";
 import { NormalizedSubredditItem } from "./types";
 import { isAbortError, PollingError } from "../../shared/errors";
 import validateSourceUrl, {
@@ -21,6 +21,30 @@ type RedditRateLimitInfo = {
   resetSeconds: number | null;
   shouldStopPolling: boolean;
 };
+
+const redditPostDataSchema = z.object({
+  author: z.string().nullish(),
+  id: z.union([z.string(), z.number()]).optional(),
+  score: z.number().nullish(),
+  created_utc: z.number().nullish(),
+  title: z.string().nullish(),
+  is_self: z.boolean().optional(),
+  is_video: z.boolean().optional(),
+  post_hint: z.string().nullish(),
+  url_overridden_by_dest: z.string().nullish(),
+  selftext: z.string().nullish(),
+  domain: z.string().nullish(),
+  permalink: z.string().nullish(),
+  url: z.string().nullish(),
+});
+
+const redditListingSchema = z.object({
+  data: z.object({
+    children: z.array(z.object({ data: z.unknown() })),
+  }),
+});
+
+type RedditPostData = z.infer<typeof redditPostDataSchema>;
 
 export default async function fetchSubredditTopPosts(url: string) {
   const controller = new AbortController();
@@ -123,15 +147,16 @@ function buildRateLimitMessage(status: number, rateLimit: RedditRateLimitInfo) {
 
 function parseTopItems(body: unknown) {
   const parsedItems: NormalizedSubredditItem[] = [];
+  const parsedListing = redditListingSchema.safeParse(body);
 
-  if (!isRecord(body)) return [];
-  if (!isRecord(body.data)) return [];
-  if (!Array.isArray(body.data.children)) return [];
+  if (!parsedListing.success) return [];
 
-  for (const wrappedItem of body.data.children) {
-    if (!isRecord(wrappedItem)) continue;
-    if (!isRecord(wrappedItem.data)) continue;
-    const item = wrappedItem.data;
+  for (const wrappedItem of parsedListing.data.data.children) {
+    const parsedItem = redditPostDataSchema.safeParse(wrappedItem.data);
+
+    if (!parsedItem.success) continue;
+
+    const item = parsedItem.data;
 
     let author: string | null = null;
     let id: number | string = 0;
@@ -141,26 +166,23 @@ function parseTopItems(body: unknown) {
     let title: string | null = null;
     let url: string | null = null;
 
-    if ("author" in item && typeof item.author === "string") {
+    if (typeof item.author === "string") {
       author = item.author;
     }
 
-    if (
-      "id" in item &&
-      (typeof item.id === "string" || typeof item.id === "number")
-    ) {
+    if (typeof item.id === "string" || typeof item.id === "number") {
       id = item.id;
     }
 
-    if ("score" in item && typeof item.score === "number") {
+    if (typeof item.score === "number") {
       score = item.score;
     }
 
-    if ("created_utc" in item && typeof item.created_utc === "number") {
+    if (typeof item.created_utc === "number") {
       publishedAt = new Date(item.created_utc * 1000);
     }
 
-    if ("title" in item && typeof item.title === "string") {
+    if (typeof item.title === "string") {
       title = item.title;
     }
 
@@ -183,16 +205,12 @@ function parseTopItems(body: unknown) {
   return parsedItems;
 }
 
-function getPostKind(item: Record<string, unknown>): SubredditPostKind {
+function getPostKind(item: RedditPostData): SubredditPostKind {
   if (item.is_self === true) return "self";
   if (item.is_video === true) return "video";
   if (item.post_hint === "image") return "image";
 
-  if (
-    item.post_hint === "link" ||
-    ("url_overridden_by_dest" in item &&
-      typeof item.url_overridden_by_dest === "string")
-  ) {
+  if (item.post_hint === "link" || typeof item.url_overridden_by_dest === "string") {
     return "external_link";
   }
 
@@ -200,14 +218,10 @@ function getPostKind(item: Record<string, unknown>): SubredditPostKind {
 }
 
 function getDescription(
-  item: Record<string, unknown>,
+  item: RedditPostData,
   postKind: SubredditPostKind,
 ) {
-  if (
-    "selftext" in item &&
-    typeof item.selftext === "string" &&
-    item.selftext
-  ) {
+  if (typeof item.selftext === "string" && item.selftext) {
     return item.selftext;
   }
 
@@ -215,7 +229,7 @@ function getDescription(
   if (postKind === "video") return "Video post on Reddit.";
 
   if (postKind === "external_link") {
-    if ("domain" in item && typeof item.domain === "string") {
+    if (typeof item.domain === "string") {
       return `External link to ${item.domain}.`;
     }
 
@@ -225,20 +239,16 @@ function getDescription(
   return null;
 }
 
-function getUrl(item: Record<string, unknown>, postKind: SubredditPostKind) {
-  if (
-    postKind === "external_link" &&
-    "url_overridden_by_dest" in item &&
-    typeof item.url_overridden_by_dest === "string"
-  ) {
+function getUrl(item: RedditPostData, postKind: SubredditPostKind) {
+  if (postKind === "external_link" && typeof item.url_overridden_by_dest === "string") {
     return item.url_overridden_by_dest;
   }
 
-  if ("permalink" in item && typeof item.permalink === "string") {
+  if (typeof item.permalink === "string") {
     return `https://www.reddit.com${item.permalink}`;
   }
 
-  if ("url" in item && typeof item.url === "string") {
+  if (typeof item.url === "string") {
     return item.url;
   }
 
