@@ -1,7 +1,11 @@
 import { and, eq, inArray } from "drizzle-orm";
 import db from "../../db";
 import { items } from "../../db/schema";
-import type { NormalizedItemInput } from "./types";
+import type {
+  ItemCountsByType,
+  NormalizedItemInput,
+  SavePolledItemsResult,
+} from "./types";
 
 type SavePolledItemsParams = {
   items: NormalizedItemInput[];
@@ -11,10 +15,19 @@ type ItemInsert = typeof items.$inferInsert;
 
 export async function savePolledItems(
   params: SavePolledItemsParams,
-): Promise<void> {
-  // TODO: Return enough information for the caller to build a source-level summary.
+): Promise<SavePolledItemsResult> {
+  const inputCount = params.items.length;
+  const inputByType = countItemsByType(params.items);
+
   if (params.items.length < 1) {
-    return;
+    return {
+      inputCount,
+      skippedCount: 0,
+      insertedCount: 0,
+      inputByType,
+      insertedByType: createEmptyItemCountsByType(),
+      skippedByType: createEmptyItemCountsByType(),
+    };
   }
 
   const itemsWithoutDuplicateHnItems = await filterDuplicateHnItems(
@@ -25,11 +38,14 @@ export async function savePolledItems(
   );
 
   if (itemsToInsert.length < 1) {
-    console.log("0 items inserted");
-    console.log("0 of type 'rss'");
-    console.log("0 of type 'subreddit'");
-    console.log("0 of type 'hnItems'");
-    return;
+    return {
+      inputCount,
+      skippedCount: inputCount,
+      insertedCount: 0,
+      inputByType,
+      insertedByType: createEmptyItemCountsByType(),
+      skippedByType: inputByType,
+    };
   }
 
   const itemRows = itemsToInsert.map((item) => ({
@@ -47,15 +63,40 @@ export async function savePolledItems(
   })) satisfies ItemInsert[];
 
   const rows = await db.insert(items).values(itemRows).returning();
+  const insertedByType = countItemsByType(rows.map((row) => ({ sourceType: row.type })));
 
-  const rssItems = rows.filter((item) => item.type === "rss");
-  const redditItems = rows.filter((item) => item.type === "subreddit");
-  const hnItems = rows.filter((item) => item.type === "hn");
+  return {
+    inputCount,
+    skippedCount: inputCount - rows.length,
+    insertedCount: rows.length,
+    inputByType,
+    insertedByType,
+    skippedByType: {
+      rss: inputByType.rss - insertedByType.rss,
+      subreddit: inputByType.subreddit - insertedByType.subreddit,
+      hn: inputByType.hn - insertedByType.hn,
+    },
+  };
+}
 
-  console.log(`${rows.length} items inserted`);
-  console.log(`${rssItems.length} of type 'rss'`);
-  console.log(`${redditItems.length} of type 'subreddit'`);
-  console.log(`${hnItems.length} of type 'hnItems'`);
+function createEmptyItemCountsByType(): ItemCountsByType {
+  return {
+    rss: 0,
+    subreddit: 0,
+    hn: 0,
+  };
+}
+
+function countItemsByType(
+  itemsToCount: Array<Pick<NormalizedItemInput, "sourceType"> | { sourceType: "rss" | "subreddit" | "hn" }>,
+): ItemCountsByType {
+  const counts = createEmptyItemCountsByType();
+
+  for (const item of itemsToCount) {
+    counts[item.sourceType] += 1;
+  }
+
+  return counts;
 }
 
 async function filterDuplicateHnItems(itemsToCheck: NormalizedItemInput[]) {
@@ -105,9 +146,15 @@ async function filterDuplicateHnItems(itemsToCheck: NormalizedItemInput[]) {
       .filter((externalId): externalId is string => Boolean(externalId)),
   );
 
-  const newHnItems = hnCandidates.filter(
-    (item) => !item.externalId || !existingExternalIds.has(item.externalId),
-  );
+  const newHnItems: NormalizedItemInput[] = [];
+
+  for (const item of hnCandidates) {
+    if (item.externalId && existingExternalIds.has(item.externalId)) {
+      continue;
+    }
+
+    newHnItems.push(item);
+  }
 
   return [...nonHnItems, ...newHnItems];
 }
@@ -163,9 +210,15 @@ async function filterDuplicateSubredditItems(
       .filter((externalId): externalId is string => Boolean(externalId)),
   );
 
-  const newSubredditItems = subredditCandidates.filter(
-    (item) => !item.externalId || !existingExternalIds.has(item.externalId),
-  );
+  const newSubredditItems: NormalizedItemInput[] = [];
+
+  for (const item of subredditCandidates) {
+    if (item.externalId && existingExternalIds.has(item.externalId)) {
+      continue;
+    }
+
+    newSubredditItems.push(item);
+  }
 
   return [...nonSubredditItems, ...newSubredditItems];
 }

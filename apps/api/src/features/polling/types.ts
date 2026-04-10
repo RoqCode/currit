@@ -1,6 +1,5 @@
 import { SourceType } from "@currit/shared/types/CreateSourceInput";
 
-export type PollSourceStatus = "success" | "error";
 export type PollSourceErrorType =
   | "network_error"
   | "http_error"
@@ -8,17 +7,22 @@ export type PollSourceErrorType =
   | "db_error"
   | "unknown_error";
 
-export type PollSourceSuccessResult = {
+export type PollSourceBaseResult = {
   sourceId: string;
   sourceName: string;
-  status: "success";
-  insertedCount: number;
-  skippedCount: number;
+  sourceType: SourceType;
+  durationMs: number;
 };
 
-export type PollSourceErrorResult = {
-  sourceId: string;
-  sourceName: string;
+export type PollSourceSuccessResult = PollSourceBaseResult & {
+  status: "success";
+  fetchedCount: number;
+  candidateItemCount: number;
+  failedItemCount: number;
+  items: NormalizedItemInput[];
+};
+
+export type PollSourceErrorResult = PollSourceBaseResult & {
   status: "error";
   errorType: PollSourceErrorType;
   errorMessage: string;
@@ -30,8 +34,54 @@ export type PollSourcesResult = {
   totalSources: number;
   processedSources: number;
   successCount: number;
+  durationMs: number;
   errorCount: number;
   results: PollSourceResult[];
+};
+
+export type ItemCountsByType = {
+  rss: number;
+  subreddit: number;
+  hn: number;
+};
+
+export type PollRunReport = {
+  startedAt: Date;
+  durationMs: number;
+  sources: {
+    total: number;
+    byType: ItemCountsByType;
+  };
+  polling: {
+    successCount: number;
+    errorCount: number;
+    fetchedCount: number;
+    candidateItemCount: number;
+    failedItemCount: number;
+    byType: Record<keyof ItemCountsByType, {
+      sourceCount: number;
+      successCount: number;
+      errorCount: number;
+      fetchedCount: number;
+      candidateItemCount: number;
+      failedItemCount: number;
+      batchDurationMs: number;
+    }>;
+  };
+  persistence: SavePolledItemsResult;
+  slowSources: Array<{
+    sourceId: string;
+    sourceName: string;
+    sourceType: SourceType;
+    durationMs: number;
+  }>;
+  errors: Array<{
+    sourceId: string;
+    sourceName: string;
+    sourceType: SourceType;
+    errorType: PollSourceErrorType;
+    errorMessage: string;
+  }>;
 };
 
 export type NormalizedItemInput = {
@@ -88,6 +138,10 @@ export type ScoredCandidate = {
 };
 
 export type SavePolledItemsResult = {
+  inputCount: number;
   insertedCount: number;
   skippedCount: number;
+  inputByType: ItemCountsByType;
+  insertedByType: ItemCountsByType;
+  skippedByType: ItemCountsByType;
 };

@@ -1,13 +1,20 @@
 import pollHnSource from "./pollHnSource";
 import { pollRssSource } from "./pollRssSource";
-import type { NormalizedItemInput } from "./types";
+import type {
+  ItemCountsByType,
+  PollRunReport,
+  PollSourceResult,
+} from "./types";
 import { savePolledItems } from "./savePolledItems";
 import pollSubredditSource from "./pollSubredditSource";
 import { getActiveSources } from "../sources/getActiveSources";
 import mapWithConcurrency from "./mapWithConcurrency";
 import fetchHnTopStories from "./fetchHnTopStories";
+import { PollingError } from "../../shared/errors";
+import logPollRunReport from "./logPollRunReport";
 
 export async function pollSources(): Promise<void> {
+  const startedAt = new Date();
   const sources = await getActiveSources();
 
   if (sources.length < 1) {
@@ -21,70 +28,233 @@ export async function pollSources(): Promise<void> {
   );
   const hnSource = sources.find((source) => source.type === "hn");
 
-  const [hnItems, rssItems, redditItems] = await Promise.all([
+  const [hnBatch, rssBatch, redditBatch] = await Promise.all([
     pollHnSources(hnSource),
     pollRssSources(rssSources),
     pollSubredditSources(subredditSources),
   ]);
 
-  const results: NormalizedItemInput[] = [
-    ...hnItems,
-    ...rssItems,
-    ...redditItems,
+  const allResults = [
+    ...(hnBatch.result ? [hnBatch.result] : []),
+    ...rssBatch.results,
+    ...redditBatch.results,
   ];
+
+  const items = allResults
+    .filter((result) => result.status === "success")
+    .flatMap((result) => result.items);
 
   // TODO: normalize scores - only after hn and reddit - RSS Feeds cant be scored
   // normalizeItemScores(newItems)
 
+  const insertResults = await savePolledItems({ items });
+  const report = buildPollRunReport({
+    startedAt,
+    durationMs: performance.now() - start,
+    sources,
+    results: allResults,
+    batchDurations: {
+      rss: rssBatch.durationMs,
+      subreddit: redditBatch.durationMs,
+      hn: hnBatch.durationMs,
+    },
+    persistence: insertResults,
+  });
+
   try {
-    await savePolledItems({ items: results });
+    logPollRunReport(report);
   } catch (e) {
     console.error(e);
     throw e;
   }
-  const elapsed = ((performance.now() - start) / 1000).toFixed(4);
-  console.log(`\nDone in ${elapsed}s`);
 }
 
 async function pollHnSources(
   hnSource: Awaited<ReturnType<typeof getActiveSources>>[number] | undefined,
-): Promise<NormalizedItemInput[]> {
-  if (!hnSource) return [];
+): Promise<{ result: PollSourceResult | null; durationMs: number }> {
+  if (!hnSource) {
+    return {
+      result: null,
+      durationMs: 0,
+    };
+  }
 
-  const hnTopPostIds = await fetchHnTopStories(hnSource);
+  const start = performance.now();
+
+  let hnTopPostIds: number[];
+  try {
+    hnTopPostIds = await fetchHnTopStories(hnSource);
+  } catch (err) {
+    if (err instanceof PollingError) {
+      return {
+        result: {
+          status: "error",
+          errorType: err.code,
+          errorMessage: err.message,
+          sourceId: hnSource.id,
+          sourceName: hnSource.name,
+          sourceType: "hn",
+          durationMs: performance.now() - start,
+        },
+        durationMs: performance.now() - start,
+      };
+    }
+
+    throw err;
+  }
+
   const hnItemsWithPossibleFailures = await mapWithConcurrency(
     hnTopPostIds,
     (itemId) => pollHnSource(hnSource.id, itemId),
     20,
   );
 
-  return hnItemsWithPossibleFailures.filter((item) => item !== null);
+  const items = hnItemsWithPossibleFailures.filter((item) => item !== null);
+
+  return {
+    result: {
+      status: "success",
+      sourceId: hnSource.id,
+      sourceName: hnSource.name,
+      sourceType: "hn",
+      durationMs: performance.now() - start,
+      fetchedCount: hnTopPostIds.length,
+      candidateItemCount: items.length,
+      failedItemCount: hnTopPostIds.length - items.length,
+      items,
+    },
+    durationMs: performance.now() - start,
+  };
 }
 
 async function pollRssSources(
   rssSources: Awaited<ReturnType<typeof getActiveSources>>,
-): Promise<NormalizedItemInput[]> {
-  const rssItemsWithPossibleFailures = await mapWithConcurrency(
-    rssSources,
-    pollRssSource,
-    20,
-  );
+): Promise<{ results: PollSourceResult[]; durationMs: number }> {
+  const start = performance.now();
+  const results = await mapWithConcurrency(rssSources, pollRssSource, 20);
 
-  return rssItemsWithPossibleFailures
-    .filter((item) => item !== null)
-    .flatMap((item) => item);
+  return {
+    results,
+    durationMs: performance.now() - start,
+  };
 }
 
 async function pollSubredditSources(
   subredditSources: Awaited<ReturnType<typeof getActiveSources>>,
-): Promise<NormalizedItemInput[]> {
-  const redditItemsWithPossibleFailures = await mapWithConcurrency(
+): Promise<{ results: PollSourceResult[]; durationMs: number }> {
+  const start = performance.now();
+  const results = await mapWithConcurrency(
     subredditSources,
     pollSubredditSource,
     5,
   );
 
-  return redditItemsWithPossibleFailures
-    .filter((item) => item !== null)
-    .flatMap((item) => item);
+  return {
+    results,
+    durationMs: performance.now() - start,
+  };
+}
+
+function buildPollRunReport(params: {
+  startedAt: Date;
+  durationMs: number;
+  sources: Awaited<ReturnType<typeof getActiveSources>>;
+  results: PollSourceResult[];
+  batchDurations: ItemCountsByType;
+  persistence: Awaited<ReturnType<typeof savePolledItems>>;
+}): PollRunReport {
+  const sourceCounts: ItemCountsByType = {
+    rss: params.sources.filter((source) => source.type === "rss").length,
+    subreddit: params.sources.filter((source) => source.type === "subreddit")
+      .length,
+    hn: params.sources.filter((source) => source.type === "hn").length,
+  };
+
+  const byType: PollRunReport["polling"]["byType"] = {
+    rss: createEmptyPollingTypeStats(sourceCounts.rss, params.batchDurations.rss),
+    subreddit: createEmptyPollingTypeStats(
+      sourceCounts.subreddit,
+      params.batchDurations.subreddit,
+    ),
+    hn: createEmptyPollingTypeStats(sourceCounts.hn, params.batchDurations.hn),
+  };
+
+  const errors: PollRunReport["errors"] = [];
+  const slowSources = [...params.results]
+    .sort((a, b) => b.durationMs - a.durationMs)
+    .slice(0, 5)
+    .map((result) => ({
+      sourceId: result.sourceId,
+      sourceName: result.sourceName,
+      sourceType: result.sourceType,
+      durationMs: result.durationMs,
+    }));
+
+  let successCount = 0;
+  let errorCount = 0;
+  let fetchedCount = 0;
+  let candidateItemCount = 0;
+  let failedItemCount = 0;
+
+  for (const result of params.results) {
+    const typeStats = byType[result.sourceType];
+
+    if (result.status === "error") {
+      errorCount += 1;
+      typeStats.errorCount += 1;
+      errors.push({
+        sourceId: result.sourceId,
+        sourceName: result.sourceName,
+        sourceType: result.sourceType,
+        errorType: result.errorType,
+        errorMessage: result.errorMessage,
+      });
+      continue;
+    }
+
+    successCount += 1;
+    fetchedCount += result.fetchedCount;
+    candidateItemCount += result.candidateItemCount;
+    failedItemCount += result.failedItemCount;
+
+    typeStats.successCount += 1;
+    typeStats.fetchedCount += result.fetchedCount;
+    typeStats.candidateItemCount += result.candidateItemCount;
+    typeStats.failedItemCount += result.failedItemCount;
+  }
+
+  return {
+    startedAt: params.startedAt,
+    durationMs: params.durationMs,
+    sources: {
+      total: params.sources.length,
+      byType: sourceCounts,
+    },
+    polling: {
+      successCount,
+      errorCount,
+      fetchedCount,
+      candidateItemCount,
+      failedItemCount,
+      byType,
+    },
+    persistence: params.persistence,
+    slowSources,
+    errors,
+  };
+}
+
+function createEmptyPollingTypeStats(
+  sourceCount: number,
+  batchDurationMs: number,
+) {
+  return {
+    sourceCount,
+    successCount: 0,
+    errorCount: 0,
+    fetchedCount: 0,
+    candidateItemCount: 0,
+    failedItemCount: 0,
+    batchDurationMs,
+  };
 }
