@@ -12,6 +12,7 @@ import mapWithConcurrency from "./mapWithConcurrency";
 import fetchHnTopStories from "./fetchHnTopStories";
 import { PollingError } from "../../shared/errors";
 import logPollRunReport from "./logPollRunReport";
+import type { PollSubredditSourceResult } from "./pollSubredditSource";
 
 export async function pollSources(): Promise<void> {
   const startedAt = new Date();
@@ -143,11 +144,22 @@ async function pollSubredditSources(
   subredditSources: Awaited<ReturnType<typeof getActiveSources>>,
 ): Promise<{ results: PollSourceResult[]; durationMs: number }> {
   const start = performance.now();
-  const results = await mapWithConcurrency(
-    subredditSources,
-    pollSubredditSource,
-    5,
-  );
+  let shouldStopPolling = false;
+  let stopPollingMessage: string | undefined;
+  const results = await mapWithConcurrency(subredditSources, async (source) => {
+    if (shouldStopPolling) {
+      return createRateLimitSkippedResult(source, stopPollingMessage);
+    }
+
+    const result = await pollSubredditSource(source);
+
+    if (result.stopPollingAfter) {
+      shouldStopPolling = true;
+      stopPollingMessage = result.stopPollingMessage;
+    }
+
+    return stripSubredditControlFields(result);
+  }, 5);
 
   return {
     results,
@@ -192,12 +204,27 @@ function buildPollRunReport(params: {
 
   let successCount = 0;
   let errorCount = 0;
+  let skippedCount = 0;
   let fetchedCount = 0;
   let candidateItemCount = 0;
   let failedItemCount = 0;
+  const skipped: PollRunReport["skipped"] = [];
 
   for (const result of params.results) {
     const typeStats = byType[result.sourceType];
+
+    if (result.status === "skipped") {
+      skippedCount += 1;
+      typeStats.skippedCount += 1;
+      skipped.push({
+        sourceId: result.sourceId,
+        sourceName: result.sourceName,
+        sourceType: result.sourceType,
+        skipReason: result.skipReason,
+        skipMessage: result.skipMessage,
+      });
+      continue;
+    }
 
     if (result.status === "error") {
       errorCount += 1;
@@ -233,6 +260,7 @@ function buildPollRunReport(params: {
     polling: {
       successCount,
       errorCount,
+      skippedCount,
       fetchedCount,
       candidateItemCount,
       failedItemCount,
@@ -241,6 +269,7 @@ function buildPollRunReport(params: {
     persistence: params.persistence,
     slowSources,
     errors,
+    skipped,
   };
 }
 
@@ -252,9 +281,35 @@ function createEmptyPollingTypeStats(
     sourceCount,
     successCount: 0,
     errorCount: 0,
+    skippedCount: 0,
     fetchedCount: 0,
     candidateItemCount: 0,
     failedItemCount: 0,
     batchDurationMs,
   };
+}
+
+function createRateLimitSkippedResult(
+  source: Awaited<ReturnType<typeof getActiveSources>>[number],
+  stopPollingMessage?: string,
+): PollSourceResult {
+  return {
+    status: "skipped",
+    skipReason: "rate_limit",
+    skipMessage:
+      stopPollingMessage ??
+      "Skipped because Reddit rate-limit budget was exhausted earlier in this batch",
+    sourceId: source.id,
+    sourceName: source.name,
+    sourceType: source.type,
+    durationMs: 0,
+  };
+}
+
+function stripSubredditControlFields(
+  result: PollSubredditSourceResult,
+): PollSourceResult {
+  const { stopPollingAfter: _stopPollingAfter, ...pollSourceResult } = result;
+
+  return pollSourceResult;
 }
