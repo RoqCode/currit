@@ -63,6 +63,8 @@ export async function pollRssSource(
       status: "success",
       items: [],
       fetchedCount: feedItems.length,
+      candidateItemCount: 0,
+      failedItemCount: 0,
       sourceId: source.id,
       sourceName: source.name,
       sourceType: "rss",
@@ -89,6 +91,8 @@ export async function pollRssSource(
   return {
     status: "success",
     fetchedCount: feedItems.length,
+    candidateItemCount: newFeedItems.length,
+    failedItemCount: 0,
     sourceId: source.id,
     sourceName: source.name,
     sourceType: "rss",

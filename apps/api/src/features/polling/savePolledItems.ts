@@ -1,7 +1,11 @@
 import { and, eq, inArray } from "drizzle-orm";
 import db from "../../db";
 import { items } from "../../db/schema";
-import type { NormalizedItemInput, SavePolledItemsResult } from "./types";
+import type {
+  ItemCountsByType,
+  NormalizedItemInput,
+  SavePolledItemsResult,
+} from "./types";
 
 type SavePolledItemsParams = {
   items: NormalizedItemInput[];
@@ -13,11 +17,16 @@ export async function savePolledItems(
   params: SavePolledItemsParams,
 ): Promise<SavePolledItemsResult> {
   const inputCount = params.items.length;
+  const inputByType = countItemsByType(params.items);
 
   if (params.items.length < 1) {
     return {
+      inputCount,
       skippedCount: 0,
       insertedCount: 0,
+      inputByType,
+      insertedByType: createEmptyItemCountsByType(),
+      skippedByType: createEmptyItemCountsByType(),
     };
   }
 
@@ -30,8 +39,12 @@ export async function savePolledItems(
 
   if (itemsToInsert.length < 1) {
     return {
+      inputCount,
       skippedCount: inputCount,
       insertedCount: 0,
+      inputByType,
+      insertedByType: createEmptyItemCountsByType(),
+      skippedByType: inputByType,
     };
   }
 
@@ -50,20 +63,40 @@ export async function savePolledItems(
   })) satisfies ItemInsert[];
 
   const rows = await db.insert(items).values(itemRows).returning();
-
-  const rssItems = rows.filter((item) => item.type === "rss");
-  const redditItems = rows.filter((item) => item.type === "subreddit");
-  const hnItems = rows.filter((item) => item.type === "hn");
-
-  console.log(`${rows.length} items inserted`);
-  console.log(`${rssItems.length} of type 'rss'`);
-  console.log(`${redditItems.length} of type 'subreddit'`);
-  console.log(`${hnItems.length} of type 'hnItems'`);
+  const insertedByType = countItemsByType(rows.map((row) => ({ sourceType: row.type })));
 
   return {
+    inputCount,
     skippedCount: inputCount - rows.length,
     insertedCount: rows.length,
+    inputByType,
+    insertedByType,
+    skippedByType: {
+      rss: inputByType.rss - insertedByType.rss,
+      subreddit: inputByType.subreddit - insertedByType.subreddit,
+      hn: inputByType.hn - insertedByType.hn,
+    },
   };
+}
+
+function createEmptyItemCountsByType(): ItemCountsByType {
+  return {
+    rss: 0,
+    subreddit: 0,
+    hn: 0,
+  };
+}
+
+function countItemsByType(
+  itemsToCount: Array<Pick<NormalizedItemInput, "sourceType"> | { sourceType: "rss" | "subreddit" | "hn" }>,
+): ItemCountsByType {
+  const counts = createEmptyItemCountsByType();
+
+  for (const item of itemsToCount) {
+    counts[item.sourceType] += 1;
+  }
+
+  return counts;
 }
 
 async function filterDuplicateHnItems(itemsToCheck: NormalizedItemInput[]) {
@@ -83,9 +116,6 @@ async function filterDuplicateHnItems(itemsToCheck: NormalizedItemInput[]) {
     }
 
     if (uniqueHnIdsInBatch.has(item.externalId)) {
-      console.log(
-        `Skipped item of type 'hn' with id ${item.externalId} : duplicate in batch`,
-      );
       continue;
     }
 
@@ -120,9 +150,6 @@ async function filterDuplicateHnItems(itemsToCheck: NormalizedItemInput[]) {
 
   for (const item of hnCandidates) {
     if (item.externalId && existingExternalIds.has(item.externalId)) {
-      console.log(
-        `Skipped item of type 'hn' with id ${item.externalId} : already in db`,
-      );
       continue;
     }
 
@@ -151,9 +178,6 @@ async function filterDuplicateSubredditItems(
     }
 
     if (uniqueSubredditIdsInBatch.has(item.externalId)) {
-      console.log(
-        `Skipped item of type 'subreddit' with id ${item.externalId} : duplicate in batch`,
-      );
       continue;
     }
 
@@ -190,9 +214,6 @@ async function filterDuplicateSubredditItems(
 
   for (const item of subredditCandidates) {
     if (item.externalId && existingExternalIds.has(item.externalId)) {
-      console.log(
-        `Skipped item of type 'subreddit' with id ${item.externalId} : already in db`,
-      );
       continue;
     }
 

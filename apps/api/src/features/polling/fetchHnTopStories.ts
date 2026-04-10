@@ -1,6 +1,7 @@
 import buildUserAgent from "@currit/shared/utils/buildUserAgent";
 import { getAllSources } from "../sources/getAllSources";
 import { updateSource } from "../sources/updateSource";
+import { isAbortError, PollingError } from "../../shared/errors";
 
 type SourceRow = Awaited<ReturnType<typeof getAllSources>>[number];
 
@@ -24,7 +25,10 @@ export default async function fetchHnTopStories(
     );
 
     if (!res.ok) {
-      throw new Error(`HTTP ${res.status}`);
+      throw new PollingError(
+        "http_error",
+        `HN top stories fetch failed with HTTP ${res.status}`,
+      );
     }
 
     const jsonBody = await res.json();
@@ -48,11 +52,19 @@ export default async function fetchHnTopStories(
       return items;
     }
   } catch (e) {
-    console.error("error while fetching hackernews topstories", e);
-    // TODO: handle error
+    if (isAbortError(e)) {
+      throw new PollingError("network_error", "HN top stories request timed out");
+    }
+
+    if (e instanceof PollingError) {
+      throw e;
+    }
+
+    throw new PollingError(
+      "unknown_error",
+      `Unexpected HN top stories polling error: ${e}`,
+    );
   } finally {
     clearTimeout(timeout);
   }
-
-  return [];
 }

@@ -11,7 +11,6 @@ export default async function pollHnSource(
   try {
     item = await fetchHnItem(itemId);
   } catch (error) {
-    console.error("error while fetching hackernews item", error, itemId);
     return null;
   }
 

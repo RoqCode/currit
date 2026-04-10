@@ -1,6 +1,7 @@
 import buildUserAgent from "@currit/shared/utils/buildUserAgent";
 import isRecord from "@currit/shared/utils/isRecord";
 import { NormalizedSubredditItem } from "./types";
+import { isAbortError, PollingError } from "../../shared/errors";
 
 type SubredditPostKind =
   | "self"
@@ -28,7 +29,10 @@ export default async function fetchSubredditTopPosts(url: string) {
       },
     );
     if (!res.ok) {
-      throw new Error(`HTTP ${res.status}`);
+      throw new PollingError(
+        "http_error",
+        `Subreddit fetch failed with HTTP ${res.status}`,
+      );
     }
 
     const jsonBody = await res.json();
@@ -37,8 +41,18 @@ export default async function fetchSubredditTopPosts(url: string) {
 
     return topItems;
   } catch (e) {
-    console.error("error while fetching subreddit topstories", e, url);
-    // TODO: handle error
+    if (isAbortError(e)) {
+      throw new PollingError("network_error", "Subreddit request timed out");
+    }
+
+    if (e instanceof PollingError) {
+      throw e;
+    }
+
+    throw new PollingError(
+      "unknown_error",
+      `Unexpected subreddit polling error for ${url}: ${e}`,
+    );
   } finally {
     clearTimeout(timeout);
   }
