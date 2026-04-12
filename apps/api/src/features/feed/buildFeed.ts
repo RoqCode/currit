@@ -12,13 +12,14 @@ const numHnSlots = 4;
 const numRssSlots = 3;
 
 const maxPerSource = 2;
+const maxPerHnSource = numHnSlots;
 
 // Experiment flags for ranking behavior:
 // - scoreBucketsSeparately: score Reddit and HN in isolated pools vs one shared pool
 // - selectBucketsSeparately: fill fixed Reddit/HN slots vs let both compete for the same slots
 const feedSelectionConfig = {
-  scoreBucketsSeparately: false,
-  selectBucketsSeparately: false,
+  scoreBucketsSeparately: true,
+  selectBucketsSeparately: true,
 };
 
 type ItemRow = typeof items.$inferSelect;
@@ -75,12 +76,13 @@ async function selectItemsForToday() {
 
   const scoredSelections = feedSelectionConfig.selectBucketsSeparately
     ? [
-        ...fillSlots(redditCandidates, numRedditSlots),
-        ...fillSlots(hnCandidates, numHnSlots),
+        ...fillSlots(redditCandidates, numRedditSlots, maxPerSource),
+        ...fillSlots(hnCandidates, numHnSlots, maxPerHnSource),
       ]
     : fillSlots(
         [...redditCandidates, ...hnCandidates],
         numRedditSlots + numHnSlots,
+        maxPerSource,
       );
 
   return [...scoredSelections, ...rssRows].sort(() => Math.random() - 0.5);
@@ -110,7 +112,11 @@ function getScoredCandidates({
   };
 }
 
-function fillSlots(candidates: ScoredItemRow[], limit: number) {
+function fillSlots(
+  candidates: ScoredItemRow[],
+  limit: number,
+  maxItemsPerSource: number,
+) {
   const available = [...candidates];
   const feedItems: ScoredItemRow[] = [];
   const sourceCounts = new Map<string, number>();
@@ -119,7 +125,7 @@ function fillSlots(candidates: ScoredItemRow[], limit: number) {
     const eligible = [];
     for (const item of available) {
       if (!item.sourceId) continue;
-      if ((sourceCounts.get(item.sourceId) ?? 0) < maxPerSource) {
+      if ((sourceCounts.get(item.sourceId) ?? 0) < maxItemsPerSource) {
         eligible.push(item);
       }
     }
