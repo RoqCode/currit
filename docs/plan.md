@@ -40,13 +40,14 @@ Ein persönlicher, täglicher Feed mit 5–10 kuratierten Inhalten. Statt endlos
 | Komponente    | Technologie                    |
 | ------------- | ------------------------------ |
 | Frontend      | React + TypeScript             |
+| Frontend App  | PWA-fähig als spätere Ausbaustufe |
 | Backend       | TypeScript (Hono oder Express) |
 | Datenbank     | PostgreSQL + Drizzle ORM       |
 | KI (optional) | Anthropic API oder OpenAI API  |
-| Hosting       | Self-hosted (VPS)              |
+| Hosting       | Self-hosted (Homelab zuerst, später ggf. VPS) |
 | Scheduling    | Cron-Job oder manueller Button |
 
-Späterer Lernschritt: Backend nach Go portieren, um die Sprache an einem bekannten System zu lernen.
+Späterer Lernschritt: Backend nach Go portieren, um die Sprache an einem bekannten System zu lernen, nachdem das TypeScript-MVP stabil live gelaufen ist.
 
 ---
 
@@ -142,6 +143,8 @@ Zusätzlich braucht das MVP einfache Endpunkte für Interessenverwaltung, damit 
 
 React-Frontend zeigt die Items an. Jedes Item enthält: Titel, Quelle, kurzen Summary und die passenden Links. Für RSS reicht ein Link zum Original. Für Hacker News und Subreddit-Items sollen zwei Links vorhanden sein: einer zum Thread auf HN bzw. Reddit und einer zum verlinkten Original-Item. Like- und Bookmark-Button schicken Feedback zurück in die DB. Zusätzlich gibt es eine Ansicht, in der alle gespeicherten Bookmarks gesammelt sichtbar sind.
 
+Eine spätere Produkterweiterung ist eine PWA-Variante des Frontends: Der aktuelle Tagesfeed soll lokal gecacht und damit auch außerhalb des Heimnetzes lesbar sein. Interaktionen wie Likes, Bookmarks und Read-Status können dann lokal gepuffert und beim nächsten erfolgreichen API-Kontakt zurück synchronisiert werden. Das ist ausdrücklich nicht Teil des ersten MVP-Livegangs.
+
 ---
 
 ## 5. High-Level Todos
@@ -153,7 +156,14 @@ React-Frontend zeigt die Items an. Jedes Item enthält: Titel, Quelle, kurzen Su
 - [x] React-Projekt initialisieren (Vite) · _Frontend-Tooling_
 - [x] PostgreSQL aufsetzen (lokal via Docker) · _Docker, PostgreSQL_
 - [x] Drizzle ORM einrichten + erstes Schema · _ORM, DB-Migrationen_
-- [ ] VPS einrichten + Deployment-Pipeline (z.B. SSH + PM2 oder Docker) · _DevOps, Linux_
+- [ ] Linting für Frontend und Backend ergänzen · _Code Quality, Tooling_
+- [ ] Homelab-Hosting und Deployment-Pipeline aufsetzen · _DevOps, Linux_
+- [ ] Produktions-Containerisierung für `web`, `api` und `db` definieren · _Docker, Runtime_
+- [ ] CI-Pipeline für Lint, Typecheck und Build aufsetzen · _GitHub Actions_
+- [ ] Docker-Images in CI bauen und in eine Registry publishen · _Container Registry_
+- [ ] Deploy-Flow vom CI-System zum Homelab-Server definieren · _CD, SSH, Docker Compose_
+- [ ] Produktions-Env- und Secret-Handling festlegen · _Security, Configuration_
+- [ ] Polling-Scheduling für den Livebetrieb einrichten (4x täglich per Cron oder ähnlich) · _Scheduling, Operations_
 
 ### Phase 2: Ingest-Pipeline
 
@@ -189,6 +199,7 @@ React-Frontend zeigt die Items an. Jedes Item enthält: Titel, Quelle, kurzen Su
 - [ ] `POST /feed/:id/like` – Like-Feedback speichern · _API-Endpunkte_
 - [ ] `POST /feed/:id/bookmark` – Bookmark speichern oder entfernen · _API-Endpunkte_
 - [ ] `GET /bookmarks` – gespeicherte Bookmarks auflisten · _REST-API-Design_
+- [ ] Sinnvolle Health-/Status-Endpunkte für Livebetrieb ergänzen · _Runtime, Monitoring_
 - [ ] `GET /interests` – gespeicherte Interessen-Keywords auflisten · _CRUD_
 - [ ] `POST /interests` – neue Interessen-Keywords hinzufügen · _Input-Validierung_
 - [ ] `DELETE /interests/:id` – Interesse entfernen · _CRUD_
@@ -212,12 +223,36 @@ React-Frontend zeigt die Items an. Jedes Item enthält: Titel, Quelle, kurzen Su
 - [ ] HN- und Subreddit-Items im UI mit zwei Links darstellen: Thread + verlinktes Original · _Informationsarchitektur, UI_
 - [ ] Responsive Design (Mobile-first – du wirst es am Handy nutzen) · _CSS, Responsive_
 
-### Phase 6: Test & Iterate
+### Phase 6: Offline / PWA
+
+- [ ] Frontend als installierbare PWA ausbauen · _Service Worker, App Manifest_
+- [ ] Den aktuellen Tagesfeed lokal cachen und offline lesbar machen · _Offline UX, Caching_
+- [ ] Likes, Bookmarks und Read-Status lokal puffern, wenn keine API erreichbar ist · _Offline-first, Client State_
+- [ ] Ausstehende Aktionen beim nächsten erfolgreichen API-Kontakt synchronisieren · _Sync-Strategien_
+- [ ] Mutationen möglichst idempotent modellieren (`set liked/bookmarked/read`) statt nur als Toggle · _API-Design_
+- [ ] Einfachen Konfliktansatz definieren (z.B. last-write-wins) · _Datenkonsistenz_
+
+### Phase 7: Test & Iterate
 
 - [ ] Eine Woche lang täglich benutzen statt Reddit · _Produktvalidierung_
 - [ ] Scoring-Gewichte nach Gefühl anpassen · _Iteration_
 - [ ] Auswertung: Greife ich öfter zum Feed als zu Reddit? · _Verhaltensanalyse_
 - [ ] Showstopper-Analyse: Warum hat Reddit gewonnen (falls ja)? · _Produktdenken_
+
+### Phase 8: Hardening Around The App
+
+- [ ] Kleinen E2E-Smoke-Test für den Hauptflow ergänzen · _Testing, QA_
+- [ ] Gezielte Unit-Tests für Ranking- und Feed-Logik ergänzen · _Testing_
+- [ ] PostgreSQL-Backup- und Restore-Strategie für den Livebetrieb definieren · _Operations, Reliability_
+- [ ] Ersten Security-Pass machen: Input-Validierung, sichere Defaults, Secret-Handling und Basis-Schutz gegen Missbrauch · _Security_
+- [ ] Sentry für Frontend und Backend ergänzen · _Error Tracking_
+- [ ] Renovate für Dependency-Updates ergänzen · _Maintenance_
+- [ ] Metrics/Dashboarding nur ergänzen, wenn Runtime-Transparenz spürbar fehlt · _Observability_
+
+### Phase 9: Backend Rewrite in Go
+
+- [ ] TypeScript-Backend nach stabilem MVP-Betrieb schrittweise in Go neu aufsetzen · _Go, API Design, Portierung_
+- [ ] Bestehendes Produktverhalten und Datenmodell als Lernanker für den Rewrite nutzen · _Lernprojekt, Systemverständnis_
 
 ---
 
