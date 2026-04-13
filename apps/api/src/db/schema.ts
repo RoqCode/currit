@@ -47,6 +47,7 @@ export const items = pgTable(
     createdAt: timestamp().defaultNow().notNull(),
     itemScore: integer().default(0),
     commentCount: integer().default(0),
+    lastObserved: timestamp(),
   },
   (table) => [
     index("items_type_external_id_idx").on(table.type, table.externalId),

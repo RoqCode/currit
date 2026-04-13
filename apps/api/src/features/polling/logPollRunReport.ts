@@ -26,16 +26,16 @@ export default function logPollRunReport(report: PollRunReport): void {
   console.log("");
   console.log("persistence");
   console.log(
-    `  overall    input ${report.persistence.inputCount}  inserted ${report.persistence.insertedCount}  skipped ${report.persistence.skippedCount}`,
+    `  overall    input ${report.persistence.inputCount}  inserted ${report.persistence.insertedCount}  updated ${report.persistence.updatedCount}  skipped ${report.persistence.skippedCount}`,
   );
   console.log(
-    `  rss        ${report.persistence.insertedByType.rss}/${report.persistence.inputByType.rss}`,
+    `  rss        inserted ${report.persistence.insertedByType.rss}  updated ${report.persistence.updatedByType.rss}  skipped ${report.persistence.skippedByType.rss}  input ${report.persistence.inputByType.rss}`,
   );
   console.log(
-    `  subreddit  ${report.persistence.insertedByType.subreddit}/${report.persistence.inputByType.subreddit}`,
+    `  subreddit  inserted ${report.persistence.insertedByType.subreddit}  updated ${report.persistence.updatedByType.subreddit}  skipped ${report.persistence.skippedByType.subreddit}  input ${report.persistence.inputByType.subreddit}`,
   );
   console.log(
-    `  hn         ${report.persistence.insertedByType.hn}/${report.persistence.inputByType.hn}`,
+    `  hn         inserted ${report.persistence.insertedByType.hn}  updated ${report.persistence.updatedByType.hn}  skipped ${report.persistence.skippedByType.hn}  input ${report.persistence.inputByType.hn}`,
   );
 
   if (report.slowSources.length > 0) {

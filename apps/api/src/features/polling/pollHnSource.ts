@@ -10,6 +10,7 @@ const hnItemSchema = z.object({
   time: z.number().nullish(),
   title: z.string().nullish(),
   url: z.string().nullish(),
+  descendants: z.number().nullish(),
 });
 
 type HnItem = z.infer<typeof hnItemSchema>;
@@ -66,12 +67,16 @@ function parseHnItem(sourceId: string, item: unknown) {
   let publishedAt: Date | null = null;
   let title: string | null = null;
   let url: string | null = null;
+  let commentCount: number = 0;
 
   if (typeof parsedHnItem.by === "string") {
     author = parsedHnItem.by;
   }
 
-  if (typeof parsedHnItem.id === "string" || typeof parsedHnItem.id === "number") {
+  if (
+    typeof parsedHnItem.id === "string" ||
+    typeof parsedHnItem.id === "number"
+  ) {
     id = parsedHnItem.id;
   }
 
@@ -95,6 +100,10 @@ function parseHnItem(sourceId: string, item: unknown) {
     url = parsedHnItem.url;
   }
 
+  if (typeof parsedHnItem.descendants === "number") {
+    commentCount = parsedHnItem.descendants;
+  }
+
   return {
     sourceId,
     externalId: String(id),
@@ -105,5 +114,6 @@ function parseHnItem(sourceId: string, item: unknown) {
     author,
     itemScore: score,
     sourceType: "hn",
+    commentCount,
   } satisfies NormalizedItemInput;
 }

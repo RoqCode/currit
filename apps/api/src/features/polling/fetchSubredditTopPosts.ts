@@ -35,6 +35,7 @@ const redditPostDataSchema = z.object({
   selftext: z.string().nullish(),
   domain: z.string().nullish(),
   permalink: z.string().nullish(),
+  num_comments: z.number().nullish(),
   url: z.string().nullish(),
 });
 
@@ -165,6 +166,7 @@ function parseTopItems(body: unknown) {
     let publishedAt: Date | null = null;
     let title: string | null = null;
     let url: string | null = null;
+    let commentCount: number = 0;
 
     if (typeof item.author === "string") {
       author = item.author;
@@ -186,6 +188,10 @@ function parseTopItems(body: unknown) {
       title = item.title;
     }
 
+    if (typeof item.num_comments === "number") {
+      commentCount = item.num_comments;
+    }
+
     const postKind = getPostKind(item);
 
     description = getDescription(item, postKind);
@@ -199,6 +205,7 @@ function parseTopItems(body: unknown) {
       publishedAt: publishedAt ?? new Date(Date.now()),
       author,
       score,
+      commentCount,
     } satisfies NormalizedSubredditItem);
   }
 
@@ -210,17 +217,17 @@ function getPostKind(item: RedditPostData): SubredditPostKind {
   if (item.is_video === true) return "video";
   if (item.post_hint === "image") return "image";
 
-  if (item.post_hint === "link" || typeof item.url_overridden_by_dest === "string") {
+  if (
+    item.post_hint === "link" ||
+    typeof item.url_overridden_by_dest === "string"
+  ) {
     return "external_link";
   }
 
   return "unknown";
 }
 
-function getDescription(
-  item: RedditPostData,
-  postKind: SubredditPostKind,
-) {
+function getDescription(item: RedditPostData, postKind: SubredditPostKind) {
   if (typeof item.selftext === "string" && item.selftext) {
     return item.selftext;
   }
@@ -240,7 +247,10 @@ function getDescription(
 }
 
 function getUrl(item: RedditPostData, postKind: SubredditPostKind) {
-  if (postKind === "external_link" && typeof item.url_overridden_by_dest === "string") {
+  if (
+    postKind === "external_link" &&
+    typeof item.url_overridden_by_dest === "string"
+  ) {
     return item.url_overridden_by_dest;
   }
 

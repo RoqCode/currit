@@ -90,6 +90,7 @@ export default async function pollSubredditSources(
         fetchedAt: now,
         itemScore: item.score,
         author: item.author,
+        commentCount: item.commentCount,
       })),
       stopPollingAfter: rateLimit.shouldStopPolling,
       stopPollingMessage: buildStopPollingMessage(rateLimit),

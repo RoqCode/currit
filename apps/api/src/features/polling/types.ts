@@ -71,16 +71,19 @@ export type PollRunReport = {
     fetchedCount: number;
     candidateItemCount: number;
     failedItemCount: number;
-    byType: Record<keyof ItemCountsByType, {
-      sourceCount: number;
-      successCount: number;
-      errorCount: number;
-      skippedCount: number;
-      fetchedCount: number;
-      candidateItemCount: number;
-      failedItemCount: number;
-      batchDurationMs: number;
-    }>;
+    byType: Record<
+      keyof ItemCountsByType,
+      {
+        sourceCount: number;
+        successCount: number;
+        errorCount: number;
+        skippedCount: number;
+        fetchedCount: number;
+        candidateItemCount: number;
+        failedItemCount: number;
+        batchDurationMs: number;
+      }
+    >;
   };
   persistence: SavePolledItemsResult;
   slowSources: Array<{
@@ -148,6 +151,7 @@ export type NormalizedSubredditItem = {
   publishedAt: Date;
   author: string | null;
   score: number | null;
+  commentCount: number;
 };
 
 export type ScoredCandidate = {
@@ -161,8 +165,10 @@ export type ScoredCandidate = {
 export type SavePolledItemsResult = {
   inputCount: number;
   insertedCount: number;
+  updatedCount: number;
   skippedCount: number;
   inputByType: ItemCountsByType;
   insertedByType: ItemCountsByType;
+  updatedByType: ItemCountsByType;
   skippedByType: ItemCountsByType;
 };

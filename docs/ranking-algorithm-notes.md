@@ -8,10 +8,10 @@ Bevor wir in Formeln eintauchen: Das mentale Modell, das sich durch _alle_ erfol
 200+ Kandidaten/Tag          3-7 Items im Feed
        │                            ▲
        ▼                            │
-┌─────────────┐  ┌──────────────┐  ┌─────────────────┐  ┌──────────────┐
-│  Candidate   │→│   Scoring    │→│   Re-Ranking     │→│   Feedback   │
-│  Generation  │  │   & Ranking  │  │   (Diversität)   │  │   Loop       │
-└─────────────┘  └──────────────┘  └─────────────────┘  └──────────────┘
+┌─────────────┐ ┌──────────────┐ ┌─────────────────┐ ┌──────────────┐
+│  Candidate  │→│   Scoring    │→│   Re-Ranking    │→│   Feedback   │
+│  Generation │ │   & Ranking  │ │   (Diversität)  │ │   Loop       │
+└─────────────┘ └──────────────┘ └─────────────────┘ └──────────────┘
  Reddit API       Freshness         MMR / Slot-basiert   Likes → Thompson
  HN API           Source Quality    Anti-Monotonie       Sampling
  RSS Feeds        Relevanz (LLM)    Serendipity-Slot     Keyword-Gewichte
