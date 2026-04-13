@@ -24,10 +24,10 @@ _Stand: April 2026_
 
 ## Ranking
 
-- [ ] Implement first non-keyword scoring pass
-- [ ] Start with freshness + source-local quality signals + simple diversity constraints
-- [ ] Replace fixed feed bucket selection in `apps/api/src/features/feed/buildFeed.ts` with ranked selection
-- [ ] Keep source selection as the main interest signal for the first product test
+- [x] Implement first non-keyword scoring pass
+- [x] Start with freshness + source-local quality signals + simple diversity constraints
+- [x] Replace fixed Reddit/HN bucket ordering in `apps/api/src/features/feed/buildFeed.ts` with scored selection while keeping RSS as a serendipity bucket for now
+- [x] Keep source selection as the main interest signal for the first product test
 
 ## Feedback
 
@@ -49,3 +49,4 @@ _Stand: April 2026_
 - Performance work should optimize for controlled orchestration, not maximum parallelism
 - Reddit should stay conservative to reduce rate-limit and blacklist risk; for the MVP we log rate-limit errors and skip all remaining Reddit fetches for that run instead of retrying
 - Keywords are intentionally postponed; the first product test should answer whether source selection + ranking + a finite feed already has enough pull
+- Current ranking baseline is intentionally light: freshness + source-local quality + per-source cap for Reddit/HN, plus semi-random source selection and an RSS serendipity slice

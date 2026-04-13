@@ -1,12 +1,22 @@
 # Currit – Scoring & Feed-Selection Algorithmus
 
-_Stand: April 2026 – Ergebnis aus empirischem Testing mit 487 Reddit-Posts aus 22 Subreddits_
+_Stand: April 2026 – Research-Notizen plus aktuelle MVP-Baseline_
 
 Siehe auch: [ranking-algorithm-notes.md](./ranking-algorithm-notes.md) für den breiteren Research-Kontext (Scoring-Theorie, LLM-Enrichment, Feedback Loops, Embeddings).
 
 ---
 
 ## Überblick
+
+> **Wichtig:** Dieses Dokument enthält teils Research-/Zielbild-Notizen. Die aktuelle MVP-Implementierung ist bewusst simpler und lebt in `apps/api/src/features/feed/buildFeed.ts` und `apps/api/src/features/feed/scoreCandidates.ts`.
+
+### Aktuelle MVP-Baseline im Code
+
+- Kandidatenfenster: 4 Tage, gemessen über `createdAt` ("frisch für Currit", nicht für die Ursprungsplattform)
+- Scoring nur für Reddit und HN; RSS bleibt vorerst ein kleiner Serendipity-Bucket
+- Signale: source-lokale Qualität (`itemScore`, `commentCount`), globaler Vergleich, Freshness-Decay
+- Auswahl: gewichtetes Sampling mit `maxPerSource`, nicht deterministisches Top-N
+- Zusätzliche Aussortierung: sehr schwache oder potenziell kontroverse Engagement-Profile werden beim Update bestehender Reddit/HN-Items eher nicht weiter hochgezogen
 
 Der Algorithmus besteht aus zwei getrennten Schritten:
 
@@ -219,9 +229,9 @@ FUNCTION PERCENTILE_RANK(posts, BY getValue):
 
 ## Offene Punkte für spätere Iterationen
 
-- **Time Decay:** Aktuell nicht enthalten, weil das Scoring gegen einen Tages- oder Wochen-Snapshot läuft. Wenn Posts über mehrere Tage im Pool bleiben, braucht es einen Freshness-Decay (empfohlen: `exp(-0.029 × ageHours)`, 24h-Halbwertszeit – siehe ranking-algorithm-notes.md).
+- **Time Decay:** In der aktuellen MVP-Baseline bereits enthalten; offen ist eher die Feinabstimmung von Halbwertszeit und Kandidatenfenster.
 - **Feedback Loop:** Likes fließen noch nicht zurück. Geplant: Thompson Sampling auf Topic-Ebene (siehe ranking-algorithm-notes.md, Stufe 4).
 - **LLM-Enrichment:** Relevanz-Scoring und Summary-Generierung via Claude Haiku als zusätzliches Signal im Score-Mix.
 - **Expliziter Serendipity-Slot:** Falls die emergente Serendipity durch gewichtetes Sampling nicht ausreicht, kann ein dedizierter Slot nachgerüstet werden (siehe ranking-algorithm-notes.md, "Der Serendipity-Slot").
-- **HN/RSS-Adaption:** Die Gewichte (0.7 score / 0.2 comments / 0.1 ratio) müssen pro Quelltyp angepasst werden. HN hat `score` + `descendants`, RSS hat oft weder noch.
+- **HN/RSS-Adaption:** HN nutzt inzwischen `score` + `descendants`; RSS ist absichtlich noch kein voll gescorter Kandidatenpool.
 - **Source-size shrinkage (verworfen):** Ein getesteter Ansatz war, `localScore` bei kleinen Quellen Richtung `globalScore` zu ziehen. In der aktuellen Reddit-Simulation hat das die Vielfalt jedoch klar verschlechtert (`gini` rauf, `subsPerWeek` runter) und auch mehrere 25-Post-Quellen unnötig benachteiligt. Deshalb aktuell nicht Teil des Baseline-Algorithmus.

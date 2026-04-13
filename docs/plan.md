@@ -174,10 +174,10 @@ React-Frontend zeigt die Items an. Jedes Item enthält: Titel, Quelle, kurzen Su
 
 ### Phase 3: Scoring Engine
 
-- [ ] Scoring-Funktion mit vier Kriterien implementieren · _Algorithmen-Design_
+- [x] Erste nicht-keyword-basierte Ranking-Baseline implementieren: Freshness + source-lokale Qualität + gewichtete Auswahl · _Algorithmen-Design_
 - [ ] Relevanz-Basis über Keyword-Matching auf Titel, Summary und Metadaten bauen · _Information Retrieval_
 - [ ] Gewichte als Konfiguration (JSON/DB) statt Hardcode · _Konfigurationsmanagement_
-- [ ] Top-N-Selektion mit Diversitätscheck · _Ranking-Logik_
+- [ ] Feed-weite Selection weiter verfeinern; aktuell: gewichtetes Sampling mit Source Caps und RSS-Serendipity-Slice · _Ranking-Logik_
 - [ ] Optional: KI-Summary über Anthropic/OpenAI API · _LLM-APIs_
 - [ ] Optional: KI-Relevanzscore · _Prompt Engineering_
 - [ ] Optional: KI-Vorschläge für verwandte Interessen-Keywords · _LLM-APIs_
