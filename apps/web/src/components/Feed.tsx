@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Item } from "@currit/shared/types/Item";
+import FeedCard from "./FeedItem/FeedCard";
 
 export default function Feed() {
   const [feedItems, setFeedItems] = useState<Item[]>([]);
@@ -87,6 +88,10 @@ export default function Feed() {
     fetchFeed();
   }, []);
 
+  function handlePatchItem() {
+    console.log("item patched");
+  }
+
   return (
     <>
       <button onClick={handlePoll}>
@@ -99,11 +104,7 @@ export default function Feed() {
         <ul>
           {feedItems.map((item) => (
             <li key={item.id}>
-              <h2>{item.title}</h2>
-              <p>{item.description}</p>
-              <a target="_blank" href={item.url}>
-                {item.url}
-              </a>
+              <FeedCard item={item} onPatchItem={handlePatchItem} />
             </li>
           ))}
         </ul>

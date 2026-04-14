@@ -72,7 +72,7 @@ export default function Sources() {
                 display: "flex",
                 alignItems: "center",
                 gap: "1rem",
-                marginBottom: "1rem",
+                marginBottom: "0.5rem",
               }}
             >
               <span style={{ fontStyle: "italic" }}>{source.type}</span> |{" "}
