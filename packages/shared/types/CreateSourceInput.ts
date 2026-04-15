@@ -1,8 +1,4 @@
-export type SourceType = "rss" | "subreddit" | "hn";
-
-export type CreateSourceInput = {
-  name: string;
-  url: string;
-  type: SourceType;
-  isBuiltin?: boolean;
-};
+export type {
+  CreateSourceInput,
+  SourceType,
+} from "../validation/sourceInput.js";

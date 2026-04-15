@@ -1,6 +1,6 @@
 import { isIP } from "node:net";
-import type { SourceType } from "@currit/shared/types/CreateSourceInput";
 import { parseSourceUrl } from "@currit/shared/validation/sourceInput";
+import type { SourceType } from "../../db/schema";
 
 const REDDIT_HOSTS = new Set([
   "reddit.com",

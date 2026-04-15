@@ -1,4 +1,4 @@
-import { SourceType } from "@currit/shared/types/CreateSourceInput";
+import type { SourceType } from "../../db/schema";
 
 export type PollSourceErrorType =
   | "network_error"

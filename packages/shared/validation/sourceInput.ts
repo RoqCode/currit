@@ -1,9 +1,10 @@
 import { z } from "zod";
-import type { SourceType } from "../types/CreateSourceInput.js";
 
 const redditHosts = new Set(["reddit.com", "www.reddit.com", "old.reddit.com"]);
 
 export const sourceTypeSchema = z.enum(["rss", "subreddit", "hn"]);
+
+export type SourceType = z.infer<typeof sourceTypeSchema>;
 
 export const sourceNameSchema = z.string().trim().min(1, "name is required");
 
@@ -72,6 +73,8 @@ export const createSourceRequestSchema = z
     type: input.type,
     url: normalizeSourceUrl(input.url, input.type),
   }));
+
+export type CreateSourceInput = z.infer<typeof createSourceRequestSchema>;
 
 export function inferSourceTypeFromUrl(url: string): SourceType | null {
   const parsedUrl = parseSourceUrl(url);

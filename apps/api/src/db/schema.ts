@@ -21,10 +21,10 @@ export const sources = pgTable(
     id: uuid().primaryKey().defaultRandom(),
     name: varchar({ length: 256 }).notNull(),
     url: varchar({ length: 512 }).notNull(),
-    createdAt: timestamp().defaultNow().notNull(),
+    createdAt: timestamp({ mode: "date" }).defaultNow().notNull(),
     type: sourceTypeEnum().notNull(),
-    lastPolledAt: timestamp(),
-    lastCollectedFrom: timestamp(),
+    lastPolledAt: timestamp({ mode: "date" }),
+    lastCollectedFrom: timestamp({ mode: "date" }),
     active: boolean().notNull().default(true),
     isBuiltin: boolean().notNull().default(false),
   },
@@ -42,12 +42,12 @@ export const items = pgTable(
     author: varchar({ length: 255 }),
     description: text(),
     url: varchar({ length: 512 }).notNull(),
-    publishedAt: timestamp().notNull(),
-    fetchedAt: timestamp().notNull(),
-    createdAt: timestamp().defaultNow().notNull(),
+    publishedAt: timestamp({ mode: "date" }).notNull(),
+    fetchedAt: timestamp({ mode: "date" }).notNull(),
+    createdAt: timestamp({ mode: "date" }).defaultNow().notNull(),
     itemScore: integer().default(0),
     commentCount: integer().default(0),
-    lastObserved: timestamp(),
+    lastObserved: timestamp({ mode: "date" }),
   },
   (table) => [
     index("items_type_external_id_idx").on(table.type, table.externalId),
@@ -59,7 +59,7 @@ export const feeds = pgTable(
   {
     id: uuid().primaryKey().defaultRandom(),
     feedDate: date().notNull(),
-    createdAt: timestamp().defaultNow().notNull(),
+    createdAt: timestamp({ mode: "date" }).defaultNow().notNull(),
   },
   (table) => [uniqueIndex("feeds_feed_date_idx").on(table.feedDate)],
 );
@@ -76,7 +76,7 @@ export const feedItems = pgTable(
     position: integer().notNull(),
     bucket: sourceTypeEnum().notNull(),
     scoreAtSelection: integer(),
-    createdAt: timestamp().defaultNow().notNull(),
+    createdAt: timestamp({ mode: "date" }).defaultNow().notNull(),
   },
   (table) => [
     primaryKey({ columns: [table.feedId, table.itemId] }),
@@ -86,3 +86,21 @@ export const feedItems = pgTable(
     ),
   ],
 );
+
+export const itemFeedback = pgTable("item_feedback", {
+  itemId: uuid()
+    .references(() => items.id)
+    .notNull(),
+  likedAt: timestamp({ mode: "date" }),
+  bookmarkedAt: timestamp({ mode: "date" }),
+  readAt: timestamp({ mode: "date" }),
+  createdAt: timestamp({ mode: "date" }).defaultNow().notNull(),
+  updatedAt: timestamp({ mode: "date" })
+    .defaultNow()
+    .$onUpdate(() => new Date())
+    .notNull(),
+});
+
+export type SourceRow = typeof sources.$inferSelect;
+export type ItemRow = typeof items.$inferSelect;
+export type SourceType = SourceRow["type"];

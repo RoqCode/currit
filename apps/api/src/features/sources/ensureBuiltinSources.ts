@@ -1,9 +1,13 @@
-import { CreateSourceInput } from "@currit/shared/types/CreateSourceInput";
 import { normalizeSourceUrl } from "@currit/shared/validation/sourceInput";
 import db from "../../db";
 import { sources } from "../../db/schema";
 
-const builtinSources: CreateSourceInput[] = [
+type BuiltinSourceSeed = Pick<
+  typeof sources.$inferInsert,
+  "name" | "type" | "url" | "isBuiltin"
+>;
+
+const builtinSources: BuiltinSourceSeed[] = [
   {
     name: "HackerNews",
     type: "hn",
@@ -32,11 +36,11 @@ export default async function ensureBuiltinSources() {
   }
 }
 
-async function insertBuiltinSources(missingSources: CreateSourceInput[]) {
-    await db.insert(sources).values(
-      missingSources.map((source) => ({
-        ...source,
-        url: normalizeSourceUrl(source.url, source.type),
-      })),
-    );
+async function insertBuiltinSources(missingSources: BuiltinSourceSeed[]) {
+  await db.insert(sources).values(
+    missingSources.map((source) => ({
+      ...source,
+      url: normalizeSourceUrl(source.url, source.type),
+    })),
+  );
 }

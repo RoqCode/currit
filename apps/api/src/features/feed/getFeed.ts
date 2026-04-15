@@ -3,6 +3,10 @@ import db from "../../db";
 import { feedItems, feeds, items } from "../../db/schema";
 import { getTodayBounds } from "../../shared/getTodayBounds";
 
+function toIsoString(value: Date | string) {
+  return value instanceof Date ? value.toISOString() : value;
+}
+
 export default async function getFeed() {
   const { feedDate } = getTodayBounds();
 
@@ -30,12 +34,16 @@ export default async function getFeed() {
 
   return {
     id: feed.id,
-    feedDate: feed.feedDate,
+    feedDate: toIsoString(feed.feedDate),
     items: rows.map((row) => ({
       position: row.position,
       bucket: row.bucket,
       scoreAtSelection: row.scoreAtSelection,
       ...row.item,
+      publishedAt: toIsoString(row.item.publishedAt),
+      fetchedAt: toIsoString(row.item.fetchedAt),
+      createdAt: toIsoString(row.item.createdAt),
+      lastObserved: row.item.lastObserved ? toIsoString(row.item.lastObserved) : null,
     })),
   };
 }

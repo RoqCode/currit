@@ -1,4 +1,4 @@
-import { items } from "../../db/schema";
+import type { ItemRow } from "../../db/schema";
 const config = {
   globalWeight: 0.3,
   temperature: 1.0,
@@ -8,7 +8,6 @@ const config = {
   weights: { score: 0.7, comments: 0.2 },
 };
 
-type ItemRow = typeof items.$inferSelect;
 export type ScoredItemRow = ItemRow & {
   localScore: number;
   globalScore: number;
