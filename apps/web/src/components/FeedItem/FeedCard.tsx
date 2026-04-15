@@ -1,20 +1,37 @@
-import type { Item } from "@currit/shared/types/Item";
+import type { FeedItem } from "@currit/shared/types/Feed";
 import { useState } from "react";
 import ToggleAction from "./ToggleAction";
 
 type Props = {
-  item: Item;
-  onPatchItem: () => void;
+  item: FeedItem;
+  onPatchItem: () => void | Promise<void>;
 };
 
 export default function FeedCard(props: Props) {
-  const [liked, setLiked] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
   const [read, setRead] = useState(false);
 
   async function handleToggleLike() {
     console.log("liked", props.item.id);
-    setLiked(!liked);
+    try {
+      const res = await fetch(`/api/items/${props.item.id}/like`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          like: !props.item.feedback.likedAt,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("like update failed");
+      }
+
+      await props.onPatchItem();
+    } catch (e) {
+      console.error(e);
+    }
   }
   async function handleToggleBookmark() {
     console.log("bookmarked", props.item.id);
@@ -34,7 +51,11 @@ export default function FeedCard(props: Props) {
       </a>
 
       <div style={{ marginTop: "0.5rem", display: "flex", gap: "0.5rem" }}>
-        <ToggleAction label="like" state={liked} onToggle={handleToggleLike} />
+        <ToggleAction
+          label="like"
+          state={Boolean(props.item.feedback.likedAt)}
+          onToggle={handleToggleLike}
+        />
         <ToggleAction
           label="bookmark"
           state={bookmarked}

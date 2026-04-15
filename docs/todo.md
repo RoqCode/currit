@@ -16,6 +16,8 @@ _Stand: April 2026_
 - [ ] Replace current debug-heavy flow with a more product-like feed experience
 - [ ] Improve empty, loading, and error states in the feed UI
 - [ ] Improve source management usability after the active toggle exists
+- [ ] Add source favorite toggle and show favored sources clearly in source management
+- [ ] Optionally highlight feed items that came from favored sources
 - [ ] Revisit mobile usability once the core loop feels stable
 
 ### Delivery / Ops
@@ -61,3 +63,5 @@ _Stand: April 2026_
 - Reddit should stay conservative to reduce rate-limit and blacklist risk; for the MVP we log rate-limit errors and skip all remaining Reddit fetches for that run instead of retrying
 - Keywords are intentionally postponed; the first product test should answer whether source selection + ranking + a finite feed already has enough pull
 - Current ranking baseline is intentionally light: freshness + source-local quality + per-source cap for Reddit/HN, plus semi-random source selection and an RSS serendipity slice
+- Add source favoritism as an explicit ranking signal; favored sources should get a ranking boost
+- Favored RSS sources are a special product rule: new items should always make it into the daily feed up to a per-source/day safety cap, even if that temporarily pushes the feed above its normal size limit

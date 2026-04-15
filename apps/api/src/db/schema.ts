@@ -90,7 +90,8 @@ export const feedItems = pgTable(
 export const itemFeedback = pgTable("item_feedback", {
   itemId: uuid()
     .references(() => items.id)
-    .notNull(),
+    .notNull()
+    .primaryKey(),
   likedAt: timestamp({ mode: "date" }),
   bookmarkedAt: timestamp({ mode: "date" }),
   readAt: timestamp({ mode: "date" }),

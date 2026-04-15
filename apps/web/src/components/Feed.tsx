@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
-import type { Item } from "@currit/shared/types/Item";
+import {
+  getFeedResponseSchema,
+  type FeedItem,
+} from "@currit/shared/types/Feed";
 import FeedCard from "./FeedItem/FeedCard";
 
 export default function Feed() {
-  const [feedItems, setFeedItems] = useState<Item[]>([]);
+  const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
 
@@ -73,9 +76,14 @@ export default function Feed() {
       if (!res.ok) {
         throw new Error("failed to fetch feed");
       }
-      const data = await res.json();
+      const rawData = await res.json();
+      const parsedData = getFeedResponseSchema.safeParse(rawData);
 
-      setFeedItems(data.feed?.items ?? []);
+      if (!parsedData.success) {
+        throw new Error("invalid feed response");
+      }
+
+      setFeedItems(parsedData.data.feed?.items ?? []);
     } catch (e) {
       console.error(e);
       setError(true);
@@ -87,10 +95,6 @@ export default function Feed() {
   useEffect(() => {
     fetchFeed();
   }, []);
-
-  function handlePatchItem() {
-    console.log("item patched");
-  }
 
   return (
     <>
@@ -104,7 +108,7 @@ export default function Feed() {
         <ul>
           {feedItems.map((item) => (
             <li key={item.id}>
-              <FeedCard item={item} onPatchItem={handlePatchItem} />
+              <FeedCard item={item} onPatchItem={fetchFeed} />
             </li>
           ))}
         </ul>
