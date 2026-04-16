@@ -4,9 +4,14 @@ import {
 } from "@currit/shared/types/Feed";
 import ToggleAction from "./ToggleAction";
 
+type FeedCardItem = Pick<
+  FeedItem,
+  "id" | "title" | "description" | "url" | "feedback"
+>;
+
 type Props = {
-  item: FeedItem;
-  onUpdateFeedback: (itemId: string, feedback: FeedItem["feedback"]) => void;
+  item: FeedCardItem;
+  onUpdateFeedback?: (itemId: string, feedback: FeedItem["feedback"]) => void;
 };
 
 export default function FeedCard(props: Props) {
@@ -35,7 +40,7 @@ export default function FeedCard(props: Props) {
         throw new Error("invalid feedback response");
       }
 
-      props.onUpdateFeedback(props.item.id, parsedData.data.feedback);
+      props.onUpdateFeedback?.(props.item.id, parsedData.data.feedback);
     } catch (e) {
       console.error(e);
     }

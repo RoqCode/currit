@@ -3,6 +3,7 @@ import z from "zod";
 import setItemLikeById from "../features/item/setItemLikeById";
 import setItemBookmarkById from "../features/item/setItemBookmarkById";
 import setItemReadById from "../features/item/setItemReadById";
+import getBookmarked from "../features/item/getBookmarked";
 
 function toFeedItemFeedback(feedback: {
   likedAt: Date | null;
@@ -14,6 +15,10 @@ function toFeedItemFeedback(feedback: {
     bookmarkedAt: feedback.bookmarkedAt?.toISOString() ?? null,
     readAt: feedback.readAt?.toISOString() ?? null,
   };
+}
+
+function toIsoString(value: Date | string) {
+  return value instanceof Date ? value.toISOString() : value;
 }
 
 const itemRoutes = new Hono();
@@ -56,7 +61,10 @@ itemRoutes.patch("/api/items/:id/like", async (c) => {
     return c.json({ error: "item feedback update failed" }, 404);
   }
 
-  return c.json({ ok: true, feedback: toFeedItemFeedback(updatedFeedback) }, 200);
+  return c.json(
+    { ok: true, feedback: toFeedItemFeedback(updatedFeedback) },
+    200,
+  );
 });
 
 itemRoutes.patch("/api/items/:id/bookmark", async (c) => {
@@ -84,7 +92,10 @@ itemRoutes.patch("/api/items/:id/bookmark", async (c) => {
     return c.json({ error: "item feedback update failed" }, 404);
   }
 
-  return c.json({ ok: true, feedback: toFeedItemFeedback(updatedFeedback) }, 200);
+  return c.json(
+    { ok: true, feedback: toFeedItemFeedback(updatedFeedback) },
+    200,
+  );
 });
 
 itemRoutes.patch("/api/items/:id/read", async (c) => {
@@ -109,7 +120,30 @@ itemRoutes.patch("/api/items/:id/read", async (c) => {
     return c.json({ error: "item feedback update failed" }, 404);
   }
 
-  return c.json({ ok: true, feedback: toFeedItemFeedback(updatedFeedback) }, 200);
+  return c.json(
+    { ok: true, feedback: toFeedItemFeedback(updatedFeedback) },
+    200,
+  );
+});
+
+itemRoutes.get("/api/items/bookmarked", async (c) => {
+  try {
+    const bookmarkedRows = await getBookmarked();
+
+    const bookmarked = bookmarkedRows.map((row) => ({
+      ...row.item,
+      publishedAt: toIsoString(row.item.publishedAt),
+      fetchedAt: toIsoString(row.item.fetchedAt),
+      createdAt: toIsoString(row.item.createdAt),
+      lastObserved: row.item.lastObserved ? toIsoString(row.item.lastObserved) : null,
+      feedback: toFeedItemFeedback(row.feedback),
+    }));
+
+    return c.json({ ok: true, bookmarked }, 200);
+  } catch (e) {
+    console.error("failed to fetch bookmarked items", e);
+    return c.json({ message: "failed to fetch bookmarked items" }, 501);
+  }
 });
 
 export default itemRoutes;
