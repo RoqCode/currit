@@ -39,6 +39,14 @@ export const getFeedResponseSchema = z.object({
   feed: feedSchema.nullable(),
 });
 
+export const patchItemFeedbackResponseSchema = z.object({
+  ok: z.literal(true),
+  feedback: feedItemFeedbackSchema,
+});
+
 export type FeedItem = z.infer<typeof feedItemSchema>;
 export type Feed = z.infer<typeof feedSchema>;
 export type GetFeedResponse = z.infer<typeof getFeedResponseSchema>;
+export type PatchItemFeedbackResponse = z.infer<
+  typeof patchItemFeedbackResponseSchema
+>;

@@ -1,45 +1,68 @@
-import type { FeedItem } from "@currit/shared/types/Feed";
-import { useState } from "react";
+import {
+  patchItemFeedbackResponseSchema,
+  type FeedItem,
+} from "@currit/shared/types/Feed";
 import ToggleAction from "./ToggleAction";
 
 type Props = {
   item: FeedItem;
-  onPatchItem: () => void | Promise<void>;
+  onUpdateFeedback: (itemId: string, feedback: FeedItem["feedback"]) => void;
 };
 
 export default function FeedCard(props: Props) {
-  const [bookmarked, setBookmarked] = useState(false);
-  const [read, setRead] = useState(false);
-
-  async function handleToggleLike() {
-    console.log("liked", props.item.id);
+  async function patchFeedback(
+    path: "like" | "bookmark" | "read",
+    body: { like?: boolean; bookmark?: boolean; read?: boolean },
+    errorMessage: string,
+  ) {
     try {
-      const res = await fetch(`/api/items/${props.item.id}/like`, {
+      const res = await fetch(`/api/items/${props.item.id}/${path}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          like: !props.item.feedback.likedAt,
-        }),
+        body: JSON.stringify(body),
       });
 
       if (!res.ok) {
-        throw new Error("like update failed");
+        throw new Error(errorMessage);
       }
 
-      await props.onPatchItem();
+      const rawData = await res.json();
+      const parsedData = patchItemFeedbackResponseSchema.safeParse(rawData);
+
+      if (!parsedData.success) {
+        throw new Error("invalid feedback response");
+      }
+
+      props.onUpdateFeedback(props.item.id, parsedData.data.feedback);
     } catch (e) {
       console.error(e);
     }
   }
-  async function handleToggleBookmark() {
-    console.log("bookmarked", props.item.id);
-    setBookmarked(!bookmarked);
+
+  async function handleToggleLike() {
+    await patchFeedback(
+      "like",
+      { like: !props.item.feedback.likedAt },
+      "like update failed",
+    );
   }
+
+  async function handleToggleBookmark() {
+    await patchFeedback(
+      "bookmark",
+      { bookmark: !props.item.feedback.bookmarkedAt },
+      "bookmark update failed",
+    );
+  }
+
   async function handleToggleRead() {
-    console.log("read", props.item.id);
-    setRead(!read);
+    await patchFeedback(
+      "read",
+      { read: !props.item.feedback.readAt },
+      "read update failed",
+    );
   }
 
   return (
@@ -58,10 +81,14 @@ export default function FeedCard(props: Props) {
         />
         <ToggleAction
           label="bookmark"
-          state={bookmarked}
+          state={Boolean(props.item.feedback.bookmarkedAt)}
           onToggle={handleToggleBookmark}
         />
-        <ToggleAction label="read" state={read} onToggle={handleToggleRead} />
+        <ToggleAction
+          label="read"
+          state={Boolean(props.item.feedback.readAt)}
+          onToggle={handleToggleRead}
+        />
       </div>
     </div>
   );

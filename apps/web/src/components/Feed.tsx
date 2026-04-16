@@ -83,13 +83,33 @@ export default function Feed() {
         throw new Error("invalid feed response");
       }
 
-      setFeedItems(parsedData.data.feed?.items ?? []);
+      const nextItems = parsedData.data.feed?.items ?? [];
+
+      setFeedItems(nextItems);
     } catch (e) {
       console.error(e);
       setError(true);
     } finally {
       setLoading(false);
     }
+  }
+
+  function handleItemFeedbackUpdated(
+    itemId: string,
+    nextFeedback: FeedItem["feedback"],
+  ) {
+    setFeedItems((currentItems) =>
+      currentItems.map((item) => {
+        if (item.id !== itemId) {
+          return item;
+        }
+
+        return {
+          ...item,
+          feedback: nextFeedback,
+        };
+      }),
+    );
   }
 
   useEffect(() => {
@@ -108,7 +128,7 @@ export default function Feed() {
         <ul>
           {feedItems.map((item) => (
             <li key={item.id}>
-              <FeedCard item={item} onPatchItem={fetchFeed} />
+              <FeedCard item={item} onUpdateFeedback={handleItemFeedbackUpdated} />
             </li>
           ))}
         </ul>

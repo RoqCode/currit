@@ -27,6 +27,7 @@ export default async function getFeed() {
       scoreAtSelection: feedItems.scoreAtSelection,
       item: items,
       feedback: {
+        itemId: itemFeedback.itemId,
         likedAt: itemFeedback.likedAt,
         bookmarkedAt: itemFeedback.bookmarkedAt,
         readAt: itemFeedback.readAt,
