@@ -1,5 +1,6 @@
+import { eq } from "drizzle-orm";
 import db from "../../db";
-import { itemFeedback } from "../../db/schema";
+import { itemFeedback, items } from "../../db/schema";
 
 type FeedbackTimestampField = "likedAt" | "bookmarkedAt" | "readAt";
 
@@ -10,6 +11,16 @@ export default async function setItemFeedbackTimestampById(
   field: FeedbackTimestampField,
   nextState: boolean,
 ) {
+  const existingItem = await db
+    .select({ id: items.id })
+    .from(items)
+    .where(eq(items.id, id))
+    .limit(1);
+
+  if (existingItem.length < 1) {
+    return null;
+  }
+
   const nextTimestamp = nextState ? new Date() : null;
 
   const insertValues: ItemFeedbackInsert = {
