@@ -8,7 +8,7 @@ _Stand: April 2026_
 
 - [x] Add like endpoint and persistence
 - [x] Add bookmark toggle endpoint and persistence
-- [ ] Add bookmarks list endpoint
+- [x] Add bookmarks list endpoint
 - [x] Add like and bookmark actions to the frontend
 
 ### UI
