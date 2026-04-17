@@ -1,6 +1,6 @@
 import { and, eq, gte, notExists, sql } from "drizzle-orm";
 import db from "../../db";
-import { items, feeds, feedItems } from "../../db/schema";
+import { items, feeds, feedItems, type ItemRow } from "../../db/schema";
 import { getTodayBounds } from "../../shared/getTodayBounds";
 import { getCandidateWindow } from "../../shared/getCandidateWindow";
 import scoreCandidates, { ScoredItemRow } from "./scoreCandidates";
@@ -9,7 +9,7 @@ const candidateWindowDays = 4;
 
 const numRedditSlots = 4;
 const numHnSlots = 4;
-const numRssSlots = 3;
+const numRssSlots = 4;
 
 const maxPerSource = 2;
 const maxPerHnSource = numHnSlots;
@@ -22,7 +22,6 @@ const feedSelectionConfig = {
   selectBucketsSeparately: true,
 };
 
-type ItemRow = typeof items.$inferSelect;
 type SelectedItemRow = ItemRow | ScoredItemRow;
 
 async function selectItemsForToday() {

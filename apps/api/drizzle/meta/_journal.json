@@ -71,6 +71,27 @@
       "when": 1775845668033,
       "tag": "0009_flimsy_exodus",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1776281139406,
+      "tag": "0010_slimy_the_professor",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1776282460770,
+      "tag": "0011_superb_silver_sable",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1776456601045,
+      "tag": "0012_fresh_marvel_apes",
+      "breakpoints": true
     }
   ]
 }

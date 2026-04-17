@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { createSourceRequestSchema } from "@currit/shared/validation/sourceInput";
+import type { Source } from "@currit/shared/types/Source";
 import { z } from "zod";
 import { clearSources } from "../features/sources/clearSources";
 import { createSource } from "../features/sources/createSource";
@@ -21,11 +22,23 @@ const setSourceActiveBodySchema = z.object({
   active: z.boolean(),
 });
 
+function toSourceDto(source: Awaited<ReturnType<typeof getAllSources>>[number]): Source {
+  return {
+    id: source.id,
+    name: source.name,
+    url: source.url,
+    createdAt: source.createdAt.toISOString(),
+    type: source.type,
+    active: source.active,
+    isBuiltin: source.isBuiltin,
+  };
+}
+
 sourcesRoutes.get("/api/sources", async (c) => {
   try {
     const sources = await getAllSources();
     return c.json({
-      sources,
+      sources: sources.map(toSourceDto),
     });
   } catch (e) {
     console.error(e);
@@ -118,7 +131,7 @@ sourcesRoutes.patch("/api/sources/:id/active", async (c) => {
   const updatedSource = await setSourceActiveById(itemId, parsedBody.data.active);
   if (!updatedSource) return c.json({ error: "source not found" }, 404);
 
-  return c.json({ ok: true, source: updatedSource }, 200);
+  return c.json({ ok: true, source: toSourceDto(updatedSource) }, 200);
 });
 
 export default sourcesRoutes;

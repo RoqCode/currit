@@ -1,6 +1,5 @@
-import { SourceType } from "@currit/shared/types/CreateSourceInput";
 import db from "../../db";
-import { sources } from "../../db/schema";
+import { sources, type SourceType } from "../../db/schema";
 import validateSourceUrl from "./validateSourceUrl";
 
 export async function createSource(

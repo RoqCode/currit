@@ -24,12 +24,14 @@ Ein persönlicher, täglicher Feed mit 5–10 kuratierten Inhalten. Statt endlos
 | Ziel         | Reddit-Doomscrolling durch bessere Alternative reduzieren          |
 | Feed-Größe   | Etwa 5 bis 10 Items pro Tag                                         |
 | Quellen      | RSS-Feeds, ausgewählte Subreddits, Hacker News                     |
+| Favoriten    | Quellen können favorisiert werden; das gibt Ranking-Boost, und favorisierte RSS-Feeds dürfen das normale Feed-Limit begrenzt übersteuern |
 | Interessen   | Startet zunächst quellenbasiert; Keywords bleiben als nächster Schritt geplant |
 | Cold Start   | User konfiguriert eigene Quellen; Hacker News ist standardmäßig da |
 | Scoring      | Heuristiken als Basis, KI optional obendrauf                       |
 | Feedback     | Like- und Bookmark-Feedback pro Item                               |
 | Leerer Feed  | "Du bist fertig für heute" (später: Mini-Reflexion)                |
 | Dünne Tage   | Weniger zeigen statt mit schwachen Items auffüllen                 |
+| Must-not-miss RSS | Neue Items aus favorisierten RSS-Quellen sollen immer im Tagesfeed landen, bis zu einer noch festzulegenden Obergrenze pro Quelle/Tag |
 | Auth         | Keine – Single-User-MVP                                            |
 | Serendipity  | Ein Teil der Items darf leicht außerhalb der Kerninteressen liegen |
 
@@ -122,14 +124,17 @@ Wichtig für den aktuellen MVP: Diese Phase darf anfangs zwischen den Quellen no
 
 ### Phase 3: Score + Rank
 
-Die Scoring Engine zieht alle heutigen Kandidaten aus der DB und bewertet sie anhand vier konfigurierbarer Gewichte. Die User-Keywords sind dabei das erste Relevanzsignal und werden gegen Titel, Summary und verfügbare Metadaten gematcht:
+Die Scoring Engine zieht alle heutigen Kandidaten aus der DB und bewertet sie anhand mehrerer konfigurierbarer Signale. Die User-Keywords sind dabei das erste Relevanzsignal und werden gegen Titel, Summary und verfügbare Metadaten gematcht:
 
 - **Relevanz** – passt der Inhalt zu den Interessen des Users?
 - **Frische** – wie aktuell ist der Inhalt?
 - **Inhaltsdichte** – hat der Inhalt Substanz oder ist er dünn?
 - **Diversität** – nicht 5x das gleiche Thema im Feed
+- **Source preference** – favorisierte Quellen bekommen einen gezielten Ranking-Boost
 
-Wichtig: Gewichte als Konfiguration bauen, nicht als Hardcode. So kann nach der ersten Testwoche gezielt an einzelnen Stellschrauben gedreht werden.
+Zusätzlich gibt es eine bewusste Produktregel für RSS: Neue Items aus favorisierten RSS-Quellen sollen nicht nur einen Score-Boost erhalten, sondern als `must include` behandelt werden – allerdings nur bis zu einer noch festzulegenden Sicherheitsgrenze pro Quelle oder pro Tag, damit ein einzelner sehr aktiver Feed den Tagesfeed nicht beliebig aufblähen kann. Diese Regel darf das normale Feed-Limit temporär überschreiten, weil sie einen anderen Zweck erfüllt: Vollständigkeit für explizit priorisierte Quellen statt bloßer Relevanzoptimierung.
+
+Wichtig: Gewichte und Caps als Konfiguration bauen, nicht als Hardcode. So kann nach der ersten Testwoche gezielt an einzelnen Stellschrauben gedreht werden.
 
 Optional: KI-Scoring für Summary-Generierung, Relevanz-Einschätzung und Keyword-Vorschläge.
 
@@ -188,6 +193,8 @@ Eine spätere Produkterweiterung ist eine PWA-Variante des Frontends: Der aktuel
 - [ ] Relevanz-Basis über Keyword-Matching auf Titel, Summary und Metadaten bauen · _Information Retrieval_
 - [ ] Gewichte als Konfiguration (JSON/DB) statt Hardcode · _Konfigurationsmanagement_
 - [ ] Feed-weite Selection weiter verfeinern; aktuell: gewichtetes Sampling mit Source Caps und RSS-Serendipity-Slice · _Ranking-Logik_
+- [ ] Quellen favorisierbar machen und `favorite` als Ranking-Signal einführen · _Produktmodell, Ranking-Logik_
+- [ ] Regel für favorisierte RSS-Quellen ergänzen: neue Items `must include` bis zu einem konfigurierbaren Safety Cap, auch wenn der Feed dadurch das normale Tageslimit überschreitet · _Produktverhalten, Ranking-Logik_
 - [ ] Optional: KI-Summary über Anthropic/OpenAI API · _LLM-APIs_
 - [ ] Optional: KI-Relevanzscore · _Prompt Engineering_
 - [ ] Optional: KI-Vorschläge für verwandte Interessen-Keywords · _LLM-APIs_
@@ -208,6 +215,7 @@ Eine spätere Produkterweiterung ist eine PWA-Variante des Frontends: Der aktuel
 - [x] `POST /sources` – neue Quelle hinzufügen · _Input-Validierung_
 - [x] `DELETE /sources/:id` – Quelle entfernen · _CRUD_
 - [x] `PATCH /sources/:id/active` – Quelle aktivieren/deaktivieren · _CRUD, Produktverhalten_
+- [ ] `PATCH /sources/:id/favorite` – Quelle favorisieren oder Favorit entfernen · _CRUD, Produktverhalten_
 
 ### Phase 5: Frontend
 
@@ -220,6 +228,8 @@ Eine spätere Produkterweiterung ist eine PWA-Variante des Frontends: Der aktuel
 - [ ] Optional: KI-Vorschläge für Interessen anzeigen und übernehmbar machen · _UX + LLM_
 - [x] Quellen-Verwaltung: Hinzufügen/Entfernen von Quellen als MVP gebaut · _Formulare, CRUD-UI_
 - [x] Quellen-Verwaltung: Active-Toggle pro Source (`true/false`) · _Formulare, CRUD-UI_
+- [ ] Quellen-Verwaltung: Favorite-Toggle pro Source · _Formulare, CRUD-UI_
+- [ ] Optional: Feed-Items aus favorisierten Quellen visuell hervorheben · _Informationshierarchie, UI_
 - [ ] HN- und Subreddit-Items im UI mit zwei Links darstellen: Thread + verlinktes Original · _Informationsarchitektur, UI_
 - [ ] Responsive Design (Mobile-first – du wirst es am Handy nutzen) · _CSS, Responsive_
 
@@ -265,6 +275,8 @@ Eine spätere Produkterweiterung ist eine PWA-Variante des Frontends: Der aktuel
 **Scoring-Opazität:** Vier Scoring-Signale gleichzeitig machen es schwer zu erkennen, welches Signal den Unterschied macht. Gewichte einzeln einstellbar halten.
 
 **Dünne Tage:** Je nach Interessenprofil kann die Schnittmenge "frisch + relevant + gehaltvoll" an manchen Tagen zu klein sein.
+
+**Favoriten-Caps:** Die Regel "favorisierte RSS-Items immer rein" ist produktseitig nützlich, kann aber das endliche-Feed-Prinzip aufweichen. Deshalb braucht sie eine klare Obergrenze pro Quelle/Tag oder global pro Tag.
 
 **Keyword-Pflegeaufwand:** Wenn Interessen-Keywords zu grob, zu fein oder veraltet sind, leidet die Relevanz schnell. Deshalb sollten Bearbeitung und KI-Vorschläge möglichst leichtgewichtig sein.
 

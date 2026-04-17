@@ -37,11 +37,14 @@ export default function SourceActiveToggle(props: Props) {
       {pending ? (
         "Pending"
       ) : (
-        <input
-          onChange={handleSetActive}
-          type="checkbox"
-          checked={props.isActive}
-        />
+        <div style={{ display: "inline-flex", flexDirection: "column" }}>
+          <input
+            onChange={handleSetActive}
+            type="checkbox"
+            checked={props.isActive}
+          />
+          <span>active</span>
+        </div>
       )}
     </>
   );

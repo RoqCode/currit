@@ -1,8 +1,12 @@
 import { useEffect, useState } from "react";
-import type { Item } from "@currit/shared/types/Item";
+import {
+  getFeedResponseSchema,
+  type FeedItem,
+} from "@currit/shared/types/Feed";
+import FeedCard from "./FeedItem/FeedCard";
 
 export default function Feed() {
-  const [feedItems, setFeedItems] = useState<Item[]>([]);
+  const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
 
@@ -72,15 +76,40 @@ export default function Feed() {
       if (!res.ok) {
         throw new Error("failed to fetch feed");
       }
-      const data = await res.json();
+      const rawData = await res.json();
+      const parsedData = getFeedResponseSchema.safeParse(rawData);
 
-      setFeedItems(data.feed?.items ?? []);
+      if (!parsedData.success) {
+        throw new Error("invalid feed response");
+      }
+
+      const nextItems = parsedData.data.feed?.items ?? [];
+
+      setFeedItems(nextItems);
     } catch (e) {
       console.error(e);
       setError(true);
     } finally {
       setLoading(false);
     }
+  }
+
+  function handleItemFeedbackUpdated(
+    itemId: string,
+    nextFeedback: FeedItem["feedback"],
+  ) {
+    setFeedItems((currentItems) =>
+      currentItems.map((item) => {
+        if (item.id !== itemId) {
+          return item;
+        }
+
+        return {
+          ...item,
+          feedback: nextFeedback,
+        };
+      }),
+    );
   }
 
   useEffect(() => {
@@ -99,11 +128,7 @@ export default function Feed() {
         <ul>
           {feedItems.map((item) => (
             <li key={item.id}>
-              <h2>{item.title}</h2>
-              <p>{item.description}</p>
-              <a target="_blank" href={item.url}>
-                {item.url}
-              </a>
+              <FeedCard item={item} onUpdateFeedback={handleItemFeedbackUpdated} />
             </li>
           ))}
         </ul>

@@ -66,7 +66,15 @@ export default function Sources() {
 
         <ul>
           {sources.map((source) => (
-            <li key={source.id}>
+            <li
+              key={source.id}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "1rem",
+                marginBottom: "0.5rem",
+              }}
+            >
               <span style={{ fontStyle: "italic" }}>{source.type}</span> |{" "}
               {source.name} | {source.url}
               <SourceActiveToggle
