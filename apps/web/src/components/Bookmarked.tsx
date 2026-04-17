@@ -76,7 +76,7 @@ export default function Bookmarked() {
           ))}
         </ul>
       ) : (
-        <p>Feed is empty :(</p>
+        <p>No bookmarks yet.</p>
       )}
 
       {error && <p>Error</p>}

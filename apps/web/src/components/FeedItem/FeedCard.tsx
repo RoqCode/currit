@@ -74,7 +74,7 @@ export default function FeedCard(props: Props) {
     <div>
       <h2>{props.item.title}</h2>
       <p>{props.item.description}</p>
-      <a target="_blank" href={props.item.url}>
+      <a target="_blank" rel="noopener noreferrer" href={props.item.url}>
         {props.item.url}
       </a>
 

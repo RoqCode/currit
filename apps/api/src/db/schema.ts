@@ -89,7 +89,7 @@ export const feedItems = pgTable(
 
 export const itemFeedback = pgTable("item_feedback", {
   itemId: uuid()
-    .references(() => items.id)
+    .references(() => items.id, { onDelete: "cascade" })
     .notNull()
     .primaryKey(),
   likedAt: timestamp({ mode: "date" }),

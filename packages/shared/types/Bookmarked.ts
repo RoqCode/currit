@@ -1,11 +1,6 @@
 import { z } from "zod";
+import { itemFeedbackSchema } from "./ItemFeedback.js";
 import { sourceTypeSchema } from "../validation/sourceInput.js";
-
-export const bookmarkedItemFeedbackSchema = z.object({
-  likedAt: z.string().nullable(),
-  bookmarkedAt: z.string().nullable(),
-  readAt: z.string().nullable(),
-});
 
 export const bookmarkedItemSchema = z.object({
   id: z.uuid(),
@@ -22,7 +17,7 @@ export const bookmarkedItemSchema = z.object({
   itemScore: z.number().nullable(),
   commentCount: z.number().nullable(),
   lastObserved: z.string().nullable(),
-  feedback: bookmarkedItemFeedbackSchema,
+  feedback: itemFeedbackSchema,
 });
 
 export const getBookmarkedResponseSchema = z.object({
@@ -30,9 +25,6 @@ export const getBookmarkedResponseSchema = z.object({
   bookmarked: z.array(bookmarkedItemSchema),
 });
 
-export type BookmarkedItemFeedback = z.infer<
-  typeof bookmarkedItemFeedbackSchema
->;
 export type BookmarkedItem = z.infer<typeof bookmarkedItemSchema>;
 export type GetBookmarkedResponse = z.infer<
   typeof getBookmarkedResponseSchema

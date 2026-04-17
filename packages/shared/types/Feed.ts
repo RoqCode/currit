@@ -1,11 +1,6 @@
 import { z } from "zod";
+import { itemFeedbackSchema } from "./ItemFeedback.js";
 import { sourceTypeSchema } from "../validation/sourceInput.js";
-
-export const feedItemFeedbackSchema = z.object({
-  likedAt: z.string().nullable(),
-  bookmarkedAt: z.string().nullable(),
-  readAt: z.string().nullable(),
-});
 
 export const feedItemSchema = z.object({
   id: z.uuid(),
@@ -25,7 +20,7 @@ export const feedItemSchema = z.object({
   position: z.number(),
   bucket: sourceTypeSchema,
   scoreAtSelection: z.number().nullable(),
-  feedback: feedItemFeedbackSchema,
+  feedback: itemFeedbackSchema,
 });
 
 export const feedSchema = z.object({
@@ -41,7 +36,7 @@ export const getFeedResponseSchema = z.object({
 
 export const patchItemFeedbackResponseSchema = z.object({
   ok: z.literal(true),
-  feedback: feedItemFeedbackSchema,
+  feedback: itemFeedbackSchema,
 });
 
 export type FeedItem = z.infer<typeof feedItemSchema>;
