@@ -9,7 +9,7 @@ const candidateWindowDays = 4;
 
 const numRedditSlots = 4;
 const numHnSlots = 4;
-const numRssSlots = 3;
+const numRssSlots = 4;
 
 const maxPerSource = 2;
 const maxPerHnSource = numHnSlots;
