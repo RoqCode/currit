@@ -2,6 +2,7 @@ import {
   getBookmarkedResponseSchema,
   type BookmarkedItem,
 } from "@currit/shared/types/Bookmarked";
+import type { FeedItem } from "@currit/shared/types/Feed";
 import { useEffect, useState } from "react";
 import FeedCard from "./FeedItem/FeedCard";
 
@@ -40,13 +41,37 @@ export default function Bookmarked() {
     }
   }
 
+  function handleItemFeedbackUpdated(
+    itemId: string,
+    nextFeedback: FeedItem["feedback"],
+  ) {
+    setBookmarkedItems((currentItems) =>
+      currentItems.flatMap((item) => {
+        if (item.id !== itemId) {
+          return item;
+        }
+
+        if (!nextFeedback.bookmarkedAt) {
+          return [];
+        }
+
+        return {
+          ...item,
+          feedback: nextFeedback,
+        };
+      }),
+    );
+  }
+
   return (
     <>
-      {bookmarkedItems.length ? (
+      {loading ? (
+        <p>Loading...</p>
+      ) : bookmarkedItems.length ? (
         <ul>
           {bookmarkedItems.map((item) => (
             <li key={item.id}>
-              <FeedCard item={item} />
+              <FeedCard item={item} onUpdateFeedback={handleItemFeedbackUpdated} />
             </li>
           ))}
         </ul>
