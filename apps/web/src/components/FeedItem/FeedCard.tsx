@@ -8,7 +8,7 @@ import CardTag from "./CardTag";
 
 type FeedCardItem = Pick<
   FeedItem,
-  "id" | "title" | "description" | "url" | "feedback" | "type"
+  "id" | "title" | "description" | "url" | "feedback" | "type" | "sourceName"
 >;
 
 type Props = {
@@ -75,8 +75,13 @@ export default function FeedCard(props: Props) {
   }
 
   return (
-    <div className="bg-surface border-border font-sans p-4">
-      <CardTag type={props.item.type} />
+    <div
+      className={`bg-surface font-sans p-4 ${props.item.feedback.readAt ? "outline-2 outline-primary" : ""}`}
+    >
+      <CardTag
+        sourceType={props.item.type}
+        sourceName={props.item.sourceName}
+      />
       <h2 className="text-text text-xl font-bold">{props.item.title}</h2>
       <p className="text-base">{props.item.description}</p>
 

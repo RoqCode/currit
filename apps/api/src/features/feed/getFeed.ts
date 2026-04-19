@@ -1,6 +1,6 @@
 import { eq } from "drizzle-orm";
 import db from "../../db";
-import { feedItems, feeds, itemFeedback, items } from "../../db/schema";
+import { feedItems, feeds, itemFeedback, items, sources } from "../../db/schema";
 import { getTodayBounds } from "../../shared/getTodayBounds";
 
 function toIsoString(value: Date | string) {
@@ -26,6 +26,7 @@ export default async function getFeed() {
       bucket: feedItems.bucket,
       scoreAtSelection: feedItems.scoreAtSelection,
       item: items,
+      sourceName: sources.name,
       feedback: {
         itemId: itemFeedback.itemId,
         likedAt: itemFeedback.likedAt,
@@ -35,6 +36,7 @@ export default async function getFeed() {
     })
     .from(feedItems)
     .innerJoin(items, eq(feedItems.itemId, items.id))
+    .leftJoin(sources, eq(items.sourceId, sources.id))
     .leftJoin(itemFeedback, eq(itemFeedback.itemId, items.id))
     .where(eq(feedItems.feedId, feed.id))
     .orderBy(feedItems.position);
@@ -47,6 +49,7 @@ export default async function getFeed() {
       bucket: row.bucket,
       scoreAtSelection: row.scoreAtSelection,
       ...row.item,
+      sourceName: row.sourceName,
       publishedAt: toIsoString(row.item.publishedAt),
       fetchedAt: toIsoString(row.item.fetchedAt),
       createdAt: toIsoString(row.item.createdAt),

@@ -10,7 +10,7 @@ export default function PostLink(props: Props) {
       rel="noopener noreferrer"
       href={props.url}
       onClick={props.handleRead}
-      className="bg-text text-bg px-2 py-1"
+      className="bg-primary text-bg px-2 py-1"
     >
       Open &middot; Read
     </a>
