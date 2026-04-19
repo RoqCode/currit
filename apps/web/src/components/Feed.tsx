@@ -125,10 +125,13 @@ export default function Feed() {
       <button onClick={handleRepoll}>Repoll Sources</button>
 
       {feedItems.length ? (
-        <ul>
+        <ul className="flex flex-col gap-4">
           {feedItems.map((item) => (
             <li key={item.id}>
-              <FeedCard item={item} onUpdateFeedback={handleItemFeedbackUpdated} />
+              <FeedCard
+                item={item}
+                onUpdateFeedback={handleItemFeedbackUpdated}
+              />
             </li>
           ))}
         </ul>

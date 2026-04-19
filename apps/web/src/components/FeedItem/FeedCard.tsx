@@ -3,10 +3,12 @@ import {
   type FeedItem,
 } from "@currit/shared/types/Feed";
 import ToggleAction from "./ToggleAction";
+import PostLink from "./PostLink";
+import CardTag from "./CardTag";
 
 type FeedCardItem = Pick<
   FeedItem,
-  "id" | "title" | "description" | "url" | "feedback"
+  "id" | "title" | "description" | "url" | "feedback" | "type"
 >;
 
 type Props = {
@@ -63,6 +65,8 @@ export default function FeedCard(props: Props) {
   }
 
   async function handleToggleRead() {
+    if (props.item.feedback.readAt) return;
+
     await patchFeedback(
       "read",
       { read: !props.item.feedback.readAt },
@@ -71,29 +75,31 @@ export default function FeedCard(props: Props) {
   }
 
   return (
-    <div>
-      <h2>{props.item.title}</h2>
-      <p>{props.item.description}</p>
-      <a target="_blank" rel="noopener noreferrer" href={props.item.url}>
-        {props.item.url}
-      </a>
+    <div className="bg-surface border-border font-sans p-4">
+      <CardTag type={props.item.type} />
+      <h2 className="text-text text-xl font-bold">{props.item.title}</h2>
+      <p className="text-base">{props.item.description}</p>
 
-      <div style={{ marginTop: "0.5rem", display: "flex", gap: "0.5rem" }}>
-        <ToggleAction
-          label="like"
-          state={Boolean(props.item.feedback.likedAt)}
-          onToggle={handleToggleLike}
-        />
-        <ToggleAction
-          label="bookmark"
-          state={Boolean(props.item.feedback.bookmarkedAt)}
-          onToggle={handleToggleBookmark}
-        />
-        <ToggleAction
+      <div className="flex justify-between mt-4 items-center">
+        <div className="flex gap-2">
+          <ToggleAction
+            label="like"
+            state={Boolean(props.item.feedback.likedAt)}
+            onToggle={handleToggleLike}
+          />
+          <ToggleAction
+            label="bookmark"
+            state={Boolean(props.item.feedback.bookmarkedAt)}
+            onToggle={handleToggleBookmark}
+          />
+        </div>
+        <PostLink url={props.item.url} handleRead={handleToggleRead} />
+
+        {/*        <ToggleAction
           label="read"
           state={Boolean(props.item.feedback.readAt)}
           onToggle={handleToggleRead}
-        />
+        />*/}
       </div>
     </div>
   );

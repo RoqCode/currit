@@ -14,17 +14,19 @@ function App() {
   }
 
   return (
-    <>
-      <ViewToggle onViewChange={handleViewChange} />
+    <main className="min-h-screen bg-bg text-text ">
+      <div className="max-w-5xl m-auto px-4 py-8">
+        <ViewToggle onViewChange={handleViewChange} />
 
-      {
         {
-          feed: <Feed />,
-          sources: <Sources />,
-          bookmarked: <Bookmarked />,
-        }[activeView]
-      }
-    </>
+          {
+            feed: <Feed />,
+            sources: <Sources />,
+            bookmarked: <Bookmarked />,
+          }[activeView]
+        }
+      </div>
+    </main>
   );
 }
 
