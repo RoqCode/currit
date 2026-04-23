@@ -76,14 +76,16 @@ export default function FeedCard(props: Props) {
 
   return (
     <div
-      className={`bg-surface font-sans p-4 ${props.item.feedback.readAt ? "outline-2 outline-primary" : ""}`}
+      className={`bg-surface font-ui p-4 ${props.item.feedback.readAt ? "outline-2 outline-primary" : ""}`}
     >
       <CardTag
         sourceType={props.item.type}
         sourceName={props.item.sourceName}
       />
       <h2 className="text-text text-xl font-bold">{props.item.title}</h2>
-      <p className="text-base">{props.item.description}</p>
+      <p className="font-reading text-base leading-relaxed text-text">
+        {props.item.description}
+      </p>
 
       <div className="flex justify-between mt-4 items-center">
         <div className="flex gap-2">

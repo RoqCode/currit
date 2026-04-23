@@ -1,3 +1,13 @@
+@import "@fontsource/space-grotesk/400.css";
+@import "@fontsource/space-grotesk/500.css";
+@import "@fontsource/space-grotesk/600.css";
+@import "@fontsource/space-grotesk/700.css";
+@import "@fontsource/lora/400.css";
+@import "@fontsource/lora/400-italic.css";
+@import "@fontsource/lora/500.css";
+@import "@fontsource/lora/600.css";
+@import "@fontsource/lora/700.css";
+
 @import "tailwindcss";
 
 :root {
@@ -5,12 +15,12 @@
   --ui-surface: #f2f2f2;
   --ui-border: #d9d9d9;
   --ui-text: #1c1c1c;
-  --ui-text-muted: #99999;
+  --ui-text-muted: #999999;
   --ui-primary: #ff5a1f;
   --ui-primary-hover: #e84e15;
   --ui-accent: #ffb800;
-  --ui-font-sans: "Space Grotesk", sans-serif;
-  --ui-font-serif: "Lora", serif;
+  --ui-font: "Space Grotesk", sans-serif;
+  --reading-font: "Lora", serif;
 }
 
 @theme inline {
@@ -22,12 +32,16 @@
   --color-primary: var(--ui-primary);
   --color-primary-hover: var(--ui-primary-hover);
   --color-accent: var(--ui-accent);
-  --font-sans: var(--ui-font-sans);
-  --font-serif: var(--ui-font-serif);
+  --font-ui: var(--ui-font);
+  --font-reading: var(--reading-font);
+}
+
+body {
+  font-family: var(--ui-font);
 }
 
 @layer components {
   .text-body {
-    @apply font-serif text-base leading-relaxed text-text;
+    @apply font-reading text-base leading-relaxed text-text;
   }
 }
