@@ -1,8 +1,8 @@
 import { useState } from "react";
 import Feed from "./components/Feed";
 import Sources from "./components/Sources";
-import ViewToggle from "./components/ViewToggle";
 import Bookmarked from "./components/Bookmarked";
+import AppHeader from "./components/AppHeader";
 
 export type Views = "feed" | "sources" | "bookmarked";
 
@@ -14,17 +14,19 @@ function App() {
   }
 
   return (
-    <main className="min-h-screen bg-bg text-text ">
-      <div className="max-w-5xl m-auto px-4 py-8">
-        <ViewToggle onViewChange={handleViewChange} />
+    <main className="min-h-screen bg-bg text-text">
+      <div className="mx-auto flex min-h-screen max-w-5xl flex-col px-4 py-6 sm:px-6 sm:py-10">
+        <AppHeader activeView={activeView} onViewChange={handleViewChange} />
 
-        {
+        <section className="flex-1">
           {
-            feed: <Feed />,
-            sources: <Sources />,
-            bookmarked: <Bookmarked />,
-          }[activeView]
-        }
+            {
+              feed: <Feed />,
+              sources: <Sources />,
+              bookmarked: <Bookmarked />,
+            }[activeView]
+          }
+        </section>
       </div>
     </main>
   );
