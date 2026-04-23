@@ -5,6 +5,13 @@ import {
 } from "@currit/shared/types/Feed";
 import FeedCard from "./FeedItem/FeedCard";
 
+const showDebugActions =
+  import.meta.env.DEV &&
+  new URLSearchParams(window.location.search).get("debug") === "1";
+
+const debugButtonClass =
+  "border border-border px-4 py-2 font-ui text-xs font-bold uppercase tracking-[0.16em] text-text-muted transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-50";
+
 export default function Feed() {
   const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -118,11 +125,39 @@ export default function Feed() {
 
   return (
     <>
-      <button onClick={handlePoll}>
-        {loading ? "Working..." : "Poll Sources"}
-      </button>
-      <button onClick={handleRebuildFeed}>Rebuild Feed</button>
-      <button onClick={handleRepoll}>Repoll Sources</button>
+      {showDebugActions ? (
+        <div className="mb-6 border border-border bg-surface p-4">
+          <p className="mb-3 font-ui text-[0.65rem] font-bold uppercase tracking-[0.24em] text-text-muted">
+            Debug actions
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              className={debugButtonClass}
+              disabled={loading}
+              onClick={handlePoll}
+              type="button"
+            >
+              {loading ? "Working..." : "Poll Sources"}
+            </button>
+            <button
+              className={debugButtonClass}
+              disabled={loading}
+              onClick={handleRebuildFeed}
+              type="button"
+            >
+              Rebuild Feed
+            </button>
+            <button
+              className={debugButtonClass}
+              disabled={loading}
+              onClick={handleRepoll}
+              type="button"
+            >
+              Repoll Sources
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       {feedItems.length ? (
         <ul className="flex flex-col gap-4">
