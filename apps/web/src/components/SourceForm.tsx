@@ -30,6 +30,7 @@ export default function SourceForm(props: Props) {
 
       setFormError(hasMissingField);
       setTypeError(!hasMissingField);
+      setFetchError(null);
       setPending(false);
       return;
     }
@@ -38,6 +39,7 @@ export default function SourceForm(props: Props) {
       setFormError(false);
       setTypeError(false);
     }
+    setFetchError(null);
 
     const payload = parsedDraft.data;
 
@@ -84,27 +86,64 @@ export default function SourceForm(props: Props) {
   }
 
   return (
-    <>
-      <h2>Add your sources</h2>
-      <form action={handleSubmit}>
-        <input type="text" placeholder="Source Name" name="sourceName" />
-        <input type="text" placeholder="Source URL" name="sourceUrl" />
-        <button type="submit">
-          {pending ? "Submitting..." : "Submit Source"}
-        </button>
+    <section className="border border-border bg-surface p-4 sm:p-5">
+      <div className="mb-4">
+        <p className="mb-1 font-ui text-[0.65rem] font-bold uppercase tracking-[0.24em] text-primary">
+          Add source
+        </p>
+        <h2 className="font-ui text-xl font-bold uppercase tracking-[0.16em] text-text">
+          Feed inputs
+        </h2>
+      </div>
+
+      <form action={handleSubmit} className="space-y-3">
+        <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_auto]">
+          <label className="flex flex-col gap-1">
+            <span className="font-ui text-[0.65rem] font-bold uppercase tracking-[0.18em] text-text-muted">
+              Name
+            </span>
+            <input
+              type="text"
+              placeholder="Hacker News"
+              name="sourceName"
+              className="border border-border bg-bg px-3 py-2 font-ui text-sm text-text outline-none transition-colors placeholder:text-text-muted focus:border-primary"
+            />
+          </label>
+
+          <label className="flex flex-col gap-1">
+            <span className="font-ui text-[0.65rem] font-bold uppercase tracking-[0.18em] text-text-muted">
+              URL
+            </span>
+            <input
+              type="text"
+              placeholder="https://example.com/feed.xml"
+              name="sourceUrl"
+              className="border border-border bg-bg px-3 py-2 font-ui text-sm text-text outline-none transition-colors placeholder:text-text-muted focus:border-primary"
+            />
+          </label>
+
+          <button
+            type="submit"
+            disabled={pending}
+            className="self-end border border-primary bg-primary px-4 py-2 font-ui text-xs font-bold uppercase tracking-[0.16em] text-bg transition-colors hover:border-primary-hover hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {pending ? "Submitting..." : "Submit"}
+          </button>
+        </div>
+
         {formError && (
-          <p style={{ color: "red" }}>
+          <p className="font-ui text-sm text-primary">
             You need to provide both a Name and a URL to proceed
           </p>
         )}
         {typeError && (
-          <p style={{ color: "red" }}>
+          <p className="font-ui text-sm text-primary">
             The source URL you provided is currently not supported
           </p>
         )}
       </form>
 
-      {fetchError && <p style={{ color: "red" }}>{fetchError}</p>}
-    </>
+      {fetchError && <p className="mt-3 font-ui text-sm text-primary">{fetchError}</p>}
+    </section>
   );
 }

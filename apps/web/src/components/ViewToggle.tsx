@@ -13,7 +13,7 @@ const views: Array<{ id: Views; label: string }> = [
 
 export default function ViewToggle(props: Props) {
   return (
-    <nav aria-label="Primary navigation" className="flex flex-wrap gap-2">
+    <nav aria-label="Primary navigation" className="flex flex-wrap items-center gap-2">
       {views.map((view) => {
         const isActive = props.activeView === view.id;
 

@@ -30,18 +30,13 @@ export default function DeleteSourceButton(props: Props) {
   }
 
   return (
-    <>
-      <button
-        onClick={handleDelete}
-        style={{
-          color: "red",
-          fontWeight: "bold",
-          marginLeft: "1rem",
-          cursor: "pointer",
-        }}
-      >
-        {pending ? "O" : "X"}
-      </button>
-    </>
+    <button
+      type="button"
+      onClick={handleDelete}
+      disabled={pending}
+      className="border border-border px-3 py-2 font-ui text-[0.65rem] font-bold uppercase tracking-[0.16em] text-text-muted transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-50"
+    >
+      {pending ? "Deleting..." : "Delete"}
+    </button>
   );
 }
