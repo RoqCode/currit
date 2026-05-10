@@ -20,10 +20,12 @@ export default function CardTag(props: Props) {
   }
 
   return (
-    <div className="flex gap-2 items-center mb-2">
-      <span>{parseType(props.sourceType)}</span>
+    <div className="mb-3 flex flex-wrap items-center gap-2">
+      <span className="border border-border px-2 py-1 font-ui text-[0.65rem] font-bold uppercase tracking-[0.18em] text-text-muted">
+        {parseType(props.sourceType)}
+      </span>
       {props.sourceName ? (
-        <span className="text-text-muted text-sm font-bold">
+        <span className="font-ui text-[0.65rem] font-bold uppercase tracking-[0.18em] text-text-muted">
           {props.sourceName}
         </span>
       ) : null}

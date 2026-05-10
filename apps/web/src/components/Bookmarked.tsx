@@ -63,23 +63,41 @@ export default function Bookmarked() {
     );
   }
 
+  const isInitialLoading = loading && !bookmarkedItems.length;
+
   return (
-    <>
-      {loading ? (
-        <p>Loading...</p>
+    <div className="space-y-4">
+      {isInitialLoading ? (
+        <p className="font-ui text-sm uppercase tracking-[0.16em] text-text-muted">
+          Loading bookmarks...
+        </p>
       ) : bookmarkedItems.length ? (
-        <ul>
+        <ul className="flex flex-col gap-4">
           {bookmarkedItems.map((item) => (
             <li key={item.id}>
-              <FeedCard item={item} onUpdateFeedback={handleItemFeedbackUpdated} />
+              <FeedCard
+                item={item}
+                onUpdateFeedback={handleItemFeedbackUpdated}
+              />
             </li>
           ))}
         </ul>
       ) : (
-        <p>No bookmarks yet.</p>
+        <div className="border border-border bg-surface p-5">
+          <p className="mb-1 font-ui text-[0.65rem] font-bold uppercase tracking-[0.24em] text-primary">
+            No bookmarks
+          </p>
+          <p className="font-reading text-sm leading-relaxed text-text-muted">
+            Saved items will show up here once you bookmark them from the feed.
+          </p>
+        </div>
       )}
 
-      {error && <p>Error</p>}
-    </>
+      {error && (
+        <p className="border border-border bg-surface p-4 font-ui text-sm text-primary">
+          Could not load bookmarks.
+        </p>
+      )}
+    </div>
   );
 }
