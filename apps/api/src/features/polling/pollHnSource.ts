@@ -13,8 +13,6 @@ const hnItemSchema = z.object({
   descendants: z.number().nullish(),
 });
 
-type HnItem = z.infer<typeof hnItemSchema>;
-
 export default async function pollHnSource(
   sourceId: string,
   itemId: number,
@@ -23,7 +21,7 @@ export default async function pollHnSource(
 
   try {
     item = await fetchHnItem(itemId);
-  } catch (error) {
+  } catch {
     return null;
   }
 
@@ -66,7 +64,6 @@ function parseHnItem(sourceId: string, item: unknown) {
   let description: string | null = null;
   let publishedAt: Date | null = null;
   let title: string | null = null;
-  let url: string | null = null;
   let commentCount: number = 0;
 
   if (typeof parsedHnItem.by === "string") {
@@ -94,10 +91,6 @@ function parseHnItem(sourceId: string, item: unknown) {
 
   if (typeof parsedHnItem.title === "string") {
     title = parsedHnItem.title;
-  }
-
-  if (typeof parsedHnItem.url === "string") {
-    url = parsedHnItem.url;
   }
 
   if (typeof parsedHnItem.descendants === "number") {

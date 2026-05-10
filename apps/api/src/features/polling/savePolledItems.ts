@@ -145,7 +145,7 @@ export async function savePolledItems(
     type: item.item.sourceType,
   })) satisfies ItemUpdate[];
 
-  let updatedRows: ItemInsert[] = [];
+  const updatedRows: ItemInsert[] = [];
   for (const row of updateRows) {
     const updatedRow = await db
       .update(items)
@@ -249,6 +249,7 @@ async function loadExistingItemsByIdentity(
         break;
       case "rss":
         rssCandidateUrls.push(candidate.url);
+        break;
       default:
         break;
     }

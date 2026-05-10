@@ -7,6 +7,8 @@
     "db:stop": "pnpm --dir infra/db run db:stop",
     "server:dev": "pnpm --dir apps/api dev",
     "frontend:dev": "pnpm --dir apps/web dev",
+    "lint": "pnpm --dir apps/web lint && pnpm --dir apps/api lint",
+    "typecheck": "pnpm --dir apps/web typecheck && pnpm --dir apps/api typecheck",
     "dev:up": "./scripts/dev-start.sh",
     "dev:down": "./scripts/dev-stop.sh"
   }
