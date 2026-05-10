@@ -45,6 +45,10 @@ body {
   font-family: var(--ui-font);
 }
 
+button:not(:disabled) {
+  cursor: pointer;
+}
+
 @layer components {
   .text-body {
     @apply font-reading text-base leading-relaxed text-text;

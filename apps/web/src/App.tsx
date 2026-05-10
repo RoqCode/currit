@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Feed from "./components/Feed";
 import Sources from "./components/Sources";
 import Bookmarked from "./components/Bookmarked";
@@ -21,6 +21,12 @@ function App() {
   const handleFeedStatsChange = useCallback((nextStats: FeedReadStats) => {
     setFeedReadStats(nextStats);
   }, []);
+
+  useEffect(() => {
+    document.title = feedReadStats.total
+      ? `Currit | ${feedReadStats.read}/${feedReadStats.total}`
+      : "Currit";
+  }, [feedReadStats]);
 
   function handleViewChange(newView: Views) {
     setActiveView(newView);
