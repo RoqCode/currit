@@ -4,11 +4,28 @@ import {
   type FeedItem,
 } from "@currit/shared/types/Feed";
 import FeedCard from "./FeedItem/FeedCard";
+import type { FeedReadStats } from "../App";
 
-export default function Feed() {
+const showDebugActions =
+  import.meta.env.DEV &&
+  new URLSearchParams(window.location.search).get("debug") === "1";
+
+const debugButtonClass =
+  "border border-border px-4 py-2 font-ui text-xs font-bold uppercase tracking-[0.16em] text-text-muted transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-50";
+
+type Props = {
+  onStatsChange: (stats: FeedReadStats) => void;
+};
+
+export default function Feed({ onStatsChange }: Props) {
   const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const todayLabel = new Intl.DateTimeFormat("en", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  }).format(new Date());
 
   async function handlePoll() {
     setError(false);
@@ -116,27 +133,95 @@ export default function Feed() {
     fetchFeed();
   }, []);
 
-  return (
-    <>
-      <button onClick={handlePoll}>
-        {loading ? "Working..." : "Poll Sources"}
-      </button>
-      <button onClick={handleRebuildFeed}>Rebuild Feed</button>
-      <button onClick={handleRepoll}>Repoll Sources</button>
+  useEffect(() => {
+    onStatsChange(getFeedReadStats(feedItems));
+  }, [feedItems, onStatsChange]);
 
-      {feedItems.length ? (
-        <ul>
+  const isInitialLoading = loading && !feedItems.length;
+
+  return (
+    <div className="space-y-4">
+      <div className="border-b border-border pb-4">
+        <p className="mb-1 font-ui text-[0.65rem] font-bold uppercase tracking-[0.24em] text-primary">
+          {todayLabel}
+        </p>
+        <h2 className="font-ui text-2xl font-bold uppercase tracking-[0.16em] text-text">
+          Your feed for today
+        </h2>
+      </div>
+
+      {showDebugActions ? (
+        <div className="mb-6 border border-border bg-surface p-4">
+          <p className="mb-3 font-ui text-[0.65rem] font-bold uppercase tracking-[0.24em] text-text-muted">
+            Debug actions
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              className={debugButtonClass}
+              disabled={loading}
+              onClick={handlePoll}
+              type="button"
+            >
+              {loading ? "Working..." : "Poll Sources"}
+            </button>
+            <button
+              className={debugButtonClass}
+              disabled={loading}
+              onClick={handleRebuildFeed}
+              type="button"
+            >
+              Rebuild Feed
+            </button>
+            <button
+              className={debugButtonClass}
+              disabled={loading}
+              onClick={handleRepoll}
+              type="button"
+            >
+              Repoll Sources
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      {isInitialLoading ? (
+        <p className="font-ui text-sm uppercase tracking-[0.16em] text-text-muted">
+          Loading feed...
+        </p>
+      ) : feedItems.length ? (
+        <ul className="flex flex-col gap-4">
           {feedItems.map((item) => (
             <li key={item.id}>
-              <FeedCard item={item} onUpdateFeedback={handleItemFeedbackUpdated} />
+              <FeedCard
+                item={item}
+                onUpdateFeedback={handleItemFeedbackUpdated}
+              />
             </li>
           ))}
         </ul>
       ) : (
-        <p>Feed is empty :(</p>
+        <div className="border border-border bg-surface p-5">
+          <p className="mb-1 font-ui text-[0.65rem] font-bold uppercase tracking-[0.24em] text-primary">
+            Empty feed
+          </p>
+          <p className="font-reading text-sm leading-relaxed text-text-muted">
+            No items are ready yet. Add sources, poll them, then rebuild the feed.
+          </p>
+        </div>
       )}
 
-      {error && <p>Error</p>}
-    </>
+      {error && (
+        <p className="border border-border bg-surface p-4 font-ui text-sm text-primary">
+          Could not load feed.
+        </p>
+      )}
+    </div>
   );
+}
+
+function getFeedReadStats(items: FeedItem[]): FeedReadStats {
+  return {
+    read: items.filter((item) => item.feedback.readAt).length,
+    total: items.length,
+  };
 }

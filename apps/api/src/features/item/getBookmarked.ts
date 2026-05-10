@@ -1,11 +1,12 @@
 import { desc, eq, isNotNull } from "drizzle-orm";
 import db from "../../db";
-import { items, itemFeedback } from "../../db/schema";
+import { items, itemFeedback, sources } from "../../db/schema";
 
 export default async function getBookmarked() {
   const rows = db
     .select({
       item: items,
+      sourceName: sources.name,
       feedback: {
         bookmarkedAt: itemFeedback.bookmarkedAt,
         likedAt: itemFeedback.likedAt,
@@ -14,6 +15,7 @@ export default async function getBookmarked() {
     })
     .from(itemFeedback)
     .innerJoin(items, eq(itemFeedback.itemId, items.id))
+    .leftJoin(sources, eq(items.sourceId, sources.id))
     .where(isNotNull(itemFeedback.bookmarkedAt))
     .orderBy(desc(itemFeedback.bookmarkedAt));
 

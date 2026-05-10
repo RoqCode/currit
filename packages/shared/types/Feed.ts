@@ -5,6 +5,7 @@ import { sourceTypeSchema } from "../validation/sourceInput.js";
 export const feedItemSchema = z.object({
   id: z.uuid(),
   sourceId: z.uuid().nullable(),
+  sourceName: z.string().nullable(),
   type: sourceTypeSchema,
   externalId: z.string().nullable(),
   title: z.string(),

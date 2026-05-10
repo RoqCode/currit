@@ -162,6 +162,7 @@ itemRoutes.get("/api/items/bookmarked", async (c) => {
 
     const bookmarked = bookmarkedRows.map((row) => ({
       ...row.item,
+      sourceName: row.sourceName,
       publishedAt: toIsoString(row.item.publishedAt),
       fetchedAt: toIsoString(row.item.fetchedAt),
       createdAt: toIsoString(row.item.createdAt),

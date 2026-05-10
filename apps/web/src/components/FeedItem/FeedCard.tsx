@@ -3,10 +3,14 @@ import {
   type FeedItem,
 } from "@currit/shared/types/Feed";
 import ToggleAction from "./ToggleAction";
+import PostLink from "./PostLink";
+import CardTag from "./CardTag";
+
+const descriptionMaxLength = 220;
 
 type FeedCardItem = Pick<
   FeedItem,
-  "id" | "title" | "description" | "url" | "feedback"
+  "id" | "title" | "description" | "url" | "feedback" | "type" | "sourceName"
 >;
 
 type Props = {
@@ -15,6 +19,11 @@ type Props = {
 };
 
 export default function FeedCard(props: Props) {
+  const description = getVisibleDescription(
+    props.item.type,
+    props.item.description,
+  );
+
   async function patchFeedback(
     path: "like" | "bookmark" | "read",
     body: { like?: boolean; bookmark?: boolean; read?: boolean },
@@ -63,6 +72,8 @@ export default function FeedCard(props: Props) {
   }
 
   async function handleToggleRead() {
+    if (props.item.feedback.readAt) return;
+
     await patchFeedback(
       "read",
       { read: !props.item.feedback.readAt },
@@ -71,30 +82,56 @@ export default function FeedCard(props: Props) {
   }
 
   return (
-    <div>
-      <h2>{props.item.title}</h2>
-      <p>{props.item.description}</p>
-      <a target="_blank" rel="noopener noreferrer" href={props.item.url}>
-        {props.item.url}
-      </a>
+    <div
+      className={`border bg-surface p-5 font-ui transition-colors ${props.item.feedback.readAt ? "border-2 border-primary" : "border-border"}`}
+    >
+      <CardTag
+        sourceType={props.item.type}
+        sourceName={props.item.sourceName}
+      />
+      <h2 className="text-xl font-bold leading-tight text-text">
+        {props.item.title}
+      </h2>
+      {description ? (
+        <p className="mt-3 font-reading text-base leading-relaxed text-text">
+          {description}
+        </p>
+      ) : null}
 
-      <div style={{ marginTop: "0.5rem", display: "flex", gap: "0.5rem" }}>
-        <ToggleAction
-          label="like"
-          state={Boolean(props.item.feedback.likedAt)}
-          onToggle={handleToggleLike}
-        />
-        <ToggleAction
-          label="bookmark"
-          state={Boolean(props.item.feedback.bookmarkedAt)}
-          onToggle={handleToggleBookmark}
-        />
-        <ToggleAction
-          label="read"
-          state={Boolean(props.item.feedback.readAt)}
-          onToggle={handleToggleRead}
+      <div className="mt-5 flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex gap-2">
+          <ToggleAction
+            label="like"
+            state={Boolean(props.item.feedback.likedAt)}
+            onToggle={handleToggleLike}
+          />
+          <ToggleAction
+            label="bookmark"
+            state={Boolean(props.item.feedback.bookmarkedAt)}
+            onToggle={handleToggleBookmark}
+          />
+        </div>
+        <PostLink
+          url={props.item.url}
+          isRead={Boolean(props.item.feedback.readAt)}
+          handleRead={handleToggleRead}
         />
       </div>
     </div>
   );
+}
+
+function getVisibleDescription(
+  type: FeedCardItem["type"],
+  description: FeedCardItem["description"],
+) {
+  if (!description || type === "hn") return null;
+
+  const trimmedDescription = description.trim();
+
+  if (trimmedDescription.length <= descriptionMaxLength) {
+    return trimmedDescription;
+  }
+
+  return `${trimmedDescription.slice(0, descriptionMaxLength).trimEnd()}...`;
 }
