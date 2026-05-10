@@ -13,12 +13,12 @@ _Stand: April 2026_
 
 ### UI
 
-- [ ] Replace current debug-heavy flow with a more product-like feed experience
-- [ ] Improve empty, loading, and error states in the feed UI
-- [ ] Improve source management usability after the active toggle exists
+- [x] Replace current debug-heavy flow with a more product-like feed experience
+- [x] Improve empty, loading, and error states in the feed UI
+- [x] Improve source management usability after the active toggle exists
 - [ ] Add source favorite toggle and show favored sources clearly in source management
 - [ ] Optionally highlight feed items that came from favored sources
-- [ ] Revisit mobile usability once the core loop feels stable
+- [x] Revisit mobile usability once the core loop feels stable
 
 ### Delivery / Ops
 

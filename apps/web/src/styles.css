@@ -36,8 +36,17 @@
   --font-reading: var(--reading-font);
 }
 
+html {
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
+}
+
 body {
   font-family: var(--ui-font);
+}
+
+button:not(:disabled) {
+  cursor: pointer;
 }
 
 @layer components {
