@@ -22,7 +22,7 @@ _Stand: April 2026_
 
 ### Delivery / Ops
 
-- [ ] Add linting for web and api
+- [x] Add linting for web and api
 - [ ] Dockerize `apps/web` and `apps/api`
 - [ ] Add production `docker-compose` setup for `db`, `api`, and `web`
 - [ ] Add production scheduling for polling (4x per day via cron or equivalent)
